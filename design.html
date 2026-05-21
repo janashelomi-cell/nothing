@@ -3,379 +3,467 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SOLA — Personal Wellness Device</title>
+  <title>SOLA</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
     :root {
-      --bg: #f7f7f5;
-      --white: #ffffff;
-      --black: #0a0a0a;
-      --mid: #6e6e73;
-      --light: #e8e8e6;
-      --accent: #0a0a0a;
+      --cream: #f2ede6;
+      --black: #0d0d0d;
+      --white: #fafaf8;
+      --warm: #e8dfd2;
+      --red: #d4341c;
+      --mid: #7a7570;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
-      font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--cream);
+      font-family: 'Inter', -apple-system, sans-serif;
       color: var(--black);
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* NAV */
+    /* ── NAV ── */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 52px;
-      background: rgba(247,247,245,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      z-index: 999;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 0 40px;
-      z-index: 100;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
+      align-items: center;
+      padding: 20px 40px;
+      mix-blend-mode: multiply;
     }
 
-    .nav-brand {
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--black);
     }
 
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-size: 13px;
+    .nav-tag {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--mid);
-      text-decoration: none;
-      letter-spacing: 0.01em;
     }
 
-    /* HERO */
+    /* ── HERO ── */
     .hero {
       min-height: 100vh;
+      background: var(--black);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 48px 64px;
+    }
+
+    .hero-big {
+      font-size: clamp(100px, 22vw, 220px);
+      font-weight: 900;
+      line-height: 0.88;
+      letter-spacing: -0.05em;
+      color: var(--white);
+      margin-bottom: 40px;
+    }
+
+    .hero-big span {
+      color: var(--red);
+    }
+
+    .hero-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 40px;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 300;
+      color: #888;
+      line-height: 1.5;
+      max-width: 440px;
+    }
+
+    .hero-sub strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .hero-device-wrap {
+      flex-shrink: 0;
+    }
+
+    .hero-device-wrap svg {
+      width: clamp(120px, 18vw, 220px);
+      filter: drop-shadow(0 0 60px rgba(212,52,28,0.25));
+      animation: breathe 5s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50% { transform: translateY(-16px) rotate(-4deg); }
+    }
+
+    .hero-scroll {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #444;
+      padding: 32px 48px;
+    }
+
+    /* ── TICKER ── */
+    .ticker {
+      background: var(--red);
+      overflow: hidden;
+      padding: 14px 0;
+      white-space: nowrap;
+    }
+
+    .ticker-inner {
+      display: inline-flex;
+      animation: ticker 20s linear infinite;
+    }
+
+    .ticker-inner span {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: white;
+      padding: 0 40px;
+    }
+
+    .ticker-inner span::after {
+      content: '·';
+      margin-left: 40px;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── SECTION BASE ── */
+    .s {
+      padding: 120px 48px;
+    }
+
+    /* ── STATEMENT ── */
+    .statement {
+      background: var(--white);
+    }
+
+    .statement-text {
+      font-size: clamp(36px, 6vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      max-width: 900px;
+    }
+
+    .statement-text em {
+      font-style: normal;
+      color: var(--mid);
+      font-weight: 300;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+      background: var(--cream);
+    }
+
+    .features-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 80px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      align-items: baseline;
+      padding: 36px 0;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      gap: 40px;
+    }
+
+    .feature-row:last-child {
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .feature-num {
+      font-size: 11px;
+      color: var(--mid);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    .feature-headline {
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .feature-copy {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    /* ── PRODUCT DARK ── */
+    .product-dark {
+      background: var(--black);
+      color: var(--white);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 80vh;
+      align-items: stretch;
+    }
+
+    .product-dark-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 60px;
+      border-right: 1px solid #1a1a1a;
+    }
+
+    .product-dark-visual svg {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .product-dark-info {
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .product-dark-info h2 {
+      font-size: clamp(42px, 5vw, 64px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 48px;
+    }
+
+    .spec-lines {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .spec-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid #1e1e1e;
+      font-size: 14px;
+      gap: 20px;
+    }
+
+    .spec-line .k { color: #555; font-weight: 400; }
+    .spec-line .v { color: #ccc; font-weight: 500; text-align: right; }
+
+    /* ── COLORWAYS ── */
+    .colorways {
+      background: var(--cream);
+    }
+
+    .colorways-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 80px;
+    }
+
+    .colorways-title {
+      font-size: clamp(42px, 6vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .colorways-note {
+      font-size: 14px;
+      color: var(--mid);
+      max-width: 240px;
+      line-height: 1.6;
+      text-align: right;
+    }
+
+    .colorway-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .cw {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .cw-swatch {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: 120px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+
+    .cw-swatch:hover { transform: scaleY(1.03); }
+
+    .cw-swatch svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .cw-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .cw-desc {
+      font-size: 12px;
+      color: var(--mid);
+      line-height: 1.5;
+    }
+
+    /* ── VIEWS ── */
+    .views {
+      background: var(--warm);
+    }
+
+    .views-title {
+      font-size: clamp(42px, 5vw, 64px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .views-sub {
+      font-size: 14px;
+      color: var(--mid);
+      margin-bottom: 72px;
+    }
+
+    .views-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .view-cell {
+      background: rgba(255,255,255,0.5);
+      padding: 56px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .view-cell-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      align-self: flex-start;
+    }
+
+    .view-cell svg { width: 100%; max-width: 160px; }
+
+    .view-cell-note {
+      font-size: 12px;
+      color: var(--mid);
+      align-self: flex-start;
+    }
+
+    /* ── END STATEMENT ── */
+    .end {
+      background: var(--black);
+      min-height: 70vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 120px 40px 80px;
-      background: var(--white);
+      padding: 120px 48px;
     }
 
-    .hero-eyebrow {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
+    .end-kicker {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--mid);
-      margin-bottom: 20px;
+      color: #444;
+      margin-bottom: 40px;
     }
 
-    .hero-title {
-      font-size: clamp(52px, 8vw, 96px);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #0a0a0a 0%, #444 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .end-big {
+      font-size: clamp(56px, 10vw, 120px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: var(--white);
+      margin-bottom: 48px;
     }
 
-    .hero-sub {
-      font-size: clamp(18px, 2.5vw, 24px);
-      font-weight: 300;
-      color: var(--mid);
-      letter-spacing: -0.01em;
-      margin-bottom: 64px;
-      max-width: 480px;
-    }
+    .end-big .accent { color: var(--red); }
 
-    .hero-device {
-      width: 100%;
-      max-width: 340px;
-      margin: 0 auto 48px;
-      filter: drop-shadow(0 40px 80px rgba(0,0,0,0.12));
-      animation: float 6s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-    }
-
-    .hero-cta {
-      display: inline-block;
-      background: var(--black);
-      color: white;
-      padding: 14px 32px;
-      border-radius: 980px;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      letter-spacing: 0.01em;
-      transition: opacity 0.2s;
-    }
-
-    .hero-cta:hover { opacity: 0.8; }
-
-    /* SECTION */
-    section {
-      padding: 120px 40px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .section-eyebrow {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--mid);
-      margin-bottom: 16px;
-    }
-
-    .section-title {
-      font-size: clamp(36px, 5vw, 56px);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.05;
-      margin-bottom: 16px;
-    }
-
-    .section-body {
+    .end-sub {
       font-size: 18px;
       font-weight: 300;
-      color: var(--mid);
-      line-height: 1.6;
-      max-width: 520px;
-    }
-
-    /* FEATURE GRID */
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      background: var(--light);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-top: 64px;
-    }
-
-    .feature-card {
-      background: var(--white);
-      padding: 48px 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-    }
-
-    .feature-card h3 {
-      font-size: 19px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    .feature-card p {
-      font-size: 14px;
-      color: var(--mid);
-      line-height: 1.6;
-    }
-
-    /* DARK SECTION */
-    .dark-section {
-      background: var(--black);
-      color: white;
-      padding: 120px 40px;
-    }
-
-    .dark-section .section-eyebrow { color: #888; }
-    .dark-section .section-body { color: #aaa; }
-
-    .views-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      margin-top: 64px;
-      background: #1c1c1e;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .view-card {
-      background: #111;
-      padding: 48px 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .view-label {
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #666;
-      margin-bottom: 32px;
-      align-self: flex-start;
-    }
-
-    .view-card svg { width: 100%; max-width: 180px; }
-
-    .view-note {
-      font-size: 12px;
       color: #555;
-      margin-top: 20px;
-      text-align: center;
+      max-width: 480px;
+      line-height: 1.6;
     }
 
-    /* SPEC TABLE */
-    .spec-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-      margin-top: 64px;
-      background: var(--light);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .spec-item {
-      background: var(--white);
-      padding: 28px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .spec-item .key {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--mid);
-    }
-
-    .spec-item .val {
-      font-size: 16px;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-
-    /* COLORWAYS */
-    .color-section {
-      background: var(--white);
-      padding: 120px 40px;
-    }
-
-    .color-section .inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .colorway-grid {
-      display: flex;
-      gap: 32px;
-      margin-top: 64px;
-      flex-wrap: wrap;
-    }
-
-    .colorway {
-      flex: 1;
-      min-width: 140px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      cursor: pointer;
-    }
-
-    .colorway-device {
-      width: 100%;
-      max-width: 120px;
-      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15));
-      transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    .colorway:hover .colorway-device {
-      transform: translateY(-8px);
-      filter: drop-shadow(0 32px 48px rgba(0,0,0,0.2));
-    }
-
-    .colorway-name {
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-
-    .colorway-hex {
-      font-size: 12px;
-      color: var(--mid);
-    }
-
-    /* BRAND SECTION */
-    .brand-section {
-      background: var(--black);
-      color: white;
-      padding: 160px 40px;
-      text-align: center;
-    }
-
-    .brand-mark {
-      font-size: clamp(80px, 15vw, 160px);
-      font-weight: 700;
-      letter-spacing: -0.06em;
-      line-height: 1;
-      margin-bottom: 32px;
-      opacity: 0.06;
-    }
-
-    .brand-statement {
-      font-size: clamp(28px, 4vw, 48px);
-      font-weight: 300;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      max-width: 700px;
-      margin: 0 auto;
-      color: #e0e0e0;
-    }
-
-    .brand-statement em {
-      font-style: normal;
-      font-weight: 600;
-      color: white;
-    }
-
-    /* FOOTER */
+    /* ── FOOTER ── */
     footer {
-      background: var(--bg);
-      padding: 48px 40px;
+      background: var(--black);
+      border-top: 1px solid #1a1a1a;
+      padding: 32px 48px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--light);
       font-size: 12px;
-      color: var(--mid);
-    }
-
-    /* DIVIDER */
-    .full-divider {
-      height: 2px;
-      background: var(--light);
+      color: #333;
     }
   </style>
 </head>
@@ -383,397 +471,323 @@
 
   <!-- NAV -->
   <nav>
-    <div class="nav-brand">SOLA</div>
-    <ul class="nav-links">
-      <li><a href="#design">Design</a></li>
-      <li><a href="#views">Views</a></li>
-      <li><a href="#specs">Specs</a></li>
-      <li><a href="#colors">Colors</a></li>
-    </ul>
+    <div class="nav-logo">Sola</div>
+    <div class="nav-tag">Personal Wellness · Concept 01</div>
   </nav>
 
   <!-- HERO -->
   <div class="hero">
-    <div class="hero-eyebrow">Personal Wellness — Concept 01</div>
-    <h1 class="hero-title">SOLA</h1>
-    <p class="hero-sub">Touch-controlled. Pocket-sized. Nobody knows what it is.</p>
-
-    <!-- Hero Device SVG -->
-    <svg class="hero-device" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="bodyGrad" cx="38%" cy="32%" r="70%">
-          <stop offset="0%" stop-color="#e8e4de"/>
-          <stop offset="100%" stop-color="#b8b2aa"/>
-        </radialGradient>
-        <radialGradient id="shineGrad" cx="30%" cy="20%" r="60%">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
-          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-        </radialGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="rgba(0,0,0,0.18)"/>
-        </filter>
-      </defs>
-
-      <!-- Device body -->
-      <ellipse cx="160" cy="210" rx="88" ry="128" fill="url(#bodyGrad)" filter="url(#shadow)"/>
-
-      <!-- Surface shine -->
-      <ellipse cx="160" cy="210" rx="88" ry="128" fill="url(#shineGrad)"/>
-
-      <!-- Touch zone indicator (subtle) -->
-      <ellipse cx="160" cy="185" rx="56" ry="72" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
-
-      <!-- Swipe gesture hint -->
-      <g opacity="0.35">
-        <line x1="160" y1="155" x2="160" y2="215" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <polyline points="152,163 160,155 168,163" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
-
-      <!-- Logo mark -->
-      <circle cx="160" cy="308" r="6" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
-      <circle cx="160" cy="308" r="2" fill="rgba(0,0,0,0.2)"/>
-
-      <!-- USB-C port -->
-      <rect x="146" y="330" width="28" height="7" rx="3.5" fill="rgba(0,0,0,0.15)"/>
-    </svg>
-
-    <a href="#design" class="hero-cta">Explore the Design</a>
-  </div>
-
-  <!-- FEATURE SECTION -->
-  <section id="design">
-    <div class="section-eyebrow">Why it works</div>
-    <h2 class="section-title">Designed to disappear.<br/>Built to deliver.</h2>
-    <p class="section-body">Every decision — form, material, input — serves one principle: it should be completely unrecognizable for what it is.</p>
-
-    <div class="feature-grid">
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <ellipse cx="22" cy="22" rx="9" ry="12" stroke="#0a0a0a" stroke-width="1.5"/>
-          <line x1="22" y1="14" x2="22" y2="11" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="22" y1="33" x2="22" y2="30" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <h3>Touch-Only Control</h3>
-        <p>Zero buttons. The entire top surface is capacitive. Swipe up for intensity, swipe down to ease off, press to toggle. No instruction manual needed.</p>
+    <div class="hero-content">
+      <div class="hero-big">
+        No<br/>buttons<span>.</span><br/>No fuss<span>.</span>
       </div>
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <path d="M12 22 C12 16 16 12 22 12 C28 12 32 16 32 22 C32 28 28 32 22 32 C16 32 12 28 12 22Z" stroke="#0a0a0a" stroke-width="1.5"/>
-          <path d="M17 22 C17 19 19 17 22 17 C25 17 27 19 27 22" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <h3>Pebble Form Factor</h3>
-        <p>104 × 78 × 28mm. Fits closed in a fist. Sits on a shelf like a worry stone. No one looks twice. That's the whole point.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <path d="M14 30 L14 18 Q14 14 18 14 L26 14 Q30 14 30 18 L30 30" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="22" y1="30" x2="22" y2="34" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-          <rect x="19" y="34" width="6" height="2" rx="1" fill="#0a0a0a"/>
-        </svg>
-        <h3>Matte Silicone</h3>
-        <p>Body-safe Shore A 40 silicone. Soft-touch matte finish. IPX7 waterproof. No visible seams, no hard edges, no cheap plastic. Feels premium because it is.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <path d="M22 12 L22 32" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M16 18 L22 12 L28 18" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M18 36 L26 36" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <h3>Whisper Motor</h3>
-        <p>Brushless motor under 35dB. Quieter than a conversation. You'll feel it, no one else will hear it. Engineered for discretion at every intensity.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <rect x="16" y="29" width="12" height="5" rx="2.5" stroke="#0a0a0a" stroke-width="1.5"/>
-          <path d="M22 12 L22 29" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="22" cy="12" r="3" stroke="#0a0a0a" stroke-width="1.5"/>
-        </svg>
-        <h3>Flush USB-C</h3>
-        <p>Recessed charging port with no cap, no cover, no protrusion. Plugs in, charges up, nothing ruins the silhouette. 90 minutes of use per charge.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="44" height="44" rx="12" fill="#f5f5f5"/>
-          <circle cx="22" cy="22" r="10" stroke="#0a0a0a" stroke-width="1.5"/>
-          <path d="M19 22 L21 24 L25 20" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h3>Nothing to Explain</h3>
-        <p>No app required. No pairing. No modes to memorize. Pick it up and use it. Complexity is the enemy of intimacy.</p>
-      </div>
-    </div>
-  </section>
-
-  <div class="full-divider"></div>
-
-  <!-- VIEWS SECTION -->
-  <div class="dark-section" id="views">
-    <div style="max-width:1100px; margin: 0 auto;">
-      <div class="section-eyebrow">Technical Reference</div>
-      <h2 class="section-title" style="color:white;">Three views.<br/>One object.</h2>
-
-      <div class="views-grid">
-
-        <!-- Top View -->
-        <div class="view-card">
-          <div class="view-label">Top View</div>
-          <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
+      <div class="hero-row">
+        <p class="hero-sub">
+          A personal wellness device that looks like <strong>nothing suspicious</strong>. Touch it anywhere. It responds. That's it. That's the whole product.
+        </p>
+        <div class="hero-device-wrap">
+          <svg viewBox="0 0 220 320" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <radialGradient id="tg" cx="40%" cy="35%" r="65%">
-                <stop offset="0%" stop-color="#3a3a3a"/>
-                <stop offset="100%" stop-color="#1a1a1a"/>
+              <radialGradient id="hg" cx="35%" cy="28%" r="70%">
+                <stop offset="0%" stop-color="#3d3830"/>
+                <stop offset="100%" stop-color="#1a1714"/>
+              </radialGradient>
+              <radialGradient id="hs" cx="30%" cy="22%" r="55%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
               </radialGradient>
             </defs>
-            <ellipse cx="90" cy="118" rx="52" ry="76" fill="url(#tg)" stroke="#444" stroke-width="1"/>
-            <ellipse cx="90" cy="104" rx="34" ry="50" fill="none" stroke="#555" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <!-- Width dim -->
-            <line x1="38" y1="210" x2="142" y2="210" stroke="#444" stroke-width="0.6"/>
-            <line x1="38" y1="207" x2="38" y2="213" stroke="#444" stroke-width="0.6"/>
-            <line x1="142" y1="207" x2="142" y2="213" stroke="#444" stroke-width="0.6"/>
-            <text x="90" y="224" text-anchor="middle" font-size="9" fill="#666" font-family="-apple-system, Helvetica Neue, sans-serif">104 mm</text>
+            <ellipse cx="110" cy="160" rx="72" ry="108" fill="url(#hg)"/>
+            <ellipse cx="110" cy="160" rx="72" ry="108" fill="url(#hs)"/>
+            <!-- Touch zone -->
+            <ellipse cx="110" cy="140" rx="46" ry="62" fill="none" stroke="rgba(212,52,28,0.3)" stroke-width="1" stroke-dasharray="4 4"/>
+            <!-- Swipe arrow -->
+            <g opacity="0.5">
+              <line x1="110" y1="120" x2="110" y2="160" stroke="#d4341c" stroke-width="1.5" stroke-linecap="round"/>
+              <polyline points="103,128 110,120 117,128" fill="none" stroke="#d4341c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
             <!-- Logo -->
-            <circle cx="90" cy="172" r="4" fill="none" stroke="#444" stroke-width="0.8"/>
-            <circle cx="90" cy="172" r="1.5" fill="#444"/>
-          </svg>
-          <div class="view-note">Touch zone shown dashed</div>
-        </div>
-
-        <!-- Side View -->
-        <div class="view-card">
-          <div class="view-label">Side View</div>
-          <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#2a2a2a"/>
-                <stop offset="50%" stop-color="#3a3a3a"/>
-                <stop offset="100%" stop-color="#222"/>
-              </linearGradient>
-            </defs>
-            <path d="M 64 45 Q 58 118 62 182 Q 90 200 118 182 Q 122 118 116 45 Q 90 34 64 45 Z" fill="url(#sg)" stroke="#444" stroke-width="1"/>
+            <circle cx="110" cy="230" r="5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
             <!-- USB-C -->
-            <rect x="78" y="183" width="24" height="5" rx="2.5" fill="#111" stroke="#555" stroke-width="0.5"/>
-            <!-- Height dim -->
-            <line x1="134" y1="45" x2="134" y2="183" stroke="#444" stroke-width="0.6"/>
-            <line x1="130" y1="45" x2="138" y2="45" stroke="#444" stroke-width="0.6"/>
-            <line x1="130" y1="183" x2="138" y2="183" stroke="#444" stroke-width="0.6"/>
-            <text x="152" y="118" text-anchor="middle" font-size="9" fill="#666" font-family="-apple-system, Helvetica Neue, sans-serif">78 mm</text>
-            <!-- Depth dim -->
-            <line x1="40" y1="224" x2="120" y2="224" stroke="#444" stroke-width="0.6"/>
-            <line x1="40" y1="221" x2="40" y2="227" stroke="#444" stroke-width="0.6"/>
-            <line x1="120" y1="221" x2="120" y2="227" stroke="#444" stroke-width="0.6"/>
-            <text x="80" y="238" text-anchor="middle" font-size="9" fill="#666" font-family="-apple-system, Helvetica Neue, sans-serif">28 mm</text>
+            <rect x="96" y="256" width="28" height="6" rx="3" fill="rgba(255,255,255,0.07)"/>
           </svg>
-          <div class="view-note">Flat back — curved front</div>
         </div>
-
-        <!-- Perspective -->
-        <div class="view-card">
-          <div class="view-label">3/4 View</div>
-          <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="pg" cx="35%" cy="28%" r="72%">
-                <stop offset="0%" stop-color="#484848"/>
-                <stop offset="100%" stop-color="#1e1e1e"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="90" cy="218" rx="50" ry="8" fill="rgba(255,255,255,0.03)"/>
-            <path d="M 58 58 Q 50 118 54 178 Q 80 204 108 198 Q 138 188 140 140 Q 142 90 132 56 Q 104 40 58 58 Z"
-                  fill="url(#pg)" stroke="#444" stroke-width="1"/>
-            <path d="M 62 62 Q 55 118 60 174 Q 82 196 100 192 Q 78 180 76 118 Q 74 74 82 60 Q 72 58 62 62 Z"
-                  fill="rgba(255,255,255,0.04)"/>
-            <!-- Highlight lines on touch surface -->
-            <path d="M 70 95 Q 92 85 122 98" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-            <path d="M 67 112 Q 92 102 126 116" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-            <!-- Logo -->
-            <circle cx="98" cy="166" r="4" fill="none" stroke="#444" stroke-width="0.8"/>
-            <circle cx="98" cy="166" r="1.5" fill="#444"/>
-          </svg>
-          <div class="view-note">No seams, no buttons</div>
-        </div>
-
       </div>
+    </div>
+    <div class="hero-scroll">↓ scroll</div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span>Touch anywhere</span>
+      <span>Swipe for more</span>
+      <span>Your business</span>
+      <span>Nobody knows</span>
+      <span>IPX7 waterproof</span>
+      <span>Under 35dB</span>
+      <span>No buttons</span>
+      <span>No app needed</span>
+      <span>Touch anywhere</span>
+      <span>Swipe for more</span>
+      <span>Your business</span>
+      <span>Nobody knows</span>
+      <span>IPX7 waterproof</span>
+      <span>Under 35dB</span>
+      <span>No buttons</span>
+      <span>No app needed</span>
     </div>
   </div>
 
-  <!-- SPEC SECTION -->
-  <section id="specs">
-    <div class="section-eyebrow">Under the surface</div>
-    <h2 class="section-title">Engineered<br/>without compromise.</h2>
-    <p class="section-body">Every component chosen for feel, longevity, and safety. Nothing here is accidental.</p>
-
-    <div class="spec-grid">
-      <div class="spec-item">
-        <span class="key">Dimensions</span>
-        <span class="val">104 × 78 × 28 mm</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Weight</span>
-        <span class="val">~85 g</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Material</span>
-        <span class="val">Body-safe silicone, Shore A 40</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Finish</span>
-        <span class="val">Matte soft-touch</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Input</span>
-        <span class="val">Capacitive touch surface</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Gestures</span>
-        <span class="val">Swipe ↑↓ intensity · Press on/off</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Motor</span>
-        <span class="val">Brushless, &lt;35 dB</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Waterproof</span>
-        <span class="val">IPX7 — 1 m / 30 min</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Battery</span>
-        <span class="val">650 mAh Li-Po</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Use time</span>
-        <span class="val">~90 min per charge</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Charging</span>
-        <span class="val">USB-C, flush recessed</span>
-      </div>
-      <div class="spec-item">
-        <span class="key">Charge time</span>
-        <span class="val">~60 min (0–100%)</span>
-      </div>
-    </div>
-  </section>
-
-  <div class="full-divider"></div>
-
-  <!-- COLORWAYS -->
-  <div class="color-section" id="colors">
-    <div class="inner">
-      <div class="section-eyebrow">Five colorways</div>
-      <h2 class="section-title">Pick one.<br/>Own it.</h2>
-      <p class="section-body">Each colorway is a mood, not a match. All five look at home on a bathroom shelf.</p>
-
-      <div class="colorway-grid">
-
-        <!-- Dune -->
-        <div class="colorway">
-          <svg class="colorway-device" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="c1" cx="38%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#e2ddd6"/>
-                <stop offset="100%" stop-color="#c4bfb7"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#c1)" filter="drop-shadow(0 12px 24px rgba(0,0,0,0.14))"/>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#shineGrad)" opacity="0.5"/>
-            <circle cx="60" cy="118" r="3" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="0.8"/>
-            <rect x="50" y="128" width="20" height="4" rx="2" fill="rgba(0,0,0,0.1)"/>
-          </svg>
-          <div class="colorway-name">Dune</div>
-          <div class="colorway-hex">#C4BFB7</div>
-        </div>
-
-        <!-- Moss -->
-        <div class="colorway">
-          <svg class="colorway-device" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="c2" cx="38%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#8fa48f"/>
-                <stop offset="100%" stop-color="#637a63"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#c2)" filter="drop-shadow(0 12px 24px rgba(0,0,0,0.18))"/>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#shineGrad)" opacity="0.4"/>
-            <circle cx="60" cy="118" r="3" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
-            <rect x="50" y="128" width="20" height="4" rx="2" fill="rgba(0,0,0,0.15)"/>
-          </svg>
-          <div class="colorway-name">Moss</div>
-          <div class="colorway-hex">#637A63</div>
-        </div>
-
-        <!-- Slate -->
-        <div class="colorway">
-          <svg class="colorway-device" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="c3" cx="38%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#6e7d8c"/>
-                <stop offset="100%" stop-color="#48555e"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#c3)" filter="drop-shadow(0 12px 24px rgba(0,0,0,0.22))"/>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#shineGrad)" opacity="0.35"/>
-            <circle cx="60" cy="118" r="3" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
-            <rect x="50" y="128" width="20" height="4" rx="2" fill="rgba(0,0,0,0.2)"/>
-          </svg>
-          <div class="colorway-name">Slate</div>
-          <div class="colorway-hex">#48555E</div>
-        </div>
-
-        <!-- Clay -->
-        <div class="colorway">
-          <svg class="colorway-device" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="c4" cx="38%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#d4b896"/>
-                <stop offset="100%" stop-color="#b8956e"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#c4)" filter="drop-shadow(0 12px 24px rgba(0,0,0,0.16))"/>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#shineGrad)" opacity="0.45"/>
-            <circle cx="60" cy="118" r="3" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="0.8"/>
-            <rect x="50" y="128" width="20" height="4" rx="2" fill="rgba(0,0,0,0.1)"/>
-          </svg>
-          <div class="colorway-name">Clay</div>
-          <div class="colorway-hex">#B8956E</div>
-        </div>
-
-        <!-- Void -->
-        <div class="colorway">
-          <svg class="colorway-device" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="c5" cx="38%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#3a3a3a"/>
-                <stop offset="100%" stop-color="#0a0a0a"/>
-              </radialGradient>
-            </defs>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#c5)" filter="drop-shadow(0 12px 28px rgba(0,0,0,0.35))"/>
-            <ellipse cx="60" cy="80" rx="38" ry="54" fill="url(#shineGrad)" opacity="0.25"/>
-            <circle cx="60" cy="118" r="3" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
-            <rect x="50" y="128" width="20" height="4" rx="2" fill="rgba(255,255,255,0.08)"/>
-          </svg>
-          <div class="colorway-name">Void</div>
-          <div class="colorway-hex">#0A0A0A</div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- BRAND STATEMENT -->
-  <div class="brand-section">
-    <div class="brand-mark">SOLA</div>
-    <p class="brand-statement">
-      <em>Nobody knows.</em><br/>
-      You do.
+  <!-- STATEMENT -->
+  <div class="statement s">
+    <p class="statement-text">
+      Every other one has <em>too many buttons, too much plastic, a name you wouldn't say out loud</em> and looks exactly like what it is. SOLA doesn't.
     </p>
   </div>
 
-  <!-- FOOTER -->
+  <!-- FEATURES -->
+  <div class="features s">
+    <div class="features-label">What makes it different</div>
+    <div class="feature-list">
+
+      <div class="feature-row">
+        <span class="feature-num">01</span>
+        <div class="feature-headline">Your roommate<br/>will never know.</div>
+        <p class="feature-copy">Brushless motor, under 35dB. Quieter than a conversation. Quieter than the TV. Quieter than you.</p>
+      </div>
+
+      <div class="feature-row">
+        <span class="feature-num">02</span>
+        <div class="feature-headline">Looks like<br/>an earbud case.</div>
+        <p class="feature-copy">The form references a familiar object. No one has ever guessed what it actually is. That's the point. That's the whole point.</p>
+      </div>
+
+      <div class="feature-row">
+        <span class="feature-num">03</span>
+        <div class="feature-headline">No buttons.<br/>No thinking.</div>
+        <p class="feature-copy">Swipe the surface to change intensity. Press to turn on or off. There is no step three. No modes, no Bluetooth, no app, no problem.</p>
+      </div>
+
+      <div class="feature-row">
+        <span class="feature-num">04</span>
+        <div class="feature-headline">Take it in<br/>the shower.</div>
+        <p class="feature-copy">IPX7. One metre of water for thirty minutes. We don't ask questions. Flush USB-C port so there's nothing to get gross or break.</p>
+      </div>
+
+      <div class="feature-row">
+        <span class="feature-num">05</span>
+        <div class="feature-headline">Fits in<br/>a closed fist.</div>
+        <p class="feature-copy">104mm long. 28mm thick. Goes in a pocket, a purse, a weekender bag. Doesn't look weird going through security. Has never looked weird going through security.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRODUCT DARK -->
+  <div class="product-dark">
+    <div class="product-dark-visual">
+      <svg viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="pdg" cx="36%" cy="28%" r="72%">
+            <stop offset="0%" stop-color="#3a3530"/>
+            <stop offset="100%" stop-color="#181512"/>
+          </radialGradient>
+          <radialGradient id="pds" cx="28%" cy="20%" r="58%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.1)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <!-- Glow ring -->
+        <ellipse cx="150" cy="210" rx="75" ry="112" fill="none" stroke="rgba(212,52,28,0.15)" stroke-width="24"/>
+        <!-- Body -->
+        <ellipse cx="150" cy="210" rx="75" ry="112" fill="url(#pdg)"/>
+        <ellipse cx="150" cy="210" rx="75" ry="112" fill="url(#pds)"/>
+        <!-- Touch zone -->
+        <ellipse cx="150" cy="185" rx="48" ry="68" fill="none" stroke="rgba(212,52,28,0.4)" stroke-width="1" stroke-dasharray="5 5"/>
+        <!-- Swipe indicator -->
+        <g opacity="0.7" filter="url(#glow)">
+          <line x1="150" y1="158" x2="150" y2="212" stroke="#d4341c" stroke-width="1.8" stroke-linecap="round"/>
+          <polyline points="141,167 150,158 159,167" fill="none" stroke="#d4341c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="150" y1="212" x2="150" y2="200" stroke="#d4341c" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+        </g>
+        <!-- Logo mark -->
+        <circle cx="150" cy="302" r="6" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.2"/>
+        <circle cx="150" cy="302" r="2" fill="rgba(255,255,255,0.08)"/>
+        <!-- USB-C -->
+        <rect x="132" y="328" width="36" height="8" rx="4" fill="rgba(255,255,255,0.06)"/>
+      </svg>
+    </div>
+    <div class="product-dark-info">
+      <h2>Built for real<br/>life use.</h2>
+      <div class="spec-lines">
+        <div class="spec-line"><span class="k">Dimensions</span><span class="v">104 × 78 × 28 mm</span></div>
+        <div class="spec-line"><span class="k">Weight</span><span class="v">~85 g</span></div>
+        <div class="spec-line"><span class="k">Material</span><span class="v">Body-safe silicone, Shore A 40</span></div>
+        <div class="spec-line"><span class="k">Input</span><span class="v">Full-surface capacitive touch</span></div>
+        <div class="spec-line"><span class="k">Motor noise</span><span class="v">&lt;35 dB</span></div>
+        <div class="spec-line"><span class="k">Waterproof</span><span class="v">IPX7 · 1 m / 30 min</span></div>
+        <div class="spec-line"><span class="k">Battery</span><span class="v">650 mAh · ~90 min use</span></div>
+        <div class="spec-line"><span class="k">Charging</span><span class="v">USB-C, flush recessed</span></div>
+        <div class="spec-line"><span class="k">Certifications</span><span class="v">Body-safe materials, CE, RoHS</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLORWAYS -->
+  <div class="colorways s">
+    <div class="colorways-header">
+      <h2 class="colorways-title">Five.<br/>Pick one.</h2>
+      <p class="colorways-note">All matte silicone. All look at home on your bathroom shelf. All ship in a box that tells nobody anything.</p>
+    </div>
+
+    <div class="colorway-strip">
+
+      <!-- Stone -->
+      <div class="cw">
+        <div class="cw-swatch" style="background: linear-gradient(145deg, #dedad3, #b8b2aa);">
+          <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <ellipse cx="60" cy="80" rx="34" ry="48" fill="rgba(255,255,255,0.15)" transform="translate(5,-8)"/>
+          </svg>
+        </div>
+        <div class="cw-name">Stone</div>
+        <div class="cw-desc">Blends in everywhere. The one you lend people and never get back.</div>
+      </div>
+
+      <!-- Fern -->
+      <div class="cw">
+        <div class="cw-swatch" style="background: linear-gradient(145deg, #8aa08a, #5a785a);">
+          <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <ellipse cx="60" cy="80" rx="34" ry="48" fill="rgba(255,255,255,0.1)" transform="translate(5,-8)"/>
+          </svg>
+        </div>
+        <div class="cw-name">Fern</div>
+        <div class="cw-desc">For the bathroom shelf next to the plants. It fits in.</div>
+      </div>
+
+      <!-- Ink -->
+      <div class="cw">
+        <div class="cw-swatch" style="background: linear-gradient(145deg, #2e2e2e, #0d0d0d);">
+          <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <ellipse cx="60" cy="80" rx="34" ry="48" fill="rgba(255,255,255,0.06)" transform="translate(5,-8)"/>
+          </svg>
+        </div>
+        <div class="cw-name">Ink</div>
+        <div class="cw-desc">All black. No softness. Not for everyone. Definitely for someone.</div>
+      </div>
+
+      <!-- Rain -->
+      <div class="cw">
+        <div class="cw-swatch" style="background: linear-gradient(145deg, #7a8fa0, #4a5f6e);">
+          <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <ellipse cx="60" cy="80" rx="34" ry="48" fill="rgba(255,255,255,0.1)" transform="translate(5,-8)"/>
+          </svg>
+        </div>
+        <div class="cw-name">Rain</div>
+        <div class="cw-desc">The colour of a grey sky that you actually love.</div>
+      </div>
+
+      <!-- Sand -->
+      <div class="cw">
+        <div class="cw-swatch" style="background: linear-gradient(145deg, #d4b896, #b08060);">
+          <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <ellipse cx="60" cy="80" rx="34" ry="48" fill="rgba(255,255,255,0.12)" transform="translate(5,-8)"/>
+          </svg>
+        </div>
+        <div class="cw-name">Sand</div>
+        <div class="cw-desc">Warm. Goes with skin. Looks like a lip balm. Genuinely has people fooled.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEWS -->
+  <div class="views s">
+    <h2 class="views-title">Every angle.</h2>
+    <p class="views-sub">For CAD and prototype reference.</p>
+
+    <div class="views-row">
+      <div class="view-cell">
+        <div class="view-cell-label">Top view</div>
+        <svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="vtg" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#c8c3bb"/>
+              <stop offset="100%" stop-color="#a8a39b"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="80" cy="102" rx="50" ry="72" fill="url(#vtg)" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+          <ellipse cx="80" cy="88" rx="32" ry="46" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="0.7" stroke-dasharray="3 3"/>
+          <line x1="30" y1="192" x2="130" y2="192" stroke="rgba(0,0,0,0.2)" stroke-width="0.6"/>
+          <line x1="30" y1="188" x2="30" y2="196" stroke="rgba(0,0,0,0.2)" stroke-width="0.6"/>
+          <line x1="130" y1="188" x2="130" y2="196" stroke="rgba(0,0,0,0.2)" stroke-width="0.6"/>
+          <text x="80" y="206" text-anchor="middle" font-size="8.5" fill="#888" font-family="Inter, sans-serif">104 mm</text>
+          <circle cx="80" cy="155" r="4" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="0.8"/>
+          <circle cx="80" cy="155" r="1.5" fill="rgba(0,0,0,0.15)"/>
+        </svg>
+        <div class="view-cell-note">Touch zone — dashed</div>
+      </div>
+
+      <div class="view-cell">
+        <div class="view-cell-label">Side view</div>
+        <svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vsg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#bbb6ae"/>
+              <stop offset="55%" stop-color="#ccc8c0"/>
+              <stop offset="100%" stop-color="#b0aba3"/>
+            </linearGradient>
+          </defs>
+          <path d="M 52 32 Q 46 102 50 162 Q 80 180 110 162 Q 114 102 108 32 Q 80 22 52 32 Z" fill="url(#vsg)" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+          <rect x="68" y="163" width="24" height="6" rx="3" fill="rgba(0,0,0,0.12)"/>
+          <text x="80" y="178" text-anchor="middle" font-size="7.5" fill="#aaa" font-family="Inter, sans-serif">USB-C</text>
+          <line x1="124" y1="32" x2="124" y2="162" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <line x1="120" y1="32" x2="128" y2="32" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <line x1="120" y1="162" x2="128" y2="162" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <text x="144" y="100" text-anchor="middle" font-size="8.5" fill="#888" font-family="Inter, sans-serif">78 mm</text>
+          <line x1="28" y1="198" x2="108" y2="198" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <line x1="28" y1="194" x2="28" y2="202" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <line x1="108" y1="194" x2="108" y2="202" stroke="rgba(0,0,0,0.15)" stroke-width="0.6"/>
+          <text x="68" y="210" text-anchor="middle" font-size="8.5" fill="#888" font-family="Inter, sans-serif">28 mm</text>
+        </svg>
+        <div class="view-cell-note">Flat back, curved face</div>
+      </div>
+
+      <div class="view-cell">
+        <div class="view-cell-label">3/4 view</div>
+        <svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="vpg" cx="34%" cy="26%" r="74%">
+              <stop offset="0%" stop-color="#d0cbc3"/>
+              <stop offset="100%" stop-color="#a0998f"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="80" cy="192" rx="40" ry="7" fill="rgba(0,0,0,0.06)"/>
+          <path d="M 44 44 Q 36 100 40 158 Q 64 180 90 175 Q 122 165 124 122 Q 126 78 116 44 Q 90 30 44 44 Z" fill="url(#vpg)" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <path d="M 48 48 Q 41 100 44 152 Q 65 172 84 168 Q 62 158 59 100 Q 57 60 65 46 Q 56 44 48 48 Z" fill="rgba(255,255,255,0.12)"/>
+          <circle cx="88" cy="148" r="4" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+          <circle cx="88" cy="148" r="1.5" fill="rgba(0,0,0,0.12)"/>
+        </svg>
+        <div class="view-cell-note">No seams, no buttons</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div class="end">
+    <div class="end-kicker">SOLA · Personal Wellness · Concept 01</div>
+    <div class="end-big">
+      Nobody<br/>knows<span class="accent">.</span>
+    </div>
+    <p class="end-sub">You do. That's enough.</p>
+  </div>
+
   <footer>
-    <span>SOLA — Personal Wellness Device · Concept 01</span>
+    <span>SOLA — Concept 01</span>
     <span>Design Reference · Not for Distribution</span>
   </footer>
 
