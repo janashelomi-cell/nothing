@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Folded Page — Book Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --paper: #f2ead8;
+      --paper2: #ede3cc;
+      --black: #0d0d0d;
+      --yellow: #ffe500;
+      --pink: #ff2d6b;
+      --lime: #c5ff41;
+      --blue: #2df0ff;
+      --purple: #9b5de5;
+      --orange: #ff6b2b;
+      --red: #ff3131;
+      --white: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      font-family: 'Space Mono', 'Courier New', monospace;
+      color: var(--black);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ─── NOISE TEXTURE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--black);
+      border-bottom: 3px solid var(--yellow);
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.04em;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .nav-brand em {
+      font-style: normal;
+      color: var(--yellow);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--yellow); }
+
+    .nav-join {
+      background: var(--yellow) !important;
+      color: var(--black) !important;
+      padding: 8px 18px;
+      font-weight: 700 !important;
+      transform: rotate(-1deg);
+      display: inline-block;
+    }
+
+    .nav-join:hover { transform: rotate(1deg) scale(1.04) !important; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 48px 80px;
+    }
+
+    /* colored rectangles chaotic background */
+    .hero-blob-1 {
+      position: absolute;
+      top: -20px; right: -40px;
+      width: 380px; height: 340px;
+      background: var(--purple);
+      transform: rotate(12deg);
+      opacity: 0.9;
+    }
+    .hero-blob-2 {
+      position: absolute;
+      bottom: 60px; left: -60px;
+      width: 300px; height: 280px;
+      background: var(--pink);
+      transform: rotate(-8deg);
+      opacity: 0.85;
+    }
+    .hero-blob-3 {
+      position: absolute;
+      top: 40%; right: 18%;
+      width: 180px; height: 220px;
+      background: var(--yellow);
+      transform: rotate(5deg);
+      opacity: 0.95;
+    }
+    .hero-blob-4 {
+      position: absolute;
+      bottom: -30px; right: 30%;
+      width: 260px; height: 200px;
+      background: var(--lime);
+      transform: rotate(-14deg);
+      opacity: 0.8;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      color: var(--yellow);
+      transform: rotate(-2deg);
+      display: inline-block;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .hero-eyebrow::after {
+      content: ' ↓';
+    }
+
+    .hero-title-wrap {
+      position: relative;
+      line-height: 0.88;
+      margin-bottom: 32px;
+    }
+
+    .hero-t1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(88px, 16vw, 200px);
+      color: transparent;
+      -webkit-text-stroke: 3px var(--white);
+      letter-spacing: -0.01em;
+      display: block;
+    }
+
+    .hero-t2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(88px, 16vw, 200px);
+      color: var(--yellow);
+      letter-spacing: -0.01em;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-t3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(88px, 16vw, 200px);
+      color: transparent;
+      -webkit-text-stroke: 3px var(--pink);
+      letter-spacing: -0.01em;
+      display: block;
+    }
+
+    /* sticker floating on title */
+    .sticker-star {
+      position: absolute;
+      top: 20px; right: 8%;
+      width: 120px; height: 120px;
+      background: var(--pink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 4px solid var(--white);
+      transform: rotate(15deg);
+      box-shadow: 4px 4px 0 var(--white);
+      z-index: 3;
+      font-family: 'Caveat', cursive;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.3;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .sticker-star:hover { transform: rotate(-8deg) scale(1.08); }
+
+    .sticker-free {
+      position: absolute;
+      bottom: 10px; right: 4%;
+      background: var(--lime);
+      color: var(--black);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.1em;
+      padding: 10px 20px;
+      border: 3px solid var(--black);
+      transform: rotate(3deg);
+      box-shadow: 4px 4px 0 var(--black);
+      z-index: 3;
+    }
+
+    .hero-sub {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-style: italic;
+      font-size: clamp(18px, 2.5vw, 26px);
+      color: rgba(255,255,255,0.75);
+      max-width: 560px;
+      line-height: 1.4;
+      margin-bottom: 40px;
+    }
+
+    .hero-sub mark {
+      background: var(--yellow);
+      color: var(--black);
+      font-style: normal;
+      padding: 0 4px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-blast {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      background: var(--yellow);
+      color: var(--black);
+      padding: 16px 40px;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+      transform: rotate(-1.5deg);
+      box-shadow: 6px 6px 0 var(--pink);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+
+    .btn-blast:hover {
+      transform: rotate(1deg) translateY(-2px);
+      box-shadow: 8px 8px 0 var(--purple);
+    }
+
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      padding: 14px 28px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-ghost:hover { border-color: var(--white); color: var(--white); }
+
+    .hero-annotation {
+      font-family: 'Caveat', cursive;
+      font-size: 19px;
+      color: rgba(255,255,255,0.45);
+      transform: rotate(2deg);
+      display: inline-block;
+      margin-left: 20px;
+    }
+
+    /* hero stats row */
+    .hero-stats {
+      display: flex;
+      gap: 0;
+      margin-top: 60px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 32px;
+    }
+
+    .hero-stat {
+      flex: 1;
+      padding: 0 32px 0 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hero-stat:last-child { border-right: none; padding-left: 32px; }
+
+    .stat-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px;
+      color: var(--white);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+    }
+
+    /* torn paper edge */
+    .torn-bottom {
+      position: relative;
+      margin-top: -2px;
+    }
+
+    .torn-bottom svg {
+      display: block;
+      width: 100%;
+    }
+
+    /* ─── CURRENT BOOK ─── */
+    .current-wrapper {
+      background: var(--paper);
+      padding: 80px 48px 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* washi tape strip top */
+    .current-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -8px; left: 0; right: 0;
+      height: 22px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,229,0,0.55) 0px, rgba(255,229,0,0.55) 80px,
+        rgba(255,229,0,0.35) 80px, rgba(255,229,0,0.35) 160px
+      );
+      transform: rotate(-0.3deg);
+    }
+
+    .current-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--pink);
+      transform: rotate(-1.5deg);
+      display: inline-block;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .section-label::before {
+      content: '✱';
+      margin-right: 8px;
+    }
+
+    .current-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 56px;
+      align-items: start;
+      margin-top: 24px;
+    }
+
+    /* book card scrapbook style */
+    .scrap-book-card {
+      position: relative;
+      background: var(--white);
+      border: 3px solid var(--black);
+      box-shadow: 8px 8px 0 var(--black);
+      transform: rotate(-3deg);
+      width: 220px;
+      padding: 16px 16px 32px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .scrap-book-card:hover { transform: rotate(0deg) scale(1.02); }
+
+    /* tape on card */
+    .tape {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 64px;
+      height: 26px;
+      background: rgba(255,229,0,0.7);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .tape-2 {
+      position: absolute;
+      bottom: -14px;
+      left: 18px;
+      transform: rotate(3deg);
+      width: 48px;
+      height: 22px;
+      background: rgba(45,240,255,0.55);
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .book-svg-wrap {
+      width: 100%;
+      border: 2px solid var(--black);
+      overflow: hidden;
+    }
+
+    .now-reading-badge {
+      position: absolute;
+      bottom: 6px;
+      right: -14px;
+      background: var(--red);
+      color: var(--white);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      padding: 6px 10px;
+      transform: rotate(90deg);
+      transform-origin: right center;
+      border: 2px solid var(--white);
+    }
+
+    /* book info panel */
+    .book-info-panel {
+      position: relative;
+    }
+
+    .big-book-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 88px);
+      letter-spacing: -0.02em;
+      line-height: 0.9;
+      color: var(--black);
+      margin-bottom: 6px;
+    }
+
+    .big-book-title span {
+      -webkit-text-stroke: 2px var(--black);
+      color: transparent;
+    }
+
+    .by-line {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: var(--purple);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .highlight-bar {
+      position: relative;
+      display: inline;
+    }
+
+    .highlight-bar::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: -2px; right: -2px;
+      height: 10px;
+      background: var(--yellow);
+      opacity: 0.7;
+      z-index: 0;
+    }
+
+    .highlight-bar span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .book-desc-text {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-style: italic;
+      font-size: 17px;
+      color: #3a3a3a;
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 520px;
+    }
+
+    .tags-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 2px solid var(--black);
+      background: transparent;
+      transition: background 0.15s, color 0.15s;
+      cursor: default;
+    }
+
+    .tag:nth-child(1) { background: var(--yellow); }
+    .tag:nth-child(2) { background: var(--lime); }
+    .tag:nth-child(3) { background: var(--blue); }
+    .tag:nth-child(4) { background: var(--pink); color: var(--white); }
+
+    .meeting-callout {
+      background: var(--black);
+      color: var(--yellow);
+      border: 3px solid var(--black);
+      padding: 20px 24px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      max-width: 460px;
+      position: relative;
+      transform: rotate(0.5deg);
+    }
+
+    .meeting-callout::after {
+      content: '';
+      position: absolute;
+      right: -10px; bottom: -10px;
+      width: 100%; height: 100%;
+      border: 3px solid var(--pink);
+      z-index: -1;
+    }
+
+    .callout-date {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 44px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--yellow);
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .callout-date small {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: rgba(255,229,0,0.55);
+    }
+
+    .callout-info {
+      font-size: 12px;
+    }
+
+    .callout-info strong {
+      display: block;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      color: var(--white);
+    }
+
+    .callout-info span {
+      color: rgba(255,229,0,0.6);
+      font-size: 11px;
+    }
+
+    /* ─── BOOKSHELF ─── */
+    .shelf-wrapper {
+      background: var(--black);
+      padding: 100px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shelf-bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%) rotate(-5deg);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22vw;
+      color: rgba(255,255,255,0.025);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .shelf-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .shelf-header {
+      display: flex;
+      align-items: flex-end;
+      gap: 32px;
+      margin-bottom: 64px;
+      flex-wrap: wrap;
+    }
+
+    .shelf-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 8vw, 96px);
+      color: var(--white);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+    }
+
+    .shelf-title em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--yellow);
+    }
+
+    .shelf-sub {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      color: rgba(255,255,255,0.45);
+      max-width: 260px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+    }
+
+    .bc {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .bc:nth-child(odd) { transform: rotate(-1.5deg); }
+    .bc:nth-child(even) { transform: rotate(1.2deg); }
+    .bc:nth-child(3n) { transform: rotate(-0.5deg) translateY(8px); }
+    .bc:hover { transform: rotate(0deg) translateY(-8px) scale(1.04) !important; z-index: 10; }
+
+    .bc-inner {
+      border: 3px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+      background: #111;
+      aspect-ratio: 2/3;
+      position: relative;
+    }
+
+    .bc-inner svg { width: 100%; height: 100%; display: block; }
+
+    .bc-label {
+      margin-top: 10px;
+    }
+
+    .bc-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+    }
+
+    .bc-author {
+      font-family: 'Caveat', cursive;
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+
+    .bc-stars {
+      font-size: 11px;
+      color: var(--yellow);
+      margin-top: 3px;
+      letter-spacing: 1px;
+    }
+
+    .bc-sticker {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--pink);
+      color: var(--white);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      padding: 5px 10px;
+      border: 2px solid var(--white);
+      transform: rotate(8deg);
+      z-index: 5;
+    }
+
+    /* ─── SCHEDULE ─── */
+    .schedule-wrapper {
+      background: var(--paper2);
+      padding: 100px 48px;
+      border-top: 6px solid var(--black);
+      position: relative;
+    }
+
+    /* newspaper fold lines */
+    .schedule-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      width: 1px;
+      height: 100%;
+      background: rgba(0,0,0,0.07);
+    }
+
+    .schedule-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .sched-left {}
+
+    .cutout-header {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 40px;
+    }
+
+    .cutout-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(44px, 6vw, 72px);
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+      color: var(--black);
+    }
+
+    /* circle scribble around word */
+    .circled {
+      position: relative;
+      display: inline-block;
+    }
+
+    .circled::after {
+      content: '';
+      position: absolute;
+      inset: -6px -10px;
+      border: 3px solid var(--red);
+      border-radius: 50% 48% 52% 50%;
+      transform: rotate(-2deg);
+    }
+
+    .meetings-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .mi {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 20px;
+      border: 2.5px solid var(--black);
+      background: var(--paper);
+      transition: background 0.15s, transform 0.15s;
+      cursor: default;
+    }
+
+    .mi:hover {
+      background: var(--yellow);
+      transform: translateX(4px);
+    }
+
+    .mi-date .day {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 34px;
+      color: var(--black);
+      line-height: 1;
+    }
+
+    .mi-date .mon {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.4);
+    }
+
+    .mi-info strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--black);
+      margin-bottom: 3px;
+    }
+
+    .mi-info span {
+      font-size: 10px;
+      color: rgba(0,0,0,0.5);
+    }
+
+    .mi-badge {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border: 2px solid var(--black);
+    }
+
+    .badge-next { background: var(--pink); color: var(--white); border-color: var(--pink); }
+    .badge-open { background: var(--lime); color: var(--black); border-color: var(--lime); }
+    .badge-done { background: transparent; color: rgba(0,0,0,0.3); }
+
+    /* how it works right side */
+    .how-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 4vw, 52px);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--black);
+      margin-bottom: 32px;
+    }
+
+    .how-title span {
+      color: var(--purple);
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 18px 20px;
+      border: 2.5px solid var(--black);
+      background: var(--paper);
+      position: relative;
+      transition: transform 0.15s;
+    }
+
+    .step:hover { transform: translateX(4px); }
+
+    .step:nth-child(2) { background: #fff; border-color: var(--purple); margin-left: 16px; }
+    .step:nth-child(3) { margin-left: 32px; }
+    .step:nth-child(4) { background: var(--yellow); margin-left: 48px; }
+
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--black);
+      line-height: 1;
+      width: 32px;
+      flex-shrink: 0;
+    }
+
+    .step-txt strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .step-txt p {
+      font-size: 11px;
+      color: rgba(0,0,0,0.55);
+      line-height: 1.55;
+    }
+
+    /* ─── TESTIMONIALS ─── */
+    .quotes-wrapper {
+      background: var(--purple);
+      padding: 100px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quotes-wrapper::before {
+      content: '❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝❝';
+      position: absolute;
+      top: -20px; left: 0;
+      font-size: 80px;
+      color: rgba(255,255,255,0.06);
+      letter-spacing: -10px;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .quotes-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quotes-header {
+      margin-bottom: 56px;
+    }
+
+    .quotes-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      color: var(--yellow);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .quotes-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(44px, 7vw, 80px);
+      color: var(--white);
+      letter-spacing: -0.02em;
+      line-height: 0.9;
+    }
+
+    .quotes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .quote-card {
+      background: var(--paper);
+      border: 3px solid var(--black);
+      padding: 28px 24px;
+      position: relative;
+      transition: transform 0.2s;
+    }
+
+    .quote-card:nth-child(1) { transform: rotate(-1.5deg); box-shadow: 6px 6px 0 var(--black); }
+    .quote-card:nth-child(2) { transform: rotate(1deg) translateY(12px); box-shadow: 6px 6px 0 rgba(0,0,0,0.7); }
+    .quote-card:nth-child(3) { transform: rotate(-0.5deg) translateY(6px); box-shadow: 6px 6px 0 var(--yellow); }
+    .quote-card:hover { transform: rotate(0deg) translateY(-4px) scale(1.02) !important; z-index: 10; }
+
+    .q-tape {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      width: 52px;
+      height: 20px;
+      background: rgba(255,229,0,0.7);
+    }
+
+    .q-mark {
+      font-family: Georgia, serif;
+      font-size: 52px;
+      color: var(--pink);
+      line-height: 0.7;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .q-text {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.65;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .q-author {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--black);
+      border-top: 1.5px solid rgba(0,0,0,0.1);
+      padding-top: 14px;
+    }
+
+    .q-since {
+      color: rgba(0,0,0,0.4);
+      font-weight: 400;
+    }
+
+    /* ─── JOIN ─── */
+    .join-wrapper {
+      background: var(--yellow);
+      padding: 120px 48px;
+      border-top: 6px solid var(--black);
+      border-bottom: 6px solid var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .join-wrapper::after {
+      content: 'JOIN JOIN JOIN JOIN JOIN JOIN JOIN JOIN';
+      position: absolute;
+      bottom: -20px; left: -20px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 80px;
+      letter-spacing: -0.02em;
+      color: rgba(0,0,0,0.05);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .join-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .join-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: var(--pink);
+      transform: rotate(-1deg);
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+
+    .join-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 12vw, 140px);
+      letter-spacing: -0.03em;
+      line-height: 0.88;
+      color: var(--black);
+      margin-bottom: 24px;
+    }
+
+    .join-title em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 3px var(--black);
+    }
+
+    .join-sub {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-style: italic;
+      font-size: 20px;
+      color: rgba(0,0,0,0.6);
+      margin-bottom: 48px;
+      line-height: 1.4;
+    }
+
+    .join-form {
+      display: flex;
+      gap: 0;
+      max-width: 500px;
+      margin: 0 auto 20px;
+      border: 3px solid var(--black);
+      box-shadow: 6px 6px 0 var(--black);
+    }
+
+    .join-input {
+      flex: 1;
+      background: var(--white);
+      border: none;
+      padding: 18px 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--black);
+      outline: none;
+      border-right: 3px solid var(--black);
+    }
+
+    .join-input::placeholder { color: rgba(0,0,0,0.3); }
+
+    .join-btn {
+      background: var(--black);
+      color: var(--yellow);
+      border: none;
+      padding: 18px 28px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .join-btn:hover { background: var(--pink); color: var(--white); }
+
+    .join-note {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.4);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--black);
+      padding: 64px 48px 40px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 32px;
+    }
+
+    .footer-brand-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+
+    .footer-brand-name em {
+      font-style: normal;
+      color: var(--yellow);
+    }
+
+    .footer-tagline {
+      font-family: 'Caveat', cursive;
+      font-size: 17px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.4;
+      max-width: 220px;
+    }
+
+    .footer-col h4 {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col a {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .footer-col a:hover { color: var(--yellow); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      nav { padding: 10px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 90px 24px 60px; }
+      .hero-stats { gap: 0; flex-wrap: wrap; }
+      .hero-stat { padding: 0 16px 0 0; min-width: 50%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 16px; }
+      .current-wrapper { padding: 60px 24px 80px; }
+      .current-grid { grid-template-columns: 1fr; gap: 40px; }
+      .scrap-book-card { transform: rotate(-1deg); width: 180px; }
+      .shelf-wrapper { padding: 72px 24px; }
+      .books-grid { grid-template-columns: repeat(2, 1fr); }
+      .schedule-wrapper { padding: 72px 24px; }
+      .schedule-inner { grid-template-columns: 1fr; gap: 48px; }
+      .quotes-wrapper { padding: 72px 24px; }
+      .quotes-grid { grid-template-columns: 1fr; }
+      .join-wrapper { padding: 80px 24px; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .sticker-star { display: none; }
+      .sticker-free { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">The Folded <em>Page</em></div>
+    <ul class="nav-links">
+      <li><a href="#current">Reading Now</a></li>
+      <li><a href="#shelf">Shelf</a></li>
+      <li><a href="#schedule">Schedule</a></li>
+      <li><a href="#join" class="nav-join">Join Free</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-blob-1"></div>
+    <div class="hero-blob-2"></div>
+    <div class="hero-blob-3"></div>
+    <div class="hero-blob-4"></div>
+
+    <div class="hero-inner">
+      <div class="hero-eyebrow">est. 2023 · monthly reads · no gatekeeping</div>
+
+      <div class="hero-title-wrap">
+        <span class="hero-t1">THE</span>
+        <span class="hero-t2">FOLDED</span>
+        <span class="hero-t3">PAGE.</span>
+
+        <div class="sticker-star">we read<br/>things &amp;<br/>talk about<br/>them</div>
+        <div class="sticker-free">100% FREE</div>
+      </div>
+
+      <p class="hero-sub">A book club for people who <mark>dog-ear pages</mark>, underline everything, and have too many opinions.</p>
+
+      <div class="hero-actions">
+        <a href="#join" class="btn-blast">Join the Club →</a>
+        <a href="#current" class="btn-ghost">See What We're Reading</a>
+        <span class="hero-annotation">it's free btw</span>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="stat-big">47</div>
+          <div class="stat-label">Members</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-big">38</div>
+          <div class="stat-label">Books Read</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-big">3 yrs</div>
+          <div class="stat-label">Running</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-big">6</div>
+          <div class="stat-label">Cities</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TORN PAPER -->
+  <div class="torn-bottom" style="background:#0d0d0d; line-height:0;">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 L0,24 Q60,48 120,30 Q200,8 280,36 Q360,52 440,28 Q520,8 600,38 Q680,52 760,24 Q840,4 920,32 Q1000,52 1080,28 Q1160,8 1240,36 Q1320,52 1380,30 L1440,22 L1440,0 Z" fill="#f2ead8"/>
+    </svg>
+  </div>
+
+  <!-- CURRENT BOOK -->
+  <div class="current-wrapper" id="current">
+    <div class="current-inner">
+      <div class="section-label">currently obsessed with</div>
+
+      <div class="current-grid">
+        <div class="scrap-book-card">
+          <div class="tape"></div>
+          <div class="tape-2"></div>
+          <div class="book-svg-wrap">
+            <svg viewBox="0 0 180 260" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1a3a4a"/>
+                  <stop offset="100%" stop-color="#0d2030"/>
+                </linearGradient>
+              </defs>
+              <rect width="180" height="260" fill="url(#cg)"/>
+              <rect x="0" y="0" width="14" height="260" fill="#102538"/>
+              <circle cx="90" cy="110" r="58" fill="none" stroke="rgba(201,145,61,0.4)" stroke-width="1"/>
+              <circle cx="90" cy="110" r="38" fill="none" stroke="rgba(201,145,61,0.25)" stroke-width="1"/>
+              <circle cx="90" cy="110" r="18" fill="rgba(201,145,61,0.1)"/>
+              <circle cx="90" cy="110" r="6" fill="rgba(201,145,61,0.5)"/>
+              <circle cx="60" cy="55" r="1.5" fill="rgba(255,255,255,0.5)"/>
+              <circle cx="130" cy="45" r="1" fill="rgba(255,255,255,0.4)"/>
+              <circle cx="148" cy="90" r="1.5" fill="rgba(255,255,255,0.45)"/>
+              <circle cx="40" cy="150" r="1" fill="rgba(255,255,255,0.35)"/>
+              <circle cx="155" cy="148" r="1.5" fill="rgba(255,255,255,0.4)"/>
+              <text x="90" y="198" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#f9f5ef" letter-spacing="-0.3">The Midnight</text>
+              <text x="90" y="215" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#f9f5ef" letter-spacing="-0.3">Library</text>
+              <text x="90" y="242" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8.5" fill="rgba(249,245,239,0.4)" letter-spacing="0.1em">MATT HAIG</text>
+            </svg>
+          </div>
+          <div class="now-reading-badge">NOW READING</div>
+        </div>
+
+        <div class="book-info-panel">
+          <h2 class="big-book-title">
+            The<br/><span>Midnight</span><br/>Library
+          </h2>
+          <div class="by-line">
+            ✦ <span class="highlight-bar"><span>Matt Haig</span></span>, 2020
+          </div>
+          <p class="book-desc-text">Between life and death there is a library. When Nora finds herself there, she can try every life she never lived. But with infinite choices — what is the best way to actually live?</p>
+          <div class="tags-row">
+            <span class="tag">Fiction</span>
+            <span class="tag">304 pp</span>
+            <span class="tag">Philosophical</span>
+            <span class="tag">★ 4.1 / 5</span>
+          </div>
+          <div class="meeting-callout">
+            <div class="callout-date">
+              28<small>JUN</small>
+            </div>
+            <div class="callout-info">
+              <strong>Discussion Night</strong>
+              <span>7 PM · The Anchor Café, Room B<br/>Also on Zoom — link in group chat</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TORN EDGE -->
+  <div style="background:var(--paper); line-height:0;">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,48 L0,30 Q80,12 160,34 Q240,50 320,22 Q400,4 480,30 Q560,50 640,26 Q720,6 800,34 Q880,52 960,24 Q1040,4 1120,32 Q1200,52 1280,24 Q1360,4 1440,28 L1440,48 Z" fill="#0d0d0d"/>
+    </svg>
+  </div>
+
+  <!-- BOOKSHELF -->
+  <div class="shelf-wrapper" id="shelf">
+    <div class="shelf-bg-text">READ</div>
+    <div class="shelf-inner">
+      <div class="shelf-header">
+        <div>
+          <div class="shelf-title">WHAT<br/>WE'VE<br/><em>READ.</em></div>
+        </div>
+        <p class="shelf-sub">3 yrs. 38 books. one unforgettable argument about Normal People.</p>
+      </div>
+
+      <div class="books-grid">
+
+        <div class="bc">
+          <div class="bc-sticker">fav</div>
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#3d2a1e"/>
+              <rect x="0" y="0" width="10" height="210" fill="#2e1e14"/>
+              <rect x="16" y="20" width="108" height="2" fill="rgba(249,245,239,0.4)"/>
+              <rect x="16" y="27" width="76" height="2" fill="rgba(249,245,239,0.2)"/>
+              <circle cx="70" cy="108" r="36" fill="none" stroke="rgba(249,245,239,0.12)" stroke-width="10"/>
+              <circle cx="70" cy="108" r="16" fill="rgba(249,245,239,0.06)"/>
+              <text x="70" y="170" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Normal People</text>
+              <text x="70" y="188" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.35)" letter-spacing="0.1em">SALLY ROONEY</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Normal People</div>
+            <div class="bc-author">Sally Rooney · May '26</div>
+            <div class="bc-stars">★★★★☆</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#1e3a2a"/>
+              <rect x="0" y="0" width="10" height="210" fill="#142a1e"/>
+              <path d="M20 105 Q70 55 120 105 Q70 155 20 105Z" fill="rgba(249,245,239,0.06)"/>
+              <text x="70" y="170" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-weight="700" fill="rgba(249,245,239,0.9)">Pachinko</text>
+              <text x="70" y="188" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.35)" letter-spacing="0.1em">MIN JIN LEE</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Pachinko</div>
+            <div class="bc-author">Min Jin Lee · Apr '26</div>
+            <div class="bc-stars">★★★★★</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-sticker">5★</div>
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#4a2e10"/>
+              <rect x="0" y="0" width="10" height="210" fill="#3a2208"/>
+              <line x1="18" y1="56" x2="122" y2="56" stroke="rgba(201,145,61,0.35)" stroke-width="1"/>
+              <line x1="18" y1="152" x2="122" y2="152" stroke="rgba(201,145,61,0.35)" stroke-width="1"/>
+              <text x="70" y="110" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-weight="700" fill="rgba(249,245,239,0.9)">Piranesi</text>
+              <text x="70" y="172" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.35)" letter-spacing="0.08em">SUSANNA CLARKE</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Piranesi</div>
+            <div class="bc-author">Susanna Clarke · Mar '26</div>
+            <div class="bc-stars">★★★★★</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#1e1e3a"/>
+              <rect x="0" y="0" width="10" height="210" fill="#14142a"/>
+              <circle cx="70" cy="88" r="44" fill="rgba(201,145,61,0.08)" stroke="rgba(201,145,61,0.2)" stroke-width="1"/>
+              <text x="70" y="160" text-anchor="middle" font-family="Georgia,serif" font-size="9.5" font-weight="700" fill="rgba(249,245,239,0.85)">Tomorrow, &amp;</text>
+              <text x="70" y="174" text-anchor="middle" font-family="Georgia,serif" font-size="9.5" font-weight="700" fill="rgba(249,245,239,0.85)">Tomorrow</text>
+              <text x="70" y="196" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="7.5" fill="rgba(249,245,239,0.3)" letter-spacing="0.08em">G. ZEVIN</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Tomorrow×3</div>
+            <div class="bc-author">Gabrielle Zevin · Feb '26</div>
+            <div class="bc-stars">★★★★☆</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#2a3a18"/>
+              <rect x="0" y="0" width="10" height="210" fill="#1e2e10"/>
+              <path d="M20 30 L120 30 L120 180 L20 180 Z" fill="none" stroke="rgba(249,245,239,0.07)" stroke-width="8"/>
+              <text x="70" y="108" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Demon</text>
+              <text x="70" y="124" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Copperhead</text>
+              <text x="70" y="172" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.3)" letter-spacing="0.08em">B. KINGSOLVER</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Demon Copperhead</div>
+            <div class="bc-author">Kingsolver · Jan '26</div>
+            <div class="bc-stars">★★★★☆</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#3a1e32"/>
+              <rect x="0" y="0" width="10" height="210" fill="#2a1424"/>
+              <path d="M40 36 Q70 18 100 36 L112 76 Q70 96 28 76Z" fill="rgba(249,245,239,0.05)"/>
+              <text x="70" y="148" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">The</text>
+              <text x="70" y="163" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Vegetarian</text>
+              <text x="70" y="186" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.35)" letter-spacing="0.1em">HAN KANG</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">The Vegetarian</div>
+            <div class="bc-author">Han Kang · Dec '25</div>
+            <div class="bc-stars">★★★★☆</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-sticker">loved</div>
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#123040"/>
+              <rect x="0" y="0" width="10" height="210" fill="#0c2230"/>
+              <line x1="18" y1="86" x2="122" y2="86" stroke="rgba(201,145,61,0.28)" stroke-width="0.8"/>
+              <line x1="18" y1="92" x2="122" y2="92" stroke="rgba(201,145,61,0.14)" stroke-width="0.8"/>
+              <text x="70" y="122" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Lessons in</text>
+              <text x="70" y="137" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="rgba(249,245,239,0.9)">Chemistry</text>
+              <text x="70" y="172" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="8" fill="rgba(249,245,239,0.3)" letter-spacing="0.08em">B. GARMUS</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Lessons in Chemistry</div>
+            <div class="bc-author">Garmus · Nov '25</div>
+            <div class="bc-stars">★★★★★</div>
+          </div>
+        </div>
+
+        <div class="bc">
+          <div class="bc-inner">
+            <svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+              <rect width="140" height="210" fill="#382c16"/>
+              <rect x="0" y="0" width="10" height="210" fill="#2c2010"/>
+              <rect x="22" y="22" width="88" height="112" fill="rgba(249,245,239,0.04)" stroke="rgba(249,245,239,0.08)" stroke-width="1"/>
+              <text x="70" y="166" text-anchor="middle" font-family="Georgia,serif" font-size="10" font-weight="700" fill="rgba(249,245,239,0.85)">Cloud Cuckoo</text>
+              <text x="70" y="180" text-anchor="middle" font-family="Georgia,serif" font-size="10" font-weight="700" fill="rgba(249,245,239,0.85)">Land</text>
+              <text x="70" y="200" text-anchor="middle" font-family="Helvetica,sans-serif" font-size="7.5" fill="rgba(249,245,239,0.3)" letter-spacing="0.08em">A. DOERR</text>
+            </svg>
+          </div>
+          <div class="bc-label">
+            <div class="bc-title">Cloud Cuckoo Land</div>
+            <div class="bc-author">A. Doerr · Oct '25</div>
+            <div class="bc-stars">★★★★☆</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TORN PAPER -->
+  <div style="background:#0d0d0d; line-height:0;">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,48 L0,28 Q100,8 200,32 Q300,52 400,20 Q500,2 600,30 Q700,52 800,22 Q900,2 1000,28 Q1100,50 1200,24 Q1300,4 1380,30 L1440,20 L1440,48 Z" fill="#ede3cc"/>
+    </svg>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="schedule-wrapper" id="schedule">
+    <div class="schedule-inner">
+      <div class="sched-left">
+        <div class="cutout-header">
+          <div class="cutout-title">
+            MEET<br/>EVERY<br/><span class="circled">MONTH.</span>
+          </div>
+        </div>
+        <div class="meetings-stack">
+          <div class="mi">
+            <div class="mi-date"><div class="day">28</div><div class="mon">Jun</div></div>
+            <div class="mi-info">
+              <strong>The Midnight Library</strong>
+              <span>7 PM · The Anchor Café, Room B</span>
+            </div>
+            <span class="mi-badge badge-next">Next</span>
+          </div>
+          <div class="mi">
+            <div class="mi-date"><div class="day">26</div><div class="mon">Jul</div></div>
+            <div class="mi-info">
+              <strong>TBD — vote opens July 1st</strong>
+              <span>7 PM · Location TBC</span>
+            </div>
+            <span class="mi-badge badge-open">Vote</span>
+          </div>
+          <div class="mi">
+            <div class="mi-date"><div class="day">30</div><div class="mon">Aug</div></div>
+            <div class="mi-info">
+              <strong>Summer Special · Noms Open</strong>
+              <span>7 PM · Location TBC</span>
+            </div>
+            <span class="mi-badge badge-open">Open</span>
+          </div>
+          <div class="mi">
+            <div class="mi-date"><div class="day">31</div><div class="mon">May</div></div>
+            <div class="mi-info">
+              <strong>Normal People · 28 attended</strong>
+              <span>The Anchor Café</span>
+            </div>
+            <span class="mi-badge badge-done">Done</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="how-title">HOW IT<br/><span>WORKS</span></div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-txt">
+              <strong>Sign up — it's free</strong>
+              <p>Drop your email. We'll send a welcome message and a link to the group chat. No credit card, no commitment.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-txt">
+              <strong>Vote on next month's pick</strong>
+              <p>Members nominate and vote at the end of each meeting. Every genre welcome, every voice counts.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-txt">
+              <strong>Read at your pace</strong>
+              <p>No deadlines. Optional weekly check-ins in the group chat if you want the discourse mid-book.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-txt">
+              <strong>Come talk about it</strong>
+              <p>Last Saturday of the month. In person or on Zoom. Come for the book, stay for the opinions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="quotes-wrapper">
+    <div class="quotes-inner">
+      <div class="quotes-header">
+        <span class="quotes-eyebrow">real members, real takes</span>
+        <div class="quotes-title">WHAT THEY<br/>SAID.</div>
+      </div>
+      <div class="quotes-grid">
+        <div class="quote-card">
+          <div class="q-tape"></div>
+          <span class="q-mark">"</span>
+          <p class="q-text">I joined expecting a polite book report. I got a two-hour argument about free will that went until the café closed. Best decision I've made this year.</p>
+          <div class="q-author">Margot D. <span class="q-since">· member since 2024</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="q-tape" style="background:rgba(197,255,65,0.65);"></div>
+          <span class="q-mark">"</span>
+          <p class="q-text">This club made me read things I would never have touched. Pachinko absolutely destroyed me. Grateful forever.</p>
+          <div class="q-author">James T. <span class="q-since">· member since 2023</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="q-tape" style="background:rgba(45,240,255,0.55);"></div>
+          <span class="q-mark">"</span>
+          <p class="q-text">I moved cities and kept coming on Zoom. The community travels with you. That's kind of everything when you're starting over somewhere new.</p>
+          <div class="q-author">Priya N. <span class="q-since">· member since 2022</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOIN -->
+  <div class="join-wrapper" id="join">
+    <div class="join-inner">
+      <div class="join-eyebrow">→ no pressure, always free</div>
+      <h2 class="join-title">ONE EMAIL.<br/><em>ONE BOOK.</em><br/>A MONTH.</h2>
+      <p class="join-sub">Show up when you can. Read what you want. Talk about all of it.</p>
+      <form class="join-form" onsubmit="handleJoin(event)">
+        <input class="join-input" type="email" placeholder="your@email.com" required/>
+        <button class="join-btn" type="submit">Join Free →</button>
+      </form>
+      <p class="join-note">47 members already in · unsubscribe anytime · no spam ever</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand-name">The Folded <em>Page</em></div>
+          <div class="footer-tagline">a monthly book club for people who believe fiction is the best way to understand anything.</div>
+        </div>
+        <div class="footer-col">
+          <h4>Club</h4>
+          <ul>
+            <li><a href="#current">Now Reading</a></li>
+            <li><a href="#shelf">Past Reads</a></li>
+            <li><a href="#schedule">Schedule</a></li>
+            <li><a href="#join">Join</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="#">Group Chat</a></li>
+            <li><a href="#">Suggest a Book</a></li>
+            <li><a href="#">Vote Next Pick</a></li>
+            <li><a href="#">Newsletter</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Info</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Host a Meeting</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 The Folded Page Book Club</span>
+        <span style="font-family:'Caveat',cursive; font-size:16px; color:rgba(255,255,255,0.25);">made for readers, by readers ✦</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function handleJoin(e) {
+      e.preventDefault();
+      const input = e.target.querySelector('input');
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'you\'re in ✦';
+      btn.style.background = '#c5ff41';
+      btn.style.color = '#0d0d0d';
+      input.value = '';
+      input.placeholder = 'welcome to the club :)';
+      input.disabled = true;
+      btn.disabled = true;
+    }
+
+    // parallax wobble on hover for book cards
+    document.querySelectorAll('.bc').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width/2) / r.width;
+        const y = (e.clientY - r.top - r.height/2) / r.height;
+        card.style.transform = `rotate(${x*4}deg) translateY(-8px) scale(1.04)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  </script>
+
+</body>
+</html>
