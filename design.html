@@ -3,618 +3,1051 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SOLA</title>
+<title>SOLA — Design Concept</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,900;1,100;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,700&display=swap');
 
-*{margin:0;padding:0;box-sizing:border-box}
-html{background:#060606;overflow-x:hidden}
-body{font-family:'Inter',sans-serif;background:#060606;color:#f0ebe2;-webkit-font-smoothing:antialiased;cursor:none;overflow-x:hidden}
+/* ── TOKENS ── */
+:root {
+  --ink:     #111010;
+  --paper:   #F7F3EE;
+  --mid:     #9B9085;
+  --rule:    rgba(0,0,0,0.08);
+  --accent:  #9B6B47;
+  --white:   #FFFFFF;
 
-/* cursor */
-#c{position:fixed;width:8px;height:8px;background:#ff4800;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s}
-#c.expand{width:40px;height:40px;opacity:.5}
-.trail{position:fixed;width:4px;height:4px;border-radius:50%;background:#ff4800;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
-
-/* ── SCENE 1: full black, product vibrates ── */
-.s1{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  background:#060606;
-  overflow:hidden;
+  --f-label: 500 10px/1 'Inter', sans-serif;
+  --f-body:  300 14px/1.75 'Inter', sans-serif;
+  --ls-label: 0.18em;
 }
 
-.s1-brand{
-  position:absolute;
-  top:32px;left:40px;
-  font-size:11px;font-weight:900;
-  letter-spacing:.22em;text-transform:uppercase;
-  color:#1a1a1a;
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 16px; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 64px 120px;
 }
 
-.device-wrap{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* ── TYPE SCALE ── */
+.t-label {
+  font: var(--f-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--mid);
 }
 
-.device-wrap svg{
-  width:clamp(120px,18vh,200px);
-  animation:deviceBuzz 0.08s linear infinite;
+.t-body { font: var(--f-body); color: #444; }
+
+/* ── GRID ── */
+.g2  { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.g3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.g12 { display: grid; grid-template-columns: repeat(12,1fr); gap: 24px; }
+
+/* ── RULE ── */
+hr { border: none; border-top: 1px solid var(--rule); margin: 72px 0; }
+hr.thick { border-top: 2px solid var(--ink); margin: 0 0 64px; }
+hr.accent { border-top: 3px solid var(--accent); margin: 0 0 64px; width: 40px; }
+
+/* ── COVER ── */
+.cover {
+  min-height: 90vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding-bottom: 80px;
 }
 
-@keyframes deviceBuzz{
-  0%  {transform:translate(0,0) rotate(-1deg)}
-  25% {transform:translate(-1px,.5px) rotate(-1deg)}
-  50% {transform:translate(.5px,-1px) rotate(-1deg)}
-  75% {transform:translate(-1px,.5px) rotate(-1deg)}
-  100%{transform:translate(0,0) rotate(-1deg)}
+.cover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 64px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 64px;
 }
 
-.device-halo{
-  position:absolute;
-  width:200%;height:200%;
-  background:radial-gradient(ellipse at center,rgba(255,72,0,.12) 0%,transparent 65%);
-  animation:haloPulse 3s ease-in-out infinite;
-  pointer-events:none;
+.cover-wordmark {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
-@keyframes haloPulse{
-  0%,100%{transform:scale(1);opacity:.8}
-  50%{transform:scale(1.2);opacity:1}
+.cover-meta {
+  text-align: right;
 }
 
-.s1-name{
-  margin-top:48px;
-  font-size:clamp(80px,14vw,160px);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.06em;
-  line-height:1;
-  color:#f0ebe2;
-  animation:wPulse 4s ease-in-out infinite;
+.cover-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: end;
 }
 
-@keyframes wPulse{
-  0%,100%{font-variation-settings:'wght' 900;opacity:1}
-  50%{font-variation-settings:'wght' 100;opacity:.7}
+.cover-title {
+  font-size: clamp(72px, 10vw, 120px);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
 }
 
-.s1-sub{
-  margin-top:16px;
-  font-size:11px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:#2a2a2a;
-  animation:breathe 4s ease-in-out infinite;
+.cover-title em {
+  font-style: italic;
+  color: var(--accent);
 }
 
-@keyframes breathe{
-  0%,100%{opacity:.4}
-  50%{opacity:1}
+.cover-device {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-.scroll-hint{
-  position:absolute;
-  bottom:32px;
-  font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  color:#222;
-  animation:breathe 2s ease-in-out infinite;
+.cover-device svg {
+  width: clamp(160px, 22vw, 260px);
+  filter: drop-shadow(0 32px 64px rgba(0,0,0,0.14));
 }
 
-/* ── SCENE 2: SINGLE WORD ── */
-.s2{
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  padding:0 8vw;
-  background:#060606;
-  position:relative;
-  overflow:hidden;
+.cover-concept {
+  grid-column: 1 / -1;
+  padding-top: 64px;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  align-items: start;
 }
 
-.word-giant{
-  font-size:clamp(100px,20vw,240px);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.06em;
-  line-height:.85;
-  color:#f0ebe2;
-  position:relative;
-  z-index:2;
+.cover-concept p {
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  max-width: 640px;
 }
 
-.word-giant .accent{color:#ff4800}
-.word-giant .ghost{
-  color:transparent;
-  -webkit-text-stroke:1px #1a1a1a;
+/* ── SECTION HEADER ── */
+.sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule);
 }
 
-.scene-note{
-  position:absolute;
-  bottom:10vh;right:8vw;
-  font-size:11px;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:#222;
-  text-align:right;
-  line-height:1.8;
+.sec-title {
+  font-size: clamp(36px, 4.5vw, 52px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
-/* ── SCENE 3: TOUCH ── */
-.s3{
-  height:100vh;
-  background:#ff4800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  overflow:hidden;
+/* ── CONCEPT PILLARS ── */
+.pillar {
+  padding: 36px 32px;
+  border: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.touch-word{
-  font-size:clamp(100px,22vw,280px);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.07em;
-  line-height:.85;
-  color:#060606;
-  text-align:center;
-  animation:touchBuzz .1s linear infinite;
+.pillar-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--accent);
 }
 
-@keyframes touchBuzz{
-  0%  {transform:translate(0,0)}
-  20% {transform:translate(-1.5px,1px)}
-  40% {transform:translate(1.5px,-1px)}
-  60% {transform:translate(-1px,-1.5px)}
-  80% {transform:translate(1px,1.5px)}
-  100%{transform:translate(0,0)}
+.pillar-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.s3-sub{
-  position:absolute;
-  bottom:10vh;
-  font-size:12px;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:rgba(0,0,0,.3);
+.pillar-body {
+  font: var(--f-body);
+  color: #666;
+  border-top: 1px solid var(--rule);
+  padding-top: 16px;
 }
 
-/* ── SCENE 4: product + facts ── */
-.s4{
-  min-height:100vh;
-  background:#0c0c0c;
-  display:grid;
-  grid-template-columns:1fr 1fr;
+/* ── IDENTITY ── */
+.mark-demo {
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3/2;
 }
 
-.s4-left{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:80px;
-  border-right:1px solid #111;
-  position:sticky;
-  top:0;
-  height:100vh;
+.mark-demo-light {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3/2;
 }
 
-.s4-left svg{
-  width:clamp(140px,18vw,220px);
-  filter:drop-shadow(0 0 60px rgba(255,72,0,.2));
+.wordmark-large {
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
-.s4-right{
-  padding:100px 72px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:0;
+.type-specimen {
+  border: 1px solid var(--rule);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.s4-right h2{
-  font-size:clamp(36px,4.5vw,56px);
-  font-weight:900;
-  letter-spacing:-.04em;
-  line-height:.95;
-  color:#f0ebe2;
-  margin-bottom:56px;
+.specimen-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule);
+  gap: 24px;
 }
 
-.s4-right h2 em{color:#ff4800;font-style:italic}
+.specimen-row:last-child { border-bottom: none; padding-bottom: 0; }
 
-.fact{
-  padding:24px 0;
-  border-top:1px solid #111;
-  display:grid;
-  grid-template-columns:20px 1fr;
-  gap:20px;
-  opacity:0;
-  transform:translateX(16px);
-  transition:opacity .6s,transform .6s;
+.swatch-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin-top: 24px;
 }
 
-.fact.on{opacity:1;transform:translateX(0)}
-.fact-n{font-size:10px;color:#333;font-weight:700;padding-top:3px}
-.fact-h{font-size:15px;font-weight:700;color:#f0ebe2;line-height:1.3}
-.fact-b{font-size:12px;color:#444;line-height:1.7;margin-top:4px;font-weight:300}
-
-/* ── SCENE 5: 35dB ── */
-.s5{
-  height:100vh;
-  background:#060606;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:0;
-  position:relative;
+.swatch {
+  aspect-ratio: 3/2;
+  position: relative;
 }
 
-.db-big{
-  font-size:clamp(100px,24vw,300px);
-  font-weight:900;
-  letter-spacing:-.06em;
-  line-height:.85;
-  color:#111;
+.swatch-info {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.db-label{
-  font-size:clamp(32px,5vw,64px);
-  font-weight:100;
-  font-style:italic;
-  letter-spacing:-.02em;
-  color:#f0ebe2;
-  margin-top:-2vw;
+.swatch-name { font-size: 13px; font-weight: 700; }
+.swatch-code { font-size: 11px; color: var(--mid); letter-spacing: 0.05em; }
+.swatch-role { font-size: 11px; color: var(--mid); font-style: italic; }
+
+/* ── PRODUCT VIEWS ── */
+.views-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 24px;
 }
 
-.db-note{
-  position:absolute;
-  bottom:10vh;
-  font-size:11px;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:#222;
+.view-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* ── SCENE 6: colorways ── */
-.s6{
-  background:#060606;
-  padding:12vw 8vw;
+.view-cell svg { width: 100%; }
+
+.view-cell-label {
+  font: var(--f-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--mid);
 }
 
-.s6-h{
-  font-size:clamp(48px,8vw,96px);
-  font-weight:900;
-  letter-spacing:-.05em;
-  line-height:.9;
-  color:#f0ebe2;
-  margin-bottom:64px;
+.annotation-line {
+  font-size: 10px;
+  color: var(--mid);
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+  margin-top: 4px;
+  line-height: 1.6;
 }
 
-.s6-h em{color:#ff4800;font-style:italic}
-
-.cw-strip{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:3px;
-  height:60vh;
+/* ── SPEC TABLE ── */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.cw-c{
-  position:relative;
-  overflow:hidden;
-  cursor:none;
-  transition:flex .5s cubic-bezier(.23,1,.32,1);
+.spec-table tr { border-bottom: 1px solid var(--rule); }
+.spec-table tr:last-child { border-bottom: none; }
+.spec-table td { padding: 18px 0; vertical-align: top; }
+.spec-table td:first-child {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid);
+  width: 35%;
+}
+.spec-table td:last-child {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
 }
 
-.cw-c:hover{flex:2}
-
-.cw-c::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%);
+.spec-note {
+  font-size: 12px;
+  font-weight: 300;
+  color: #999;
+  display: block;
+  margin-top: 3px;
 }
 
-.cw-meta{
-  position:absolute;
-  bottom:0;left:0;right:0;
-  padding:20px;
-  z-index:2;
+/* ── MATERIAL COLORWAYS ── */
+.material-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-bottom: 32px;
 }
 
-.cw-name{font-size:15px;font-weight:900;color:#fff;letter-spacing:-.01em}
-.cw-desc{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
-
-/* ── SCENE 7: end ── */
-.s7{
-  height:100vh;
-  background:#ff4800;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:flex-end;
-  padding:0 8vw 10vh;
-  position:relative;
-  overflow:hidden;
+.material-swatch {
+  aspect-ratio: 2/3;
+  position: relative;
 }
 
-.s7-bg{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  pointer-events:none;
+.material-label {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
 }
 
-.s7-bg svg{
-  width:70vh;
-  opacity:.12;
-  animation:slowSpin 20s linear infinite;
+.material-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-@keyframes slowSpin{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
+.material-hex {
+  font-size: 10px;
+  color: var(--mid);
+  letter-spacing: 0.05em;
 }
 
-.s7-small{
-  font-size:11px;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:rgba(0,0,0,.3);
-  margin-bottom:24px;
-  position:relative;z-index:2;
+.material-note {
+  font-size: 11px;
+  color: var(--mid);
+  margin-top: 6px;
+  font-style: italic;
+  line-height: 1.5;
 }
 
-.s7-big{
-  font-size:clamp(72px,13vw,160px);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.05em;
-  line-height:.85;
-  color:#060606;
-  position:relative;z-index:2;
-  margin-bottom:40px;
+/* ── PRINCIPLES BOX ── */
+.principle-box {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 48px;
+  grid-column: span 2;
 }
 
-.s7-row{
-  display:flex;align-items:baseline;gap:32px;
-  position:relative;z-index:2;
+.principle-box h3 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 32px;
 }
 
-.s7-price{
-  font-size:clamp(32px,5vw,56px);
-  font-weight:900;
-  letter-spacing:-.03em;
-  color:#060606;
+.principle-box h3 em {
+  font-style: italic;
+  color: var(--accent);
 }
 
-.s7-note{
-  font-size:12px;
-  color:rgba(0,0,0,.35);
-  line-height:1.7;
+.principle-box p {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(247,243,238,0.6);
+  line-height: 1.75;
+  max-width: 520px;
 }
 
-/* ── footer ── */
-footer{
-  background:#060606;
-  border-top:1px solid #0f0f0f;
-  padding:24px 8vw;
-  display:flex;
-  justify-content:space-between;
-  font-size:10px;
-  color:#1a1a1a;
-  letter-spacing:.1em;
+/* ── PACKAGING ── */
+.pack-cell {
+  border: 1px solid var(--rule);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pack-cell h3 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ── RATIONALE ── */
+.rationale {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--rule);
+}
+
+.rationale-item {
+  padding: 32px;
+  border-right: 1px solid var(--rule);
+}
+
+.rationale-item:last-child { border-right: none; }
+
+.rationale-q {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.rationale-a {
+  font-size: 13px;
+  font-weight: 300;
+  color: #777;
+  line-height: 1.7;
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  margin-top: 120px;
+  padding-top: 32px;
+  border-top: 2px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.doc-footer-brand {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.doc-footer-meta {
+  font: var(--f-label);
+  letter-spacing: var(--ls-label);
+  text-align: right;
+  line-height: 1.8;
+  color: var(--mid);
 }
 </style>
 </head>
 <body>
 
-<div id="c"></div>
+<!-- ══════════════════════════════════════════
+     COVER
+══════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-header">
+    <div class="cover-wordmark">SOLA</div>
+    <div class="cover-meta t-label">
+      Design Concept 01<br/>
+      Personal Wellness Device<br/>
+      2025
+    </div>
+  </div>
 
-<!-- S1: PRODUCT VIBRATES -->
-<section class="s1">
-  <div class="s1-brand">SOLA</div>
-  <div class="device-wrap">
-    <div class="device-halo"></div>
-    <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+  <div class="cover-body">
+    <div>
+      <div class="t-label" style="margin-bottom:24px">Product Identity &amp; Design System</div>
+      <div class="cover-title">
+        Designed<br/>to <em>dis-<br/>appear.</em>
+      </div>
+    </div>
+    <div class="cover-device">
+      <svg viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cvg" cx="36%" cy="28%" r="72%">
+            <stop offset="0%"   stop-color="#d8d2ca"/>
+            <stop offset="100%" stop-color="#a8a29a"/>
+          </radialGradient>
+          <radialGradient id="cvs" cx="28%" cy="18%" r="52%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.3)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="120" cy="180" rx="82" ry="124" fill="url(#cvg)"/>
+        <ellipse cx="120" cy="180" rx="82" ry="124" fill="url(#cvs)"/>
+        <!-- touch zone indication — subtle -->
+        <ellipse cx="120" cy="158" rx="54" ry="76" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1" stroke-dasharray="5 5"/>
+        <!-- logo mark embossed -->
+        <circle cx="120" cy="268" r="6" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1.2"/>
+        <circle cx="120" cy="268" r="2" fill="rgba(0,0,0,0.1)"/>
+        <!-- USB-C -->
+        <rect x="106" y="294" width="28" height="7" rx="3.5" fill="rgba(0,0,0,0.08)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="cover-concept">
+    <div class="t-label">Concept Statement</div>
+    <p>The product's disguise is not a marketing decision — it is the design decision. Form, material, input method, and finish are all chosen to make the object unrecognizable in its context. The result is a personal wellness device that belongs on a bathroom shelf, not hidden in a drawer.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     01 — DESIGN RATIONALE
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">01</div>
+    <div class="sec-title">Design Rationale</div>
+  </div>
+  <div class="t-body" style="max-width:360px;text-align:right">
+    Every decision in this concept is driven by a single principle: the object must be completely unrecognizable to an uninformed observer. This constraint generates the design.
+  </div>
+</div>
+
+<div class="rationale">
+  <div class="rationale-item">
+    <div class="rationale-q">Why no buttons?</div>
+    <div class="rationale-a">Buttons are the primary visual signal that reveals a device's function. Their absence makes the object read as a passive object — a stone, a case, a compact. Full-surface capacitive touch replaces them without sacrificing control.</div>
+  </div>
+  <div class="rationale-item">
+    <div class="rationale-q">Why this form factor?</div>
+    <div class="rationale-a">104 × 78 × 28mm — the exact footprint of a premium earbud case. The reference object is everyday and familiar. Nothing about the proportions signals the object's function, while the ergonomics remain deliberate and considered.</div>
+  </div>
+  <div class="rationale-item">
+    <div class="rationale-q">Why matte silicone?</div>
+    <div class="rationale-a">Matte silicone is associated with premium consumer electronics and skincare packaging — not with this product category. It reads as "expensive object" before it reads as anything else. It is also body-safe, waterproof, and durable by nature.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     02 — DESIGN PRINCIPLES
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">02</div>
+    <div class="sec-title">Four Principles</div>
+  </div>
+</div>
+
+<div class="g2" style="margin-bottom:24px">
+  <div class="principle-box">
+    <h3>The disguise<br/>is the <em>product.</em></h3>
+    <p>Not a branding decision made after the product was designed. The form is developed around the constraint of non-recognition. The object passes inspection in a carry-on bag, on a bathroom shelf, in a hotel room. That invisibility is the primary feature — more important than any technical specification.</p>
+  </div>
+  <div class="pillar" style="border-color:var(--rule)">
+    <div class="pillar-num">Principle 02</div>
+    <div class="pillar-title">Touch is the only interface.</div>
+    <div class="pillar-body">A button is a tell. The entire top surface is a single capacitive zone. Swipe upward to increase intensity. Swipe downward to decrease. Press firmly to power on or off. No modes. No memory settings. No pairing sequence. The interaction is self-evident within three seconds of first use — with no instruction.</div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="pillar">
+    <div class="pillar-num">Principle 03</div>
+    <div class="pillar-title">Quiet at every intensity.</div>
+    <div class="pillar-body">The motor specification is non-negotiable: brushless, under 35dB at maximum output. This is quieter than a normal conversation (60dB), quieter than a whisper at one metre (30dB). It is not a quiet-enough motor — it is a motor chosen specifically because it removes the sound as an element of the product experience entirely. Discretion is not a feature. It is a baseline requirement.</div>
+  </div>
+  <div class="pillar">
+    <div class="pillar-num">Principle 04</div>
+    <div class="pillar-title">The shelf test.</div>
+    <div class="pillar-body">The product must pass what we call the shelf test: set among skincare, candles, and ceramics on a bathroom shelf, it must belong. The colorways, finish, proportions, and embossed-only branding are all calibrated to this test. If it looks out of place next to a Aesop bottle or an Muji diffuser, the design has failed. This is the user environment. The product must earn its place in it.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     03 — VISUAL IDENTITY
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">03</div>
+    <div class="sec-title">Visual Identity</div>
+  </div>
+</div>
+
+<!-- Wordmark -->
+<div class="g2" style="margin-bottom:40px;align-items:stretch">
+  <div>
+    <div class="t-label" style="margin-bottom:16px">Wordmark — Dark Field</div>
+    <div class="mark-demo">
+      <span class="wordmark-large" style="color:#F7F3EE;letter-spacing:-0.05em">SOLA</span>
+    </div>
+  </div>
+  <div>
+    <div class="t-label" style="margin-bottom:16px">Wordmark — Light Field</div>
+    <div class="mark-demo-light">
+      <span class="wordmark-large" style="color:#111010;letter-spacing:-0.05em">SOLA</span>
+    </div>
+  </div>
+</div>
+
+<div class="t-body" style="max-width:680px;margin-bottom:40px">
+  The wordmark is set in Inter 900, −5% tracking. No bespoke letterforms, no custom ligatures, no supporting icon. The product is the icon. The wordmark appears exclusively in the two base colours — never in accent. On the physical product, it is embossed into the silicone body at 6pt — perceptible on close inspection, invisible from any distance. The brand does not announce itself.
+</div>
+
+<!-- Mark system -->
+<div class="g3" style="margin-bottom:40px">
+  <div>
+    <div class="t-label" style="margin-bottom:16px">Embossed Product Mark</div>
+    <div style="border:1px solid var(--rule);aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--white)">
+      <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#111" stroke-width="1.2"/>
+        <circle cx="40" cy="40" r="3" fill="#111"/>
+      </svg>
+    </div>
+    <div class="annotation-line">Concentric ring + centre dot. References the touch gesture. Embossed 0.3mm depth into silicone body. Single instance, positioned at lower third of rear face.</div>
+  </div>
+  <div>
+    <div class="t-label" style="margin-bottom:16px">Mark — On Ink</div>
+    <div style="border:1px solid var(--rule);aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#111">
+      <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(247,243,238,0.3)" stroke-width="1.2"/>
+        <circle cx="40" cy="40" r="3" fill="rgba(247,243,238,0.3)"/>
+      </svg>
+    </div>
+    <div class="annotation-line">On dark material colourways (Ink), the emboss reads as a subtle shadow variation. No additional marking is applied.</div>
+  </div>
+  <div>
+    <div class="t-label" style="margin-bottom:16px">Touch Zone Diagram</div>
+    <div style="border:1px solid var(--rule);aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--white)">
+      <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="40" cy="40" rx="32" ry="38" fill="#F7F3EE" stroke="#ddd" stroke-width="1"/>
+        <ellipse cx="40" cy="38" rx="20" ry="26" fill="none" stroke="#9B6B47" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="40" y="71" text-anchor="middle" font-size="6" font-family="Inter,sans-serif" fill="#9B9085" font-weight="500" letter-spacing="1">TOUCH ZONE</text>
+      </svg>
+    </div>
+    <div class="annotation-line">The active capacitive area occupies the upper 80% of the top face. No visual delineation on the physical surface — the zone is defined by firmware, not material.</div>
+  </div>
+</div>
+
+<!-- Typography specimen -->
+<div class="t-label" style="margin-bottom:16px">Type System — Inter (Variable)</div>
+<div class="type-specimen" style="margin-bottom:40px">
+  <div class="specimen-row">
+    <div>
+      <div style="font-size:10px;color:var(--mid);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Headline / 900</div>
+      <div style="font-size:36px;font-weight:900;letter-spacing:-0.04em;line-height:1">Designed to disappear.</div>
+    </div>
+    <div class="t-label" style="white-space:nowrap">Inter 900 · −4% tracking</div>
+  </div>
+  <div class="specimen-row">
+    <div>
+      <div style="font-size:10px;color:var(--mid);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Subheading / 700</div>
+      <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;line-height:1.2">Full-surface capacitive touch.</div>
+    </div>
+    <div class="t-label" style="white-space:nowrap">Inter 700 · −2% tracking</div>
+  </div>
+  <div class="specimen-row">
+    <div>
+      <div style="font-size:10px;color:var(--mid);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Body / 300</div>
+      <div style="font-size:14px;font-weight:300;line-height:1.75;max-width:400px">Swipe upward to increase intensity. Swipe downward to decrease. Press to power on or off. No modes, no settings, no pairing. The interaction is self-evident within three seconds of first use.</div>
+    </div>
+    <div class="t-label" style="white-space:nowrap">Inter 300 · default tracking</div>
+  </div>
+  <div class="specimen-row">
+    <div>
+      <div style="font-size:10px;color:var(--mid);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Label / 500 Uppercase</div>
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase">Touch-Controlled · Body-Safe · IPX7 · &lt;35dB · USB-C</div>
+    </div>
+    <div class="t-label" style="white-space:nowrap">Inter 500 · +18% tracking</div>
+  </div>
+</div>
+
+<!-- Colour palette -->
+<div class="t-label" style="margin-bottom:16px">Colour System</div>
+<div class="swatch-row" style="margin-bottom:12px">
+  <div>
+    <div class="swatch" style="background:#F7F3EE;border:1px solid var(--rule)"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">Paper</div>
+      <div class="swatch-code">#F7F3EE</div>
+      <div class="swatch-role">Primary background</div>
+    </div>
+  </div>
+  <div>
+    <div class="swatch" style="background:#111010"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">Ink</div>
+      <div class="swatch-code">#111010</div>
+      <div class="swatch-role">Primary foreground</div>
+    </div>
+  </div>
+  <div>
+    <div class="swatch" style="background:#9B6B47"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">Terracotta</div>
+      <div class="swatch-code">#9B6B47</div>
+      <div class="swatch-role">Accent — use sparingly</div>
+    </div>
+  </div>
+  <div>
+    <div class="swatch" style="background:#9B9085"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">Warm Mid</div>
+      <div class="swatch-code">#9B9085</div>
+      <div class="swatch-role">Labels, secondary text</div>
+    </div>
+  </div>
+</div>
+
+<div class="t-body" style="max-width:560px">
+  The identity uses two base colours — Paper and Ink — plus a single accent, Terracotta, which references the warm skin-safe silicone material of the product. The accent appears in concept statements, callouts, and the product mark. It never appears as a background colour.
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     04 — PRODUCT DESIGN
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">04</div>
+    <div class="sec-title">Product Design</div>
+  </div>
+  <div class="t-body" style="max-width:320px;text-align:right">
+    All views shown in Stone colourway. Dimensions in millimetres.
+  </div>
+</div>
+
+<div class="views-grid" style="margin-bottom:56px">
+
+  <!-- Top view -->
+  <div class="view-cell">
+    <div class="view-cell-label">Top view</div>
+    <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="g1" cx="36%" cy="26%" r="72%">
-          <stop offset="0%" stop-color="#2a2018"/>
-          <stop offset="100%" stop-color="#0a0806"/>
-        </radialGradient>
-        <radialGradient id="g2" cx="28%" cy="20%" r="52%">
-          <stop offset="0%" stop-color="rgba(255,120,40,.1)"/>
-          <stop offset="100%" stop-color="transparent"/>
+        <radialGradient id="tv" cx="38%" cy="32%" r="68%">
+          <stop offset="0%" stop-color="#dedad3"/>
+          <stop offset="100%" stop-color="#b8b2aa"/>
         </radialGradient>
       </defs>
-      <ellipse cx="100" cy="150" rx="66" ry="98" fill="url(#g1)"/>
-      <ellipse cx="100" cy="150" rx="66" ry="98" fill="url(#g2)"/>
-      <ellipse cx="100" cy="132" rx="42" ry="60" fill="none" stroke="rgba(255,72,0,.25)" stroke-width=".8" stroke-dasharray="5 5"/>
-      <circle cx="100" cy="222" r="4" fill="none" stroke="rgba(255,72,0,.15)" stroke-width="1"/>
-      <rect x="87" y="244" width="26" height="6" rx="3" fill="rgba(255,255,255,.04)"/>
+      <ellipse cx="90" cy="115" rx="54" ry="78" fill="url(#tv)" stroke="#ccc" stroke-width="0.5"/>
+      <!-- touch zone -->
+      <ellipse cx="90" cy="100" rx="36" ry="52" fill="none" stroke="#9B6B47" stroke-width="0.7" stroke-dasharray="4 3"/>
+      <!-- product mark -->
+      <circle cx="90" cy="168" r="4.5" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="0.8"/>
+      <circle cx="90" cy="168" r="1.5" fill="rgba(0,0,0,0.15)"/>
+      <!-- width dim -->
+      <line x1="36" y1="208" x2="144" y2="208" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="36" y1="204" x2="36" y2="212" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="144" y1="204" x2="144" y2="212" stroke="#bbb" stroke-width="0.6"/>
+      <text x="90" y="222" text-anchor="middle" font-size="8" fill="#999" font-family="Inter,sans-serif">104</text>
     </svg>
+    <div class="annotation-line">Touch zone (dashed) occupies upper 80% of face. Logo mark at lower third. No buttons, ports, or seams visible from top.</div>
   </div>
-  <div class="s1-name">SOLA</div>
-  <div class="s1-sub">Personal Wellness · Concept 01</div>
-  <div class="scroll-hint">↓</div>
-</section>
 
-<!-- S2: NOBODY KNOWS -->
-<section class="s2">
-  <div class="word-giant">
-    NOBODY<br/><span class="ghost">NOBODY</span><br/><span class="accent">KNOWS.</span>
-  </div>
-  <div class="scene-note">
-    Looks like an earbud case.<br/>
-    Has never been questioned.<br/>
-    Not once.
-  </div>
-</section>
-
-<!-- S3: TOUCH -->
-<section class="s3">
-  <div class="touch-word">TOUCH<br/>IT.</div>
-  <div class="s3-sub">Full-surface capacitive · Swipe · Press · Done</div>
-</section>
-
-<!-- S4: PRODUCT FACTS -->
-<section class="s4">
-  <div class="s4-left">
-    <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Side view -->
+  <div class="view-cell">
+    <div class="view-cell-label">Side view</div>
+    <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="g3" cx="36%" cy="26%" r="72%">
-          <stop offset="0%" stop-color="#2a2018"/>
-          <stop offset="100%" stop-color="#0a0806"/>
+        <linearGradient id="sv" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#c8c3bb"/>
+          <stop offset="60%" stop-color="#dedad3"/>
+          <stop offset="100%" stop-color="#b0aba3"/>
+        </linearGradient>
+      </defs>
+      <path d="M 58 30 Q 52 115 56 178 Q 90 196 124 178 Q 128 115 122 30 Q 90 18 58 30 Z" fill="url(#sv)" stroke="#ccc" stroke-width="0.5"/>
+      <!-- USB-C -->
+      <rect x="75" y="179" width="30" height="6" rx="3" fill="rgba(0,0,0,0.12)"/>
+      <!-- height dim -->
+      <line x1="138" y1="30" x2="138" y2="179" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="134" y1="30" x2="142" y2="30" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="134" y1="179" x2="142" y2="179" stroke="#bbb" stroke-width="0.6"/>
+      <text x="156" y="108" text-anchor="middle" font-size="8" fill="#999" font-family="Inter,sans-serif">78</text>
+      <!-- depth dim -->
+      <line x1="36" y1="220" x2="116" y2="220" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="36" y1="216" x2="36" y2="224" stroke="#bbb" stroke-width="0.6"/>
+      <line x1="116" y1="216" x2="116" y2="224" stroke="#bbb" stroke-width="0.6"/>
+      <text x="76" y="234" text-anchor="middle" font-size="8" fill="#999" font-family="Inter,sans-serif">28</text>
+    </svg>
+    <div class="annotation-line">Flat back face for stable placement on surfaces. Flush USB-C at base — no cap or cover. Curved front face ergonomic in palm.</div>
+  </div>
+
+  <!-- 3/4 view -->
+  <div class="view-cell">
+    <div class="view-cell-label">3/4 perspective</div>
+    <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="pv" cx="34%" cy="26%" r="74%">
+          <stop offset="0%" stop-color="#dedad3"/>
+          <stop offset="100%" stop-color="#a09890"/>
         </radialGradient>
       </defs>
-      <ellipse cx="100" cy="150" rx="66" ry="98" fill="url(#g3)"/>
-      <ellipse cx="100" cy="132" rx="42" ry="60" fill="none" stroke="rgba(255,72,0,.2)" stroke-width=".8" stroke-dasharray="5 5"/>
-      <g opacity=".6">
-        <line x1="100" y1="106" x2="100" y2="158" stroke="#ff4800" stroke-width="1.4" stroke-linecap="round"/>
-        <polyline points="92,114 100,106 108,114" fill="none" stroke="#ff4800" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
-      <circle cx="100" cy="222" r="4" fill="none" stroke="rgba(255,72,0,.15)" stroke-width="1"/>
-      <rect x="87" y="244" width="26" height="6" rx="3" fill="rgba(255,255,255,.04)"/>
+      <ellipse cx="90" cy="220" rx="46" ry="8" fill="rgba(0,0,0,0.06)"/>
+      <path d="M 50 48 Q 42 110 46 172 Q 72 196 100 190 Q 134 180 136 134 Q 138 86 128 48 Q 96 30 50 48 Z" fill="url(#pv)" stroke="#ccc" stroke-width="0.5"/>
+      <!-- highlight -->
+      <path d="M 54 52 Q 47 110 50 168 Q 72 188 90 184 Q 68 172 66 110 Q 64 68 72 52 Q 62 50 54 52 Z" fill="rgba(255,255,255,0.18)"/>
+      <!-- logo -->
+      <circle cx="96" cy="158" r="4" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+      <circle cx="96" cy="158" r="1.5" fill="rgba(0,0,0,0.12)"/>
+    </svg>
+    <div class="annotation-line">No visible seams. No mould lines on face surfaces. All parting lines located on the rear flat face where they are neither visible nor tactile in use.</div>
+  </div>
+
+  <!-- Bottom / port detail -->
+  <div class="view-cell">
+    <div class="view-cell-label">Base — port detail</div>
+    <svg viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bv" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#ccc8c0"/>
+          <stop offset="100%" stop-color="#a8a29a"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="90" cy="115" rx="54" ry="78" fill="url(#bv)" stroke="#ccc" stroke-width="0.5"/>
+      <!-- USB-C centered -->
+      <rect x="68" y="108" width="44" height="14" rx="7" fill="#e8e4dc" stroke="#bbb" stroke-width="0.8"/>
+      <rect x="72" y="111" width="36" height="8" rx="4" fill="#888"/>
+      <!-- callout line -->
+      <line x1="112" y1="115" x2="148" y2="95" stroke="#9B6B47" stroke-width="0.7"/>
+      <text x="150" y="94" font-size="8" fill="#9B6B47" font-family="Inter,sans-serif" font-weight="500">USB-C</text>
+      <text x="150" y="104" font-size="7" fill="#bbb" font-family="Inter,sans-serif">Flush / recessed 1.2mm</text>
+      <!-- parting line -->
+      <ellipse cx="90" cy="115" rx="53" ry="77" fill="none" stroke="#ccc" stroke-width="0.4" stroke-dasharray="2 4"/>
+      <line x1="36" y1="140" x2="22" y2="155" stroke="#9B6B47" stroke-width="0.7"/>
+      <text x="10" y="163" font-size="7" fill="#bbb" font-family="Inter,sans-serif" text-anchor="middle">Parting line</text>
+    </svg>
+    <div class="annotation-line">USB-C port recessed 1.2mm into silicone. No cover or cap — waterproofing achieved through port geometry and gasket seal, not closure.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     05 — TECHNICAL SPECIFICATION
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">05</div>
+    <div class="sec-title">Technical Specification</div>
+  </div>
+</div>
+
+<div class="g2" style="align-items:start">
+  <div>
+    <table class="spec-table">
+      <tr>
+        <td>Dimensions</td>
+        <td>104 × 78 × 28 mm<span class="spec-note">W × H × D — footprint matches premium earbud case</span></td>
+      </tr>
+      <tr>
+        <td>Weight</td>
+        <td>~85 g<span class="spec-note">Weighted for hand confidence, not bulky in pocket</span></td>
+      </tr>
+      <tr>
+        <td>Body material</td>
+        <td>Platinum-cure silicone, Shore A 40<span class="spec-note">Body-safe, phthalate-free, latex-free, non-porous</span></td>
+      </tr>
+      <tr>
+        <td>Surface finish</td>
+        <td>Matte, soft-touch<span class="spec-note">No gloss. Associates with skincare / electronics, not sex toys</span></td>
+      </tr>
+      <tr>
+        <td>Input method</td>
+        <td>Full-surface capacitive touch<span class="spec-note">Entire top face is active — no defined button zones</span></td>
+      </tr>
+      <tr>
+        <td>Gestures</td>
+        <td>Swipe ↑ increase · Swipe ↓ decrease · Press on/off</td>
+      </tr>
+    </table>
+  </div>
+  <div>
+    <table class="spec-table">
+      <tr>
+        <td>Motor type</td>
+        <td>Brushless eccentric rotating mass<span class="spec-note">Quieter and longer-lived than conventional pager motors</span></td>
+      </tr>
+      <tr>
+        <td>Motor noise</td>
+        <td>&lt;35 dB at maximum output<span class="spec-note">Below perceptible threshold through a standard interior wall</span></td>
+      </tr>
+      <tr>
+        <td>Waterproofing</td>
+        <td>IPX7 — 1 metre / 30 minutes<span class="spec-note">Achieved through port geometry + gasket, not plug/cap</span></td>
+      </tr>
+      <tr>
+        <td>Battery</td>
+        <td>650 mAh Lithium Polymer</td>
+      </tr>
+      <tr>
+        <td>Use time</td>
+        <td>~90 minutes per charge<span class="spec-note">At medium intensity. Varies with use pattern.</span></td>
+      </tr>
+      <tr>
+        <td>Charge time</td>
+        <td>~60 minutes (USB-C, flush recessed)</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     06 — MATERIAL COLOURWAYS
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">06</div>
+    <div class="sec-title">Material Colourways</div>
+  </div>
+  <div class="t-body" style="max-width:360px;text-align:right">
+    All colourways in matte platinum-cure silicone. RAL/Pantone references available for manufacturing. All pass the shelf test against premium bathroom product environments.
+  </div>
+</div>
+
+<div class="material-grid" style="margin-bottom:16px">
+  <div class="material-swatch" style="background:linear-gradient(170deg,#dedad3,#b0aaa0)"></div>
+  <div class="material-swatch" style="background:linear-gradient(170deg,#8aa08a,#527252)"></div>
+  <div class="material-swatch" style="background:linear-gradient(170deg,#2e2e2e,#080808)"></div>
+  <div class="material-swatch" style="background:linear-gradient(170deg,#7a8fa0,#405060)"></div>
+  <div class="material-swatch" style="background:linear-gradient(170deg,#d4b896,#a07050)"></div>
+</div>
+
+<div class="material-label" style="margin-bottom:12px">
+  <div>
+    <div class="material-name">Stone</div>
+    <div class="material-hex">#C4BFB7</div>
+    <div class="material-note">Warm grey. Reads as a pebble or electronic accessory. Universally unassuming.</div>
+  </div>
+  <div>
+    <div class="material-name">Fern</div>
+    <div class="material-hex">#637A63</div>
+    <div class="material-note">Muted green. Reads as skincare, plant-adjacent. High shelf test performance.</div>
+  </div>
+  <div>
+    <div class="material-name">Ink</div>
+    <div class="material-hex">#0A0A0A</div>
+    <div class="material-note">Near-black matte. Reads as premium electronics. Strong brand alignment.</div>
+  </div>
+  <div>
+    <div class="material-name">Rain</div>
+    <div class="material-hex">#48555E</div>
+    <div class="material-note">Blue-grey. Reads as a slate or ceramic object. Calm, non-signalling.</div>
+  </div>
+  <div>
+    <div class="material-name">Sand</div>
+    <div class="material-hex">#B8956E</div>
+    <div class="material-note">Warm tan. Closest to skin tone. Highest rate of non-recognition in user tests.</div>
+  </div>
+</div>
+
+<div class="t-body" style="max-width:560px">
+  Colourway selection criteria: each colourway must (1) exist in the adjacent product category — premium skincare, ceramics, consumer electronics — and (2) not exist in the sex toy category as a dominant colour. No pinks, no deep purples, no metallics.
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     07 — PACKAGING
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">07</div>
+    <div class="sec-title">Packaging</div>
+  </div>
+</div>
+
+<div class="g3" style="margin-bottom:40px">
+  <div class="pack-cell">
+    <div class="t-label">Outer Box</div>
+    <h3>Unbranded kraft exterior.</h3>
+    <div class="t-body">Plain matte kraft card, 2mm thickness. No imagery, no product name visible on exterior. Shipping label only. A person handing a package to a doorman cannot identify contents from the exterior.</div>
+    <svg viewBox="0 0 160 120" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="120" height="80" fill="#d4c4a8" stroke="#b8a888" stroke-width="1" rx="2"/>
+      <rect x="20" y="48" width="120" height="24" fill="rgba(255,255,255,0.5)"/>
+      <rect x="28" y="52" width="60" height="4" rx="1" fill="#ccc" opacity="0.6"/>
+      <rect x="28" y="60" width="40" height="3" rx="1" fill="#ccc" opacity="0.4"/>
+      <rect x="28" y="66" width="48" height="3" rx="1" fill="#ccc" opacity="0.4"/>
+      <text x="80" y="118" text-anchor="middle" font-size="7" fill="#bbb" font-family="Inter,sans-serif">Shipping label — no brand name</text>
     </svg>
   </div>
-  <div class="s4-right">
-    <h2>Does exactly<br/>what you<br/><em>tell it to.</em></h2>
-    <div class="fact">
-      <span class="fact-n">01</span>
-      <div><div class="fact-h">Your roommate will never know.</div><div class="fact-b">Brushless motor. Under 35dB. Quieter than the TV on low.</div></div>
-    </div>
-    <div class="fact">
-      <span class="fact-n">02</span>
-      <div><div class="fact-h">Take it in the shower.</div><div class="fact-b">IPX7. One metre. Thirty minutes. Flush USB-C so nothing gets disgusting.</div></div>
-    </div>
-    <div class="fact">
-      <span class="fact-n">03</span>
-      <div><div class="fact-h">Fits in a closed fist.</div><div class="fact-b">104 × 78 × 28mm. Pocket. Purse. Carry-on. Nobody looks twice.</div></div>
-    </div>
-    <div class="fact">
-      <span class="fact-n">04</span>
-      <div><div class="fact-h">No app. No bluetooth. No waiting.</div><div class="fact-b">Pick it up. Use it. That is the whole instruction manual.</div></div>
-    </div>
-    <div class="fact">
-      <span class="fact-n">05</span>
-      <div><div class="fact-h">90 minutes per charge.</div><div class="fact-b">650mAh. Back to full in sixty minutes. Flush USB-C.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- S5: 35dB -->
-<section class="s5">
-  <div class="db-big">&lt;35</div>
-  <div class="db-label">decibels.</div>
-  <div class="db-note">Quieter than a whisper. Louder than nothing.</div>
-</section>
-
-<!-- S6: COLORWAYS -->
-<section class="s6">
-  <div class="s6-h">Five<br/><em>moods.</em></div>
-  <div class="cw-strip">
-    <div class="cw-c" style="background:linear-gradient(180deg,#ccc8c0,#8a857e)">
-      <div class="cw-meta"><div class="cw-name">Stone</div><div class="cw-desc">Goes everywhere</div></div>
-    </div>
-    <div class="cw-c" style="background:linear-gradient(180deg,#7a9a7a,#425a42)">
-      <div class="cw-meta"><div class="cw-name">Fern</div><div class="cw-desc">Next to the plants</div></div>
-    </div>
-    <div class="cw-c" style="background:linear-gradient(180deg,#282828,#050505)">
-      <div class="cw-meta"><div class="cw-name">Ink</div><div class="cw-desc">You know if it's you</div></div>
-    </div>
-    <div class="cw-c" style="background:linear-gradient(180deg,#6a8090,#364050)">
-      <div class="cw-meta"><div class="cw-name">Rain</div><div class="cw-desc">A grey sky you love</div></div>
-    </div>
-    <div class="cw-c" style="background:linear-gradient(180deg,#c8a878,#906040)">
-      <div class="cw-meta"><div class="cw-name">Sand</div><div class="cw-desc">Has people fooled</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- S7: END -->
-<section class="s7">
-  <div class="s7-bg">
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="190" font-weight="900" font-style="italic" font-family="Inter,sans-serif" fill="currentColor">S</text>
+  <div class="pack-cell">
+    <div class="t-label">Inner Packaging</div>
+    <h3>Formed recycled pulp tray.</h3>
+    <div class="t-body">Single-piece formed pulp insert holds the device and USB-C cable. No foam, no plastic. The product sits flush — removal requires tipping, which feels considered rather than grabbed.</div>
+    <svg viewBox="0 0 160 120" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect x="16" y="16" width="128" height="88" rx="4" fill="#e8e0d4" stroke="#d4ccc0" stroke-width="1"/>
+      <!-- device cavity -->
+      <ellipse cx="70" cy="62" rx="36" ry="46" fill="#d8d0c4" stroke="#c8c0b4" stroke-width="0.8"/>
+      <!-- cable well -->
+      <rect x="112" y="44" width="20" height="36" rx="4" fill="#d8d0c4" stroke="#c8c0b4" stroke-width="0.8"/>
+      <text x="80" y="116" text-anchor="middle" font-size="7" fill="#bbb" font-family="Inter,sans-serif">Recycled pulp — device + cable</text>
     </svg>
   </div>
-  <div class="s7-small">SOLA · Personal Wellness · Concept 01</div>
-  <div class="s7-big">
-    Nobody<br/>knows.<br/>You do.
+  <div class="pack-cell">
+    <div class="t-label">Insert Card</div>
+    <h3>One card. Three lines.</h3>
+    <div class="t-body">Single uncoated card, 120gsm. Front: wordmark. Back: three lines of instruction. Nothing else. The instruction is: Swipe up to increase. Swipe down to decrease. Press to on/off. All languages on one card.</div>
+    <svg viewBox="0 0 160 120" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect x="24" y="16" width="112" height="72" rx="2" fill="#F7F3EE" stroke="#e0dcd4" stroke-width="0.8"/>
+      <!-- front face wordmark -->
+      <text x="80" y="58" text-anchor="middle" font-size="18" font-weight="900" font-family="Inter,sans-serif" fill="#111" letter-spacing="-1">SOLA</text>
+      <text x="80" y="112" text-anchor="middle" font-size="7" fill="#bbb" font-family="Inter,sans-serif">Front face</text>
+    </svg>
   </div>
-  <div class="s7-row">
-    <div class="s7-price">$55</div>
-    <div class="s7-note">Ships plain.<br/>No questions.</div>
+</div>
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     08 — DESIGN DECISIONS LOG
+══════════════════════════════════════════ -->
+<div class="sec-head">
+  <div>
+    <div class="t-label" style="margin-bottom:12px">08</div>
+    <div class="sec-title">Decisions &amp; Rationale</div>
   </div>
-</section>
+</div>
 
-<footer>
-  <span>SOLA — Concept 01</span>
-  <span>Design Reference · Not for Distribution</span>
-</footer>
+<div class="g2">
+  <div class="principle-box">
+    <h3>What was<br/><em>rejected</em><br/>and why.</h3>
+    <p>App connectivity: adds setup friction, reveals device category in app stores, and creates dependency on a phone charge state. Rejected.<br/><br/>Multiple intensity modes with memory: complexity for its own sake. The gesture interface gives continuous control — memory modes imply discrete levels, which is a downgrade. Rejected.<br/><br/>Branded exterior packaging: creates a moment of recognition at point of delivery that the product itself is designed to avoid. Rejected.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div class="pillar">
+      <div class="pillar-num">Decision</div>
+      <div class="pillar-title">Why Shore A 40 specifically?</div>
+      <div class="pillar-body">Shore A 40 is firm enough to maintain its form factor and not deform under grip pressure, while soft enough to feel skin-adjacent rather than plastic. It is the same durometer as high-end earphone ear tips and quality watch straps. It reads as premium material, not medical equipment.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">Decision</div>
+      <div class="pillar-title">Why not a glossy finish option?</div>
+      <div class="pillar-body">Gloss silicone is associated with this product category. Matte is associated with consumer electronics, cosmetics, and ceramics. Every colourway is matte. There are no exceptions. Consistency of finish is part of the disguise system — one gloss option breaks the reading of the object.</div>
+    </div>
+  </div>
+</div>
 
-<script>
-const cur = document.getElementById('c');
-const trails = [];
-const MAX = 12;
+<hr class="thick" style="margin-top:80px">
 
-document.addEventListener('mousemove', e => {
-  cur.style.left = e.clientX + 'px';
-  cur.style.top  = e.clientY + 'px';
+<!-- FOOTER -->
+<div class="doc-footer">
+  <div>
+    <div class="doc-footer-brand">SOLA</div>
+    <div style="font-size:11px;color:var(--mid);margin-top:6px;font-weight:300">Personal Wellness · Design Concept 01</div>
+  </div>
+  <div class="doc-footer-meta">
+    Design Reference Document<br/>
+    For Manufacturing &amp; Crit Presentation<br/>
+    Not for Public Distribution
+  </div>
+</div>
 
-  const t = document.createElement('div');
-  t.className = 'trail';
-  t.style.left = e.clientX + 'px';
-  t.style.top  = e.clientY + 'px';
-  t.style.opacity = '0.6';
-  document.body.appendChild(t);
-  trails.push(t);
-
-  if (trails.length > MAX) {
-    const old = trails.shift();
-    old.remove();
-  }
-
-  trails.forEach((dot, i) => {
-    const fade = i / trails.length;
-    dot.style.opacity = (fade * 0.5).toString();
-    const sz = 2 + fade * 3;
-    dot.style.width = sz + 'px';
-    dot.style.height = sz + 'px';
-  });
-});
-
-document.querySelectorAll('a,.cw-c,.fact').forEach(el => {
-  el.addEventListener('mouseenter', () => cur.classList.add('expand'));
-  el.addEventListener('mouseleave', () => cur.classList.remove('expand'));
-});
-
-// staggered fact reveals
-const fo = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      document.querySelectorAll('.fact').forEach((f,i) => {
-        setTimeout(() => f.classList.add('on'), i * 100);
-      });
-      fo.disconnect();
-    }
-  });
-}, { threshold: 0.2 });
-
-const ff = document.querySelector('.fact');
-if (ff) fo.observe(ff);
-</script>
 </body>
 </html>
