@@ -5,743 +5,651 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SOLA</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,700;1,900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,400;0,900;1,900&display=swap');
 
-    :root {
-      --black:   #080604;
-      --burg:    #1a0808;
-      --red:     #c42010;
-      --cream:   #f0e8dc;
-      --skin:    #d4a878;
-      --pale:    #f8f2ea;
-      --mid:     #6a5a4a;
-    }
-
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { overflow-x:hidden; }
 
     body {
-      background: var(--black);
+      background: #f5f0e8;
       font-family: 'Inter', sans-serif;
-      color: var(--cream);
-      cursor: none;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* ── GRAIN ── */
-    body::after {
-      content:'';
-      position: fixed;
-      inset: -200%;
-      width: 400%; height: 400%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.045;
-      pointer-events: none;
-      z-index: 9998;
-      animation: grain 0.4s steps(1) infinite;
-    }
-
-    @keyframes grain {
-      0%  { transform: translate(0,0); }
-      10% { transform: translate(-3%,-4%); }
-      20% { transform: translate(4%,1%); }
-      30% { transform: translate(-1%,5%); }
-      40% { transform: translate(5%,-2%); }
-      50% { transform: translate(-4%,3%); }
-      60% { transform: translate(2%,-5%); }
-      70% { transform: translate(-5%,1%); }
-      80% { transform: translate(3%,4%); }
-      90% { transform: translate(-2%,-3%); }
-    }
-
-    /* ── CURSOR ── */
-    #cursor {
-      position: fixed;
-      width: 10px; height: 10px;
-      background: var(--red);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%,-50%);
-      transition: width 0.2s, height 0.2s, opacity 0.2s;
-      mix-blend-mode: screen;
-    }
-
-    #cursor.big { width: 48px; height: 48px; opacity: 0.6; }
-
-    /* ── SNAP SECTIONS ── */
-    .snap { scroll-snap-align: start; }
-
-    /* ── FULL SCREEN WORD ── */
-    .word-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
+      cursor: crosshair;
     }
 
     /* ── HERO ── */
     .hero {
-      background: var(--black);
+      min-height: 100vh;
+      background: #f5f0e8;
+      display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding: 0 8vw 10vh;
-      gap: 0;
+      padding: 0 0 0 6vw;
+      position: relative;
+      overflow: hidden;
     }
 
-    .hero-eyebrow {
-      font-size: 11px;
-      letter-spacing: 0.22em;
+    .hero-stamp {
+      position: absolute;
+      top: 40px; right: 48px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #3a2a1a;
-      margin-bottom: 20px;
-      opacity: 0;
-      animation: fadeUp 1.2s 0.3s forwards;
+      color: #c8c0b0;
+      writing-mode: vertical-rl;
     }
 
-    .hero-title {
-      font-size: clamp(88px, 18vw, 200px);
+    .hero-line1 {
+      font-size: clamp(72px, 14vw, 168px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.85;
+      color: #111;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-line2 {
+      font-size: clamp(72px, 14vw, 168px);
       font-weight: 900;
       font-style: italic;
-      line-height: 0.82;
-      letter-spacing: -0.06em;
-      color: var(--cream);
-      opacity: 0;
-      animation: fadeUp 1s 0.6s forwards;
+      letter-spacing: -0.05em;
+      line-height: 0.85;
+      color: #ff2d55;
+      position: relative;
+      z-index: 2;
     }
 
-    .hero-title .hot { color: var(--red); }
+    .hero-line3 {
+      font-size: clamp(72px, 14vw, 168px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.85;
+      color: #111;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 2;
+    }
 
     .hero-bottom {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-top: 48px;
-      opacity: 0;
-      animation: fadeUp 1s 1s forwards;
+      padding: 36px 6vw 56px 0;
+      border-top: 2px solid #111;
+      margin-top: 40px;
     }
 
-    .hero-desc {
-      font-size: clamp(14px, 1.6vw, 19px);
-      font-weight: 300;
-      line-height: 1.6;
-      color: #6a5040;
-      max-width: 380px;
+    .hero-bottom-left {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: #666;
+      max-width: 320px;
     }
 
-    .hero-scroll-hint {
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #3a2a1a;
-      animation: pulse 2s ease-in-out infinite;
+    .hero-bottom-left strong { color: #111; font-weight: 700; }
+
+    .hero-price-tag {
+      text-align: right;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50%       { opacity: 1; }
-    }
-
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(32px); }
-      to   { opacity:1; transform: translateY(0); }
-    }
-
-    /* ── GO ON ── */
-    .goon {
-      background: var(--burg);
-    }
-
-    .goon-text {
-      font-size: clamp(88px, 18vw, 200px);
+    .hero-price {
+      font-size: clamp(36px, 5vw, 64px);
       font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.05em;
-      line-height: 0.85;
-      text-align: center;
-      color: var(--cream);
-      opacity: 0;
-      transform: translateY(40px) scale(0.96);
-      transition: opacity 1s cubic-bezier(.23,1,.32,1), transform 1s cubic-bezier(.23,1,.32,1);
+      letter-spacing: -0.04em;
+      color: #111;
+      line-height: 1;
     }
 
-    .goon-text.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
+    .hero-price-note {
+      font-size: 11px;
+      color: #aaa;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 6px;
     }
 
-    .goon-text em { color: var(--red); font-style: italic; }
+    /* ── CUT ── */
+    .cut {
+      height: 4px;
+      background: #111;
+    }
 
-    /* ── DEVICE FEATURE ── */
-    .device-screen {
-      background: var(--black);
+    .cut-pink {
+      height: 4px;
+      background: #ff2d55;
+    }
+
+    /* ── PRODUCT BLOCK ── */
+    .product-block {
+      background: #111;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
+      min-height: 90vh;
     }
 
-    .device-left {
+    .product-visual {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 80px 60px;
-      border-right: 1px solid #1a0c06;
-    }
-
-    .device-svg-wrap {
+      padding: 80px;
+      border-right: 1px solid #1e1e1e;
       position: relative;
     }
 
-    .device-svg-wrap svg {
-      width: clamp(180px, 22vw, 300px);
-      filter: drop-shadow(0 0 80px rgba(196,32,16,0.3));
-      animation: deviceFloat 7s ease-in-out infinite;
+    .product-visual svg {
+      width: clamp(160px, 20vw, 260px);
+      animation: tilt 6s ease-in-out infinite;
     }
 
-    .device-glow {
+    @keyframes tilt {
+      0%,100% { transform: rotate(-3deg) translateY(0); }
+      50%      { transform: rotate(3deg) translateY(-16px); }
+    }
+
+    .product-label {
       position: absolute;
-      bottom: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px; height: 40px;
-      background: radial-gradient(ellipse, rgba(196,32,16,0.35) 0%, transparent 70%);
-      animation: glowPulse 3s ease-in-out infinite;
+      bottom: 48px; left: 48px;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #333;
     }
 
-    @keyframes deviceFloat {
-      0%,100% { transform: translateY(0) rotate(-2deg); }
-      50%      { transform: translateY(-20px) rotate(-2deg); }
-    }
-
-    @keyframes glowPulse {
-      0%,100% { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
-      50%      { opacity: 1;   transform: translateX(-50%) scaleX(1.15); }
-    }
-
-    .device-right {
+    .product-text {
+      padding: 80px 64px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 80px 60px;
-      gap: 56px;
+      gap: 0;
     }
 
-    .device-right h2 {
-      font-size: clamp(36px, 5vw, 64px);
+    .product-text h2 {
+      font-size: clamp(32px, 4.5vw, 56px);
       font-weight: 900;
-      font-style: italic;
       letter-spacing: -0.04em;
-      line-height: 0.95;
-      color: var(--cream);
+      line-height: 1;
+      color: #f5f0e8;
+      margin-bottom: 48px;
     }
 
-    .device-right h2 .accent { color: var(--red); }
+    .product-text h2 .pink { color: #ff2d55; }
 
-    .feat-lines { display: flex; flex-direction: column; gap: 0; }
-
-    .feat-line {
+    .feat {
+      padding: 20px 0;
+      border-bottom: 1px solid #1e1e1e;
       display: grid;
-      grid-template-columns: 32px 1fr;
+      grid-template-columns: 24px 1fr;
       gap: 20px;
-      padding: 22px 0;
-      border-bottom: 1px solid #1a0c06;
       align-items: start;
-      opacity: 0;
-      transform: translateX(20px);
-      transition: opacity 0.7s, transform 0.7s;
     }
 
-    .feat-line.visible { opacity: 1; transform: translateX(0); }
+    .feat-n { font-size: 11px; color: #333; font-weight: 700; padding-top: 2px; }
 
-    .feat-line-num { font-size: 11px; color: #3a2010; font-weight: 500; padding-top: 3px; }
-
-    .feat-line-body h3 {
+    .feat-t {
       font-size: 15px;
       font-weight: 700;
-      letter-spacing: -0.01em;
-      margin-bottom: 6px;
-      color: var(--cream);
+      color: #f5f0e8;
+      line-height: 1.3;
     }
 
-    .feat-line-body p {
-      font-size: 13px;
-      color: #6a5040;
-      line-height: 1.65;
-      font-weight: 300;
-    }
-
-    /* ── AGAIN SCREEN ── */
-    .again-screen {
-      background: var(--red);
-      flex-direction: column;
-      gap: 0;
-      overflow: hidden;
-    }
-
-    .again-word {
-      font-size: clamp(72px, 14vw, 160px);
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.05em;
-      line-height: 0.88;
-      color: rgba(0,0,0,0.12);
-      white-space: nowrap;
-      width: 100%;
+    .feat-t span {
       display: block;
-      animation: slideAgain 8s linear infinite;
-      will-change: transform;
-    }
-
-    .again-word:nth-child(2) { animation-delay: -4s; color: rgba(0,0,0,0.08); }
-
-    @keyframes slideAgain {
-      from { transform: translateX(0%); }
-      to   { transform: translateX(-33.33%); }
-    }
-
-    .again-center {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      font-size: clamp(32px, 5vw, 56px);
+      font-size: 12px;
       font-weight: 300;
-      font-style: italic;
-      letter-spacing: -0.02em;
-      color: white;
-      text-align: center;
-      pointer-events: none;
+      color: #555;
+      margin-top: 4px;
+      line-height: 1.6;
     }
 
-    /* ── SPECS DARK ── */
-    .specs-screen {
-      background: var(--burg);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
-      align-items: stretch;
-    }
-
-    .specs-left {
-      padding: 100px 60px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border-right: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .specs-left h2 {
-      font-size: clamp(52px, 7vw, 88px);
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.05em;
-      line-height: 0.9;
-      color: var(--cream);
-    }
-
-    .specs-left h2 .dim { color: #3a2010; }
-
-    .specs-tagline {
-      font-size: 14px;
-      font-weight: 300;
-      color: #4a3020;
-      line-height: 1.7;
-      max-width: 300px;
-    }
-
-    .specs-right {
-      padding: 100px 60px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0;
-    }
-
-    .spec-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 20px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      gap: 24px;
-    }
-
-    .spec-row .k { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #3a2010; font-weight: 500; }
-    .spec-row .v { font-size: 14px; color: #b09070; font-weight: 400; text-align: right; }
-
-    /* ── COLORWAYS ── */
-    .colors-screen {
-      background: var(--black);
-      flex-direction: column;
-      padding: 100px 8vw;
-      align-items: flex-start;
-      justify-content: center;
-      min-height: 100vh;
-      gap: 64px;
-    }
-
-    .colors-title {
-      font-size: clamp(52px, 8vw, 100px);
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.05em;
-      line-height: 0.9;
-      color: var(--cream);
-    }
-
-    .colors-title em { color: var(--red); font-style: italic; }
-
-    .cw-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 16px;
-      width: 100%;
-    }
-
-    .cw {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .cw-pill {
-      aspect-ratio: 2/3;
-      border-radius: 999px;
+    /* ── FULLWIDTH STATEMENT ── */
+    .statement {
+      padding: 10vw 6vw;
+      background: #f5f0e8;
       position: relative;
       overflow: hidden;
-      transition: transform 0.5s cubic-bezier(.23,1,.32,1);
     }
 
-    .cw-pill:hover { transform: scaleY(1.04) translateY(-8px); }
-
-    .cw-pill::after {
-      content: '';
-      position: absolute;
-      top: 8%; left: 15%;
-      width: 35%; height: 40%;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 80%);
-      border-radius: 50%;
-    }
-
-    .cw-label { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; color: var(--cream); }
-    .cw-mood  { font-size: 12px; color: #4a3828; font-weight: 300; line-height: 1.5; }
-
-    /* ── END ── */
-    .end-screen {
-      background: var(--black);
-      flex-direction: column;
-      gap: 32px;
-      padding: 0 8vw;
-    }
-
-    .end-kicker {
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #2a1808;
-    }
-
-    .end-big {
-      font-size: clamp(72px, 15vw, 180px);
+    .statement-big {
+      font-size: clamp(48px, 9vw, 120px);
       font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.05em;
-      line-height: 0.85;
-      color: var(--cream);
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+      color: #111;
+      max-width: 14ch;
+      position: relative;
+      z-index: 2;
     }
 
-    .end-big .red { color: var(--red); }
-
-    .end-whisper {
-      font-size: clamp(14px, 1.8vw, 20px);
-      font-weight: 100;
-      color: #2a1808;
-      letter-spacing: 0.05em;
+    .statement-big .pink { color: #ff2d55; }
+    .statement-big .ghost {
+      color: transparent;
+      -webkit-text-stroke: 2px #ddd;
     }
 
-    /* ── FOOTER ── */
-    footer {
-      background: var(--black);
-      border-top: 1px solid #0f0806;
-      padding: 32px 8vw;
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #2a1808;
-      letter-spacing: 0.08em;
+    .statement-aside {
+      position: absolute;
+      right: 6vw;
+      bottom: 10vw;
+      font-size: 13px;
+      color: #aaa;
+      text-align: right;
+      max-width: 220px;
+      line-height: 1.6;
     }
 
-    /* ── TICKER ── */
-    .ticker {
-      background: var(--red);
-      padding: 12px 0;
+    /* ── STRIP ── */
+    .strip {
+      background: #ff2d55;
       overflow: hidden;
+      padding: 16px 0;
       white-space: nowrap;
     }
 
-    .ticker-track {
+    .strip-inner {
       display: inline-flex;
-      animation: tick 18s linear infinite;
+      animation: run 16s linear infinite;
     }
 
-    .ticker-track span {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
+    .strip-inner span {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(0,0,0,0.35);
-      padding: 0 36px;
+      color: rgba(0,0,0,0.25);
+      padding: 0 32px;
     }
 
-    @keyframes tick {
+    @keyframes run {
       from { transform: translateX(0); }
       to   { transform: translateX(-50%); }
     }
 
-    /* ── UTILS ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.9s cubic-bezier(.23,1,.32,1), transform 0.9s cubic-bezier(.23,1,.32,1);
+    /* ── SPECS TABLE ── */
+    .specs {
+      background: #f5f0e8;
+      padding: 10vw 6vw;
     }
 
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .specs-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #111;
+    }
+
+    .specs-title {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #111;
+    }
+
+    .specs-subtitle {
+      font-size: 12px;
+      color: #aaa;
+      text-align: right;
+      letter-spacing: 0.05em;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 6vw;
+    }
+
+    .spec-r {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid #e0d8cc;
+      align-items: baseline;
+    }
+
+    .spec-r .k { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.1em; }
+    .spec-r .v { font-size: 15px; font-weight: 700; color: #111; }
+
+    /* ── COLORWAYS ── */
+    .colors {
+      background: #111;
+      padding: 10vw 6vw;
+    }
+
+    .colors-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 56px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .colors-h {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #f5f0e8;
+    }
+
+    .colors-note {
+      font-size: 12px;
+      color: #333;
+      text-align: right;
+      max-width: 200px;
+      line-height: 1.6;
+    }
+
+    .cw-grid {
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      gap: 2px;
+    }
+
+    .cw-item {
+      aspect-ratio: 3/5;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex 0.4s;
+    }
+
+    .cw-item:hover { filter: brightness(1.08); }
+
+    .cw-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 16px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    }
+
+    .cw-n { font-size: 14px; font-weight: 900; color: white; letter-spacing: -0.01em; }
+    .cw-m { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    /* ── BIG END ── */
+    .end {
+      min-height: 100vh;
+      background: #f5f0e8;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10vw 6vw;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .end-bg-text {
+      position: absolute;
+      bottom: -4vw;
+      right: -2vw;
+      font-size: 28vw;
+      font-weight: 900;
+      font-style: italic;
+      color: transparent;
+      -webkit-text-stroke: 2px #e0d8cc;
+      line-height: 1;
+      pointer-events: none;
+      letter-spacing: -0.06em;
+      user-select: none;
+    }
+
+    .end-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .end-small {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 32px;
+    }
+
+    .end-title {
+      font-size: clamp(64px, 12vw, 144px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.88;
+      color: #111;
+      margin-bottom: 48px;
+    }
+
+    .end-title .pink { color: #ff2d55; }
+
+    .end-row {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .end-btn {
+      display: inline-block;
+      background: #111;
+      color: #f5f0e8;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 18px 40px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .end-btn:hover { background: #ff2d55; }
+
+    .end-legal {
+      font-size: 11px;
+      color: #bbb;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #111;
+      padding: 28px 6vw;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #333;
+      letter-spacing: 0.08em;
+    }
   </style>
 </head>
 <body>
 
-  <div id="cursor"></div>
-
-  <!-- ── HERO ── -->
-  <section class="word-screen hero snap">
-    <div class="hero-eyebrow">Personal Wellness · Concept 01</div>
-    <div class="hero-title">
-      SO<span class="hot">L</span>A
-    </div>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-stamp">SOLA · 2025 · Personal Wellness</div>
+    <div class="hero-line1">IT'S A</div>
+    <div class="hero-line2">VIBRATOR.</div>
+    <div class="hero-line3">A GOOD ONE.</div>
     <div class="hero-bottom">
-      <p class="hero-desc">Touch-controlled. Pocket-sized. Looks like absolutely nothing.<br/>Does exactly what you want it to.</p>
-      <span class="hero-scroll-hint">↓ scroll</span>
-    </div>
-  </section>
-
-  <!-- ── GO ON ── -->
-  <section class="word-screen goon snap">
-    <div class="goon-text reveal">
-      Go<br/><em>on</em><br/>then<em>.</em>
-    </div>
-  </section>
-
-  <!-- ── DEVICE + FEATURES ── -->
-  <section class="device-screen snap">
-    <div class="device-left">
-      <div class="device-svg-wrap">
-        <svg viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="dg" cx="36%" cy="26%" r="74%">
-              <stop offset="0%"   stop-color="#2e2018"/>
-              <stop offset="100%" stop-color="#0e0804"/>
-            </radialGradient>
-            <radialGradient id="ds" cx="28%" cy="18%" r="56%">
-              <stop offset="0%"   stop-color="rgba(255,200,140,0.12)"/>
-              <stop offset="100%" stop-color="rgba(255,180,100,0)"/>
-            </radialGradient>
-            <radialGradient id="rim" cx="50%" cy="50%" r="50%">
-              <stop offset="70%"  stop-color="transparent"/>
-              <stop offset="100%" stop-color="rgba(196,32,16,0.2)"/>
-            </radialGradient>
-            <filter id="blur8"><feGaussianBlur stdDeviation="8"/></filter>
-          </defs>
-          <!-- Red rim glow -->
-          <ellipse cx="120" cy="180" rx="82" ry="124" fill="url(#rim)"/>
-          <!-- Body -->
-          <ellipse cx="120" cy="180" rx="76" ry="116" fill="url(#dg)"/>
-          <ellipse cx="120" cy="180" rx="76" ry="116" fill="url(#ds)"/>
-          <!-- Touch zone -->
-          <ellipse cx="120" cy="156" rx="50" ry="72" fill="none" stroke="rgba(196,32,16,0.35)" stroke-width="1" stroke-dasharray="5 5"/>
-          <!-- Swipe hint -->
-          <g opacity="0.8">
-            <line x1="120" y1="126" x2="120" y2="186" stroke="#c42010" stroke-width="1.5" stroke-linecap="round"/>
-            <polyline points="111,135 120,126 129,135" fill="none" stroke="#c42010" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="120" y1="186" x2="120" y2="175" stroke="#c42010" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-          </g>
-          <!-- Logo -->
-          <circle cx="120" cy="266" r="5.5" fill="none" stroke="rgba(196,32,16,0.2)" stroke-width="1"/>
-          <circle cx="120" cy="266" r="2" fill="rgba(196,32,16,0.2)"/>
-          <!-- USB-C -->
-          <rect x="104" y="294" width="32" height="7" rx="3.5" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
-        </svg>
-        <div class="device-glow"></div>
+      <div class="hero-bottom-left">
+        Touch-controlled. Pocket-sized. Looks like <strong>nothing suspicious.</strong><br/>
+        No buttons. No app. No overthinking it.
       </div>
-    </div>
-    <div class="device-right">
-      <h2>Finally<em>,</em><br/>one that<br/><span class="accent">listens.</span></h2>
-      <div class="feat-lines">
-        <div class="feat-line">
-          <span class="feat-line-num">01</span>
-          <div class="feat-line-body">
-            <h3>Your roommate will never know.</h3>
-            <p>Brushless motor. Under 35dB. Quieter than a whisper, louder than nothing.</p>
-          </div>
-        </div>
-        <div class="feat-line">
-          <span class="feat-line-num">02</span>
-          <div class="feat-line-body">
-            <h3>Touch it. Anywhere.</h3>
-            <p>Full-surface capacitive touch. Swipe up for more. It responds immediately. No delay. No questions.</p>
-          </div>
-        </div>
-        <div class="feat-line">
-          <span class="feat-line-num">03</span>
-          <div class="feat-line-body">
-            <h3>Take it in the shower.</h3>
-            <p>IPX7. One metre. Thirty minutes. You're welcome.</p>
-          </div>
-        </div>
-        <div class="feat-line">
-          <span class="feat-line-num">04</span>
-          <div class="feat-line-body">
-            <h3>Nobody looks twice.</h3>
-            <p>Designed to look like an earbud case. Has never been questioned. Not once.</p>
-          </div>
-        </div>
-        <div class="feat-line">
-          <span class="feat-line-num">05</span>
-          <div class="feat-line-body">
-            <h3>No app. No pairing. No waiting.</h3>
-            <p>Pick it up. Use it. That's the whole manual.</p>
-          </div>
-        </div>
+      <div class="hero-price-tag">
+        <div class="hero-price">$55</div>
+        <div class="hero-price-note">ships discreetly</div>
       </div>
-    </div>
-  </section>
-
-  <!-- ── TICKER ── -->
-  <div class="ticker">
-    <div class="ticker-track">
-      <span>Touch it</span><span>Swipe up</span><span>Don't stop</span><span>Again</span>
-      <span>Nobody knows</span><span>Your business</span><span>Go on then</span><span>Finally</span>
-      <span>Touch it</span><span>Swipe up</span><span>Don't stop</span><span>Again</span>
-      <span>Nobody knows</span><span>Your business</span><span>Go on then</span><span>Finally</span>
     </div>
   </div>
 
-  <!-- ── AGAIN ── -->
-  <section class="word-screen again-screen snap">
-    <span class="again-word">Again · Again · Again · Again · Again · Again · Again · Again · Again · </span>
-    <span class="again-word">Again · Again · Again · Again · Again · Again · Again · Again · Again · </span>
-    <div class="again-center">
-      90 minutes<br/>per charge<em>.</em>
-    </div>
-  </section>
+  <div class="cut"></div>
+  <div class="cut-pink"></div>
 
-  <!-- ── SPECS ── -->
-  <section class="specs-screen snap">
-    <div class="specs-left">
-      <h2>Built<br/>for<br/><span class="dim">real</span><br/>use<em>.</em></h2>
-      <p class="specs-tagline">Every component chosen for longevity, safety, and feel. Body-safe silicone. Flush USB-C. Nothing that chips, cracks, or needs replacing.</p>
+  <!-- PRODUCT -->
+  <div class="product-block">
+    <div class="product-visual">
+      <svg viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="pg" cx="36%" cy="26%" r="72%">
+            <stop offset="0%"   stop-color="#3a3530"/>
+            <stop offset="100%" stop-color="#141010"/>
+          </radialGradient>
+          <radialGradient id="ps" cx="28%" cy="20%" r="52%">
+            <stop offset="0%"   stop-color="rgba(255,200,150,0.1)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="120" cy="180" rx="78" ry="118" fill="url(#pg)"/>
+        <ellipse cx="120" cy="180" rx="78" ry="118" fill="url(#ps)"/>
+        <ellipse cx="120" cy="158" rx="52" ry="74" fill="none" stroke="rgba(255,45,85,0.3)" stroke-width="1" stroke-dasharray="6 5"/>
+        <g opacity="0.7">
+          <line x1="120" y1="124" x2="120" y2="192" stroke="#ff2d55" stroke-width="1.6" stroke-linecap="round"/>
+          <polyline points="110,133 120,124 130,133" fill="none" stroke="#ff2d55" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <circle cx="120" cy="268" r="5" fill="none" stroke="rgba(255,45,85,0.18)" stroke-width="1"/>
+        <rect x="104" y="295" width="32" height="7" rx="3.5" fill="rgba(255,255,255,0.05)"/>
+      </svg>
+      <div class="product-label">Concept 01 — Touch-controlled</div>
     </div>
-    <div class="specs-right">
-      <div class="spec-row"><span class="k">Dimensions</span><span class="v">104 × 78 × 28 mm</span></div>
-      <div class="spec-row"><span class="k">Weight</span><span class="v">~85 g</span></div>
-      <div class="spec-row"><span class="k">Material</span><span class="v">Body-safe silicone, Shore A 40</span></div>
-      <div class="spec-row"><span class="k">Input</span><span class="v">Full-surface capacitive touch</span></div>
-      <div class="spec-row"><span class="k">Motor noise</span><span class="v">&lt; 35 dB</span></div>
-      <div class="spec-row"><span class="k">Waterproof</span><span class="v">IPX7 · 1 m / 30 min</span></div>
-      <div class="spec-row"><span class="k">Battery</span><span class="v">650 mAh Li-Po</span></div>
-      <div class="spec-row"><span class="k">Use time</span><span class="v">~90 min per charge</span></div>
-      <div class="spec-row"><span class="k">Charge</span><span class="v">USB-C flush · ~60 min</span></div>
-      <div class="spec-row"><span class="k">Finish</span><span class="v">Matte soft-touch</span></div>
+    <div class="product-text">
+      <h2>No buttons.<br/>No fuss.<br/><span class="pink">Just touch.</span></h2>
+      <div class="feat">
+        <span class="feat-n">01</span>
+        <div class="feat-t">Your roommate will never know.
+          <span>Brushless motor. Under 35dB. Quieter than a conversation.</span>
+        </div>
+      </div>
+      <div class="feat">
+        <span class="feat-n">02</span>
+        <div class="feat-t">Touch anywhere. It responds.
+          <span>Full-surface capacitive. Swipe up for more. Press to stop. That's it.</span>
+        </div>
+      </div>
+      <div class="feat">
+        <span class="feat-n">03</span>
+        <div class="feat-t">Take it in the shower.
+          <span>IPX7. Fully submerged. Flush USB-C. No caps to lose.</span>
+        </div>
+      </div>
+      <div class="feat">
+        <span class="feat-n">04</span>
+        <div class="feat-t">Looks like an earbud case.
+          <span>Nobody has ever guessed. Not once.</span>
+        </div>
+      </div>
+      <div class="feat">
+        <span class="feat-n">05</span>
+        <div class="feat-t">90 minutes per charge.
+          <span>650mAh. USB-C. Back to full in an hour.</span>
+        </div>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── COLORWAYS ── -->
-  <section class="word-screen colors-screen snap">
-    <div class="colors-title reveal">
-      Five<br/>moods<em>.</em>
+  <!-- STATEMENT -->
+  <div class="statement">
+    <div class="statement-big">
+      Every other one
+      is ugly,<br/>
+      <span class="ghost">complicated,</span><br/>
+      or <span class="pink">both.</span>
     </div>
-    <div class="cw-row">
-      <div class="cw">
-        <div class="cw-pill" style="background: linear-gradient(160deg,#dedad3,#b0aaa0);"></div>
-        <div class="cw-label">Stone</div>
-        <div class="cw-mood">Blends into everything. Goes everywhere.</div>
-      </div>
-      <div class="cw">
-        <div class="cw-pill" style="background: linear-gradient(160deg,#8aa08a,#527252);"></div>
-        <div class="cw-label">Fern</div>
-        <div class="cw-mood">Next to the plants. Nobody looks twice.</div>
-      </div>
-      <div class="cw">
-        <div class="cw-pill" style="background: linear-gradient(160deg,#2e2e2e,#080808);"></div>
-        <div class="cw-label">Ink</div>
-        <div class="cw-mood">Not for everyone. You know if it's you.</div>
-      </div>
-      <div class="cw">
-        <div class="cw-pill" style="background: linear-gradient(160deg,#7a8fa0,#405060);"></div>
-        <div class="cw-label">Rain</div>
-        <div class="cw-mood">A grey sky you actually love.</div>
-      </div>
-      <div class="cw">
-        <div class="cw-pill" style="background: linear-gradient(160deg,#d4b896,#a07050);"></div>
-        <div class="cw-label">Sand</div>
-        <div class="cw-mood">Looks like a lip balm. Has people fooled.</div>
-      </div>
+    <div class="statement-aside">
+      This one isn't.<br/>
+      It sits on your shelf.<br/>
+      Nobody asks questions.
     </div>
-  </section>
+  </div>
 
-  <!-- ── END ── -->
-  <section class="word-screen end-screen snap">
-    <span class="end-kicker">SOLA · Personal Wellness</span>
-    <div class="end-big">
-      Nobody<br/>knows<span class="red">.</span><br/>You do<span class="red">.</span>
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="strip-inner">
+      <span>Touch-controlled</span>
+      <span>IPX7</span>
+      <span>Under 35dB</span>
+      <span>104mm</span>
+      <span>Body-safe silicone</span>
+      <span>USB-C</span>
+      <span>90 min</span>
+      <span>5 colorways</span>
+      <span>Touch-controlled</span>
+      <span>IPX7</span>
+      <span>Under 35dB</span>
+      <span>104mm</span>
+      <span>Body-safe silicone</span>
+      <span>USB-C</span>
+      <span>90 min</span>
+      <span>5 colorways</span>
     </div>
-    <p class="end-whisper">That's enough.</p>
-  </section>
+  </div>
+
+  <!-- SPECS -->
+  <div class="specs">
+    <div class="specs-head">
+      <div class="specs-title">The numbers.</div>
+      <div class="specs-subtitle">104 × 78 × 28 mm<br/>Fits in a closed fist.</div>
+    </div>
+    <div class="specs-grid">
+      <div class="spec-r"><span class="k">Dimensions</span><span class="v">104 × 78 × 28 mm</span></div>
+      <div class="spec-r"><span class="k">Motor noise</span><span class="v">&lt; 35 dB</span></div>
+      <div class="spec-r"><span class="k">Weight</span><span class="v">~85 g</span></div>
+      <div class="spec-r"><span class="k">Waterproof</span><span class="v">IPX7 · 1m / 30min</span></div>
+      <div class="spec-r"><span class="k">Material</span><span class="v">Body-safe silicone</span></div>
+      <div class="spec-r"><span class="k">Battery</span><span class="v">650 mAh Li-Po</span></div>
+      <div class="spec-r"><span class="k">Input</span><span class="v">Full-surface capacitive</span></div>
+      <div class="spec-r"><span class="k">Use time</span><span class="v">~90 min per charge</span></div>
+      <div class="spec-r"><span class="k">Finish</span><span class="v">Matte soft-touch</span></div>
+      <div class="spec-r"><span class="k">Charge time</span><span class="v">~60 min (USB-C)</span></div>
+    </div>
+  </div>
+
+  <div class="cut-pink"></div>
+
+  <!-- COLORWAYS -->
+  <div class="colors">
+    <div class="colors-top">
+      <div class="colors-h">Five colorways.</div>
+      <div class="colors-note">All matte silicone. All ship in a plain box. All look like they belong on a bathroom shelf.</div>
+    </div>
+    <div class="cw-grid">
+      <div class="cw-item" style="background: linear-gradient(170deg,#dedad3,#b0aaa0);">
+        <div class="cw-info"><div class="cw-n">Stone</div><div class="cw-m">Goes everywhere</div></div>
+      </div>
+      <div class="cw-item" style="background: linear-gradient(170deg,#8aa08a,#527252);">
+        <div class="cw-info"><div class="cw-n">Fern</div><div class="cw-m">Next to the plants</div></div>
+      </div>
+      <div class="cw-item" style="background: linear-gradient(170deg,#2e2e2e,#080808);">
+        <div class="cw-info"><div class="cw-n">Ink</div><div class="cw-m">You know if it's you</div></div>
+      </div>
+      <div class="cw-item" style="background: linear-gradient(170deg,#7a8fa0,#405060);">
+        <div class="cw-info"><div class="cw-n">Rain</div><div class="cw-m">A grey you love</div></div>
+      </div>
+      <div class="cw-item" style="background: linear-gradient(170deg,#d4b896,#a07050);">
+        <div class="cw-info"><div class="cw-n">Sand</div><div class="cw-m">Has people fooled</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div class="end">
+    <div class="end-bg-text">BUY IT.</div>
+    <div class="end-content">
+      <div class="end-small">SOLA · Personal Wellness · Concept 01</div>
+      <div class="end-title">
+        Nobody<br/>knows<span class="pink">.</span><br/>
+        You do<span class="pink">.</span>
+      </div>
+      <div class="end-row">
+        <a href="#" class="end-btn">Get SOLA — $55</a>
+        <p class="end-legal">Ships in plain packaging. No brand name on the box. Free returns.</p>
+      </div>
+    </div>
+  </div>
 
   <footer>
-    <span>SOLA — Concept 01</span>
-    <span>Design Reference · Not for Distribution</span>
+    <span>© SOLA 2025</span>
+    <span>Concept 01 · Design Reference</span>
   </footer>
 
-  <script>
-    // ── Custom cursor
-    const cur = document.getElementById('cursor');
-    document.addEventListener('mousemove', e => {
-      cur.style.left = e.clientX + 'px';
-      cur.style.top  = e.clientY + 'px';
-    });
-    document.querySelectorAll('a, button, .cw-pill, .feat-line').forEach(el => {
-      el.addEventListener('mouseenter', () => cur.classList.add('big'));
-      el.addEventListener('mouseleave', () => cur.classList.remove('big'));
-    });
-
-    // ── Scroll reveal
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach((e, i) => {
-        if (e.isIntersecting) {
-          const delay = e.target.dataset.delay || 0;
-          setTimeout(() => e.target.classList.add('visible'), delay);
-        }
-      });
-    }, { threshold: 0.15 });
-
-    document.querySelectorAll('.reveal, .goon-text').forEach(el => obs.observe(el));
-
-    // ── Staggered feat-lines
-    const featObs = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          document.querySelectorAll('.feat-line').forEach((line, i) => {
-            setTimeout(() => line.classList.add('visible'), i * 120);
-          });
-          featObs.disconnect();
-        }
-      });
-    }, { threshold: 0.2 });
-
-    const firstFeat = document.querySelector('.feat-line');
-    if (firstFeat) featObs.observe(firstFeat);
-  </script>
 </body>
 </html>
