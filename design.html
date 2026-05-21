@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Design Concept</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f5f2ee;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      padding: 60px 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid #1a1a1a;
+      padding-bottom: 16px;
+      margin-bottom: 60px;
+    }
+
+    header h1 {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 0.1em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 4px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .panel-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 24px;
+      align-self: flex-start;
+    }
+
+    .panel svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .annotation {
+      font-size: 10px;
+      color: #888;
+      margin-top: 16px;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .spec-block {
+      background: #fff;
+      border-radius: 4px;
+      padding: 32px;
+    }
+
+    .spec-block h2 {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0ede9;
+      font-size: 13px;
+    }
+
+    .spec-row:last-child { border-bottom: none; }
+
+    .spec-row span:first-child { color: #888; font-size: 11px; }
+    .spec-row span:last-child { font-weight: 500; }
+
+    .palette {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .swatch-name {
+      font-size: 10px;
+      color: #888;
+      letter-spacing: 0.05em;
+    }
+
+    .full-panel {
+      background: #fff;
+      border-radius: 4px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .full-panel h2 {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .principle {
+      padding: 20px;
+      background: #f5f2ee;
+      border-radius: 4px;
+    }
+
+    .principle h3 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .principle p {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid #1a1a1a;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #888;
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Personal Wellness Device — Concept 01</h1>
+    <p>Design Brief / Reference Sheet</p>
+  </header>
+
+  <!-- Three views -->
+  <div class="grid">
+
+    <!-- Top View -->
+    <div class="panel">
+      <div class="panel-label">Top View</div>
+      <svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- Body -->
+        <ellipse cx="100" cy="130" rx="52" ry="78" fill="#d4cfc8" stroke="#1a1a1a" stroke-width="1.2"/>
+        <!-- Touch zone -->
+        <ellipse cx="100" cy="115" rx="34" ry="44" fill="none" stroke="#1a1a1a" stroke-width="0.7" stroke-dasharray="3 3"/>
+        <!-- Touch zone label -->
+        <line x1="134" y1="115" x2="160" y2="100" stroke="#aaa" stroke-width="0.6"/>
+        <text x="162" y="99" font-size="8" fill="#888" font-family="Helvetica Neue, sans-serif">touch zone</text>
+        <!-- Width annotation -->
+        <line x1="48" y1="220" x2="152" y2="220" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="48" y1="216" x2="48" y2="224" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="152" y1="216" x2="152" y2="224" stroke="#1a1a1a" stroke-width="0.6"/>
+        <text x="100" y="235" text-anchor="middle" font-size="9" fill="#888" font-family="Helvetica Neue, sans-serif">104mm</text>
+        <!-- Logo mark -->
+        <circle cx="100" cy="185" r="4" fill="none" stroke="#1a1a1a" stroke-width="0.8"/>
+        <text x="100" y="188.5" text-anchor="middle" font-size="5" fill="#1a1a1a" font-family="Helvetica Neue, sans-serif">●</text>
+      </svg>
+      <div class="annotation">Symmetric, pebble-like form</div>
+    </div>
+
+    <!-- Side View -->
+    <div class="panel">
+      <div class="panel-label">Side View</div>
+      <svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- Body side -->
+        <path d="M 70 55 Q 65 130 72 195 Q 100 215 128 195 Q 135 130 130 55 Q 100 42 70 55 Z"
+              fill="#d4cfc8" stroke="#1a1a1a" stroke-width="1.2"/>
+        <!-- USB-C port -->
+        <rect x="88" y="196" width="24" height="5" rx="2.5" fill="#1a1a1a"/>
+        <text x="100" y="216" text-anchor="middle" font-size="8" fill="#888" font-family="Helvetica Neue, sans-serif">USB-C</text>
+        <!-- Height annotation -->
+        <line x1="145" y1="55" x2="145" y2="195" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="141" y1="55" x2="149" y2="55" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="141" y1="195" x2="149" y2="195" stroke="#1a1a1a" stroke-width="0.6"/>
+        <text x="158" y="128" text-anchor="middle" font-size="9" fill="#888" font-family="Helvetica Neue, sans-serif">78mm</text>
+        <!-- Depth annotation -->
+        <line x1="48" y1="240" x2="132" y2="240" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="48" y1="236" x2="48" y2="244" stroke="#1a1a1a" stroke-width="0.6"/>
+        <line x1="132" y1="236" x2="132" y2="244" stroke="#1a1a1a" stroke-width="0.6"/>
+        <text x="90" y="255" text-anchor="middle" font-size="9" fill="#888" font-family="Helvetica Neue, sans-serif">28mm</text>
+      </svg>
+      <div class="annotation">Flat back, curved front face</div>
+    </div>
+
+    <!-- Perspective / Hero -->
+    <div class="panel">
+      <div class="panel-label">Perspective</div>
+      <svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shadow -->
+        <ellipse cx="100" cy="222" rx="44" ry="8" fill="rgba(0,0,0,0.07)"/>
+        <!-- Body perspective — simplified 3/4 view -->
+        <path d="M 68 70 Q 60 130 65 190 Q 90 215 115 210 Q 148 200 150 150 Q 152 100 140 68 Q 112 50 68 70 Z"
+              fill="#ccc8c0" stroke="#1a1a1a" stroke-width="1.2"/>
+        <!-- Face highlight -->
+        <path d="M 72 75 Q 65 130 70 185 Q 92 205 112 200 Q 88 190 84 130 Q 82 85 88 72 Q 80 70 72 75 Z"
+              fill="rgba(255,255,255,0.15)"/>
+        <!-- Touch surface subtle lines -->
+        <path d="M 80 105 Q 100 95 128 108" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+        <path d="M 76 120 Q 100 110 132 124" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <!-- Logo -->
+        <circle cx="105" cy="175" r="4" fill="none" stroke="#1a1a1a" stroke-width="0.7"/>
+      </svg>
+      <div class="annotation">Matte silicone, no visible seams</div>
+    </div>
+
+  </div>
+
+  <!-- Specs + Palette -->
+  <div class="row">
+
+    <div class="spec-block">
+      <h2>Technical Specifications</h2>
+      <div class="spec-row"><span>Dimensions</span><span>104 × 78 × 28 mm</span></div>
+      <div class="spec-row"><span>Weight</span><span>~85g</span></div>
+      <div class="spec-row"><span>Material</span><span>Body-safe silicone (Shore A 40)</span></div>
+      <div class="spec-row"><span>Finish</span><span>Matte, soft-touch</span></div>
+      <div class="spec-row"><span>Input</span><span>Capacitive touch surface</span></div>
+      <div class="spec-row"><span>Control</span><span>Swipe up/down — intensity. Press — on/off</span></div>
+      <div class="spec-row"><span>Charging</span><span>USB-C, flush recessed port</span></div>
+      <div class="spec-row"><span>Battery</span><span>650mAh Li-Po, ~90 min use</span></div>
+      <div class="spec-row"><span>Waterproof</span><span>IPX7 (1m / 30 min)</span></div>
+      <div class="spec-row"><span>Motor</span><span>Brushless, whisper-quiet (&lt;35dB)</span></div>
+    </div>
+
+    <div class="spec-block">
+      <h2>Colorways</h2>
+      <div class="palette">
+        <div class="swatch">
+          <div class="swatch-circle" style="background:#c9c4bc;"></div>
+          <div class="swatch-name">Dune</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background:#7a8c7e;"></div>
+          <div class="swatch-name">Moss</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background:#5a6472;"></div>
+          <div class="swatch-name">Slate</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background:#c4a882;"></div>
+          <div class="swatch-name">Clay</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background:#1a1a1a;"></div>
+          <div class="swatch-name">Void</div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:32px;">Disguise Reference Objects</h2>
+      <div class="spec-row"><span>Primary ref</span><span>Wireless earbud case</span></div>
+      <div class="spec-row"><span>Secondary ref</span><span>River stone / worry stone</span></div>
+      <div class="spec-row"><span>Tertiary ref</span><span>Luxury lip balm / solid perfume</span></div>
+      <div class="spec-row"><span>Key rule</span><span>No feature should reveal function</span></div>
+    </div>
+
+  </div>
+
+  <!-- Design Principles -->
+  <div class="full-panel">
+    <h2>Design Principles</h2>
+    <div class="principles">
+      <div class="principle">
+        <h3>Disguise</h3>
+        <p>The form references familiar everyday objects. No feature — shape, port, texture — should reveal its function to an uninformed observer.</p>
+      </div>
+      <div class="principle">
+        <h3>Touch-first</h3>
+        <p>Zero buttons. The entire top face is a capacitive touch surface. Swipe controls intensity. A firm press toggles power. Intuitive without instruction.</p>
+      </div>
+      <div class="principle">
+        <h3>Shelf-worthy</h3>
+        <p>Should look at home next to skincare and ceramics. No overtly sexual curves or branding. Muted palette. Minimal embossed mark only.</p>
+      </div>
+      <div class="principle">
+        <h3>No apology</h3>
+        <p>The brand doesn't hide what it is — the product does. Honest, direct, a little bold. Not pink, not clinical. Has an edge.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Concept 01 — Personal Wellness Device</span>
+    <span>For CAD / Prototype Reference Only</span>
+  </footer>
+
+</body>
+</html>
