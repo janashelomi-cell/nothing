@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>BARDAGULAN — Senate Fantasy League 2026</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000;min-height:100%;overscroll-behavior:none}
+  body{font-family:'Arial Black','Impact','Helvetica Neue',Arial,sans-serif;color:#F3F4F6}
+  button{font-family:inherit;cursor:pointer}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:#111}
+  ::-webkit-scrollbar-thumb{background:#E1FF00}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React 18 -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel for in-browser JSX -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+
+const { useState, useEffect } = React;
+
+/* ── INLINE LUCIDE ICONS (only what we use) ── */
+const icon = (d, extra = "") => ({ size = 14, color = "currentColor", strokeWidth = 2 } = {}) =>
+  React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: size, height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: color,
+    strokeWidth,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  },
+  ...d.map(p => React.createElement("path", { d: p })),
+  ...(extra ? [React.createElement("circle", extra)] : [])
+  );
+
+const CheckCircle  = icon(["M22 11.08V12a10 10 0 1 1-5.93-9.14","M22 4 12 14.01l-3-3"]);
+const XCircle      = icon(["M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z","m15 9-6 6","m9 9 6 6"]);
+const AlertTriangle= icon(["m10.29 3.86-8.17 14.14a1 1 0 0 0 .86 1.5h16.04a1 1 0 0 0 .86-1.5L11.71 3.86a1 1 0 0 0-1.72 0z","M12 9v4","M12 17h.01"]);
+const Shield       = icon(["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"]);
+const Users        = icon(["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2","M16 3.13a4 4 0 0 1 0 7.75"], { cx: 20, cy: 7, r: 4 });
+const Swords       = icon(["m14.5 17.5 3 3 3-3-3-3-3 3z","m2.5 2.5 16 16","m2.5 11.5 6-6","m12.5 6.5 2-2","m17 7-5-5","M3.4 17.6l3.5-3.5"]);
+const Crown        = icon(["M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z","M5 20h14"]);
+const ChevronDown  = icon(["m6 9 6 6 6-6"]);
+const ChevronUp    = icon(["m18 15-6-6-6 6"]);
+const Star         = icon(["M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"]);
+const Flame        = icon(["M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"]);
+const BarChart2    = icon(["M18 20V10","M12 20V4","M6 20v-6"]);
+const Trophy       = icon(["M6 9H4.5a2.5 2.5 0 0 1 0-5H6","M18 9h1.5a2.5 2.5 0 0 0 0-5H18","M4 22h16","M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22","M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22","M18 2H6v7a6 6 0 0 0 12 0V2z"]);
+const Radio        = icon(["M4.9 19.1C1 15.2 1 8.8 4.9 4.9","M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5","M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z","M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5","M19.1 4.9C23 8.8 23 15.1 19.1 19"]);
+
+/* ── DATA ── */
+const SENATORS = [
+  { id:1,  name:"WIN GATCHALIAN",       party:"NPC", status:"PRESENT",        pts:142, role:"Majority Floor Leader (Disputed)",    drama:98  },
+  { id:2,  name:"ALAN PETER CAYETANO",  party:"IND", status:"WALKOUT",        pts:88,  role:"Minority Leader / Coup Architect",    drama:100 },
+  { id:3,  name:"TITO SOTTO",           party:"NPC", status:"PRESENT",        pts:119, role:"Senate President Emeritus",           drama:71  },
+  { id:4,  name:"BATO DELA ROSA",       party:"PFP", status:"PRESENT",        pts:94,  role:"Committee on Public Order",           drama:85  },
+  { id:5,  name:"KIKO PANGILINAN",      party:"LP",  status:"PRESENT",        pts:110, role:"Opposition Stalwart",                 drama:62  },
+  { id:6,  name:"CHIZ ESCUDERO",        party:"IND", status:"PRESENT",        pts:131, role:"Senate President",                    drama:88  },
+  { id:7,  name:"NANCY BINAY",          party:"UNA", status:"PRESENT",        pts:103, role:"Committee on Women",                  drama:55  },
+  { id:8,  name:"MARK VILLAR",          party:"NP",  status:"PRESENT",        pts:97,  role:"Committee on Public Works",           drama:60  },
+  { id:9,  name:"CYNTHIA VILLAR",       party:"NP",  status:"PRESENT",        pts:108, role:"Committee on Agriculture",            drama:58  },
+  { id:10, name:"SHERWIN GATCHALIAN",   party:"NPC", status:"PRESENT",        pts:76,  role:"Committee on Basic Education",        drama:44  },
+  { id:11, name:"ERWIN TULFO",          party:"PFP", status:"WALKOUT",        pts:61,  role:"Committee on Social Services",        drama:92  },
+  { id:12, name:"RAFFY TULFO",          party:"IND", status:"PRESENT",        pts:79,  role:"Committee on Labor",                  drama:89  },
+  { id:13, name:"LITO LAPID",           party:"NP",  status:"PRESENT",        pts:55,  role:"Committee on Justice",                drama:33  },
+  { id:14, name:"JV EJERCITO",          party:"NUP", status:"PRESENT",        pts:88,  role:"Committee on Health",                 drama:50  },
+  { id:15, name:"JINGGOY ESTRADA",      party:"PMP", status:"EVADING ARREST", pts:22,  role:"On Bail / Eternal Comeback",          drama:97  },
+  { id:16, name:"LOREN LEGARDA",        party:"IND", status:"PRESENT",        pts:122, role:"Committee on Finance",                drama:45  },
+  { id:17, name:"IMEE MARCOS",          party:"NP",  status:"PRESENT",        pts:115, role:"Committee on Foreign Affairs",        drama:80  },
+  { id:18, name:"RISA HONTIVEROS",      party:"LP",  status:"PRESENT",        pts:138, role:"Opposition Conscience / Drama Queen", drama:91  },
+  { id:19, name:"FRANCIS TOLENTINO",    party:"PFP", status:"PRESENT",        pts:84,  role:"Committee on Tourism",                drama:55  },
+  { id:20, name:"AQUILINO PIMENTEL III",party:"PDP", status:"WALKOUT",        pts:47,  role:"Minority Bloc Coordinator",           drama:68  },
+  { id:21, name:"SONNY ANGARA",         party:"LDP", status:"PRESENT",        pts:126, role:"Committee on Education",              drama:40  },
+  { id:22, name:"RONALDO PUNO",         party:"NP",  status:"DETAINED",       pts:0,   role:"PDEA Case / Sabbatical (Involuntary)",drama:99  },
+  { id:23, name:"PING LACSON",          party:"IND", status:"PRESENT",        pts:109, role:"Committee on National Defense",       drama:62  },
+  { id:24, name:"ROBINHOOD PADILLA",    party:"PFP", status:"PRESENT",        pts:71,  role:"Action Star / Committee on DICT",     drama:74  },
+];
+
+const STATUS_CFG = {
+  "PRESENT":        { label:"PRESENT",      color:"#E1FF00", bg:"#1a1f00", Icon:CheckCircle   },
+  "WALKOUT":        { label:"LUMABAS NA",   color:"#FF6B00", bg:"#1f1100", Icon:XCircle       },
+  "EVADING ARREST": { label:"NAGTATAKAS",   color:"#FF003C", bg:"#1f0010", Icon:AlertTriangle },
+  "DETAINED":       { label:"NASA KULUNGAN",color:"#9CA3AF", bg:"#111111", Icon:Shield        },
+};
+
+const TICKER = [
+  "🔴 BREAKING: Cayetano coalition claims 13 votes pero walang roll call — BARDAGULAN CONFIRMED",
+  "⚡ Win Gatchalian nagpadala ng memo sa 12 committee chairs: 'Ikaw pa rin ang boss ko'",
+  "🏆 Risa Hontiveros leads drama points sa Week 23 — #SabotageQueen",
+  "🚨 Jinggoy Estrada spotted sa Duty Free — EVADING ARREST badge remains ACTIVE",
+  "👑 Chiz Escudero: 'Hindi ako nag-resign. Nag-bakasyon lang.' — +15 drama pts",
+  "💀 Erwin Tulfo walkout counter: 4 na ngayong taon. Personal record na.",
+  "📊 Villar siblings combined committee control: 14% ng Senate budget",
+  "🔥 Bato dela Rosa nagbanta ng contempt sa journalist — +22 pts sa drama board",
+  "⚠️ QUORUM ALERT: 10 senators missing. Session suspended. Fantasy points FROZEN.",
+  "🎭 Tulfos vs Cayetanos sa committee hearing — Resibo Battleground UPDATE: Tulfos leading 61–39",
+];
+
+const DYNASTIES = [
+  { family:"VILLAR",   members:["CYNTHIA VILLAR","MARK VILLAR"],   exMembers:[],                                  committees:["Agriculture","Public Works","Finance (observer)","DPWH Oversight"],  pct:14, color:"#E1FF00", note:"Mother-son tandem. Combined budget influence: ₱1.2T per year." },
+  { family:"CAYETANO", members:["ALAN PETER CAYETANO"],            exMembers:["PIA CAYETANO (ex-senator)"],       committees:["Foreign Affairs (blocked)","Rules Committee (disputed)"],            pct:8,  color:"#FF6B00", note:"Alan Peter operating as lone wolf after Pia's exit. Still coordinating externally." },
+  { family:"TULFO",    members:["RAFFY TULFO","ERWIN TULFO"],      exMembers:["BEN TULFO (ex-undersecretary)"],   committees:["Labor","Social Services","DSWD Oversight","OFW Affairs"],             pct:11, color:"#FF003C", note:"Media empire + Senate seats. Combined: 4 shows, 2 seats, unlimited tsismis budget." },
+  { family:"ESTRADA",  members:["JV EJERCITO","JINGGOY ESTRADA"],  exMembers:["ERAP (ex-president, culturally immortal)"], committees:["Health","Justice (nominal)"],                               pct:9,  color:"#9C27B0", note:"Half-brothers. JV present, Jinggoy evading. Legacy brand still delivering votes." },
+];
+
+const MATCHUP = {
+  left: { name:"CHIZ ESCUDERO",      title:"Senate President",  subtitle:"Nagtatagal sa trono",     image:"CE",  color:"#E1FF00",
+    stats:{ VOTES:14, COMMITTEES:12, DRAMA:88, DAYS_IN_POWER:410 },
+    quote:"Ang Senate ay para sa lahat — pero ang pwesto ko ay para sa akin.",
+    chips:["#Trabaho","#LegitimateLeader","#PalagayNa"] },
+  right:{ name:"ALAN PETER CAYETANO",title:"Coup Architect",    subtitle:"Nag-oorganisa sa labas",  image:"APC", color:"#FF003C",
+    stats:{ VOTES:11, COMMITTEES:3, DRAMA:100, DAYS_PLOTTING:180 },
+    quote:"May 13 na kaming boto. Ibibigay ko sa inyo bukas. O makalawa. O next week.",
+    chips:["#Drama","#SaanAngBoto","#HindiDasurb"] },
+  context:"LEADERSHIP COUP WEEK 26 — Win Gatchalian vs Cayetano bloc: Sino ba talaga ang may hawak ng gavel?",
+};
+
+/* ── TICKER ── */
+function NewsTicker() {
+  const [idx, setIdx] = useState(0);
+  const [vis, setVis] = useState(true);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVis(false);
+      setTimeout(() => { setIdx(i => (i+1) % TICKER.length); setVis(true); }, 300);
+    }, 4000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div style={{background:"#FF003C",borderBottom:"2px solid #E1FF00",padding:"8px 12px",display:"flex",alignItems:"center",gap:"8px",minHeight:"40px"}}>
+      <div style={{background:"#000",color:"#E1FF00",fontSize:"9px",fontWeight:900,letterSpacing:"0.15em",padding:"2px 6px",flexShrink:0,border:"1px solid #E1FF00"}}>LIVE</div>
+      <div style={{color:"#fff",fontSize:"11px",fontWeight:700,letterSpacing:"0.04em",opacity:vis?1:0,transition:"opacity 0.3s",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>
+        {TICKER[idx]}
+      </div>
+    </div>
+  );
+}
+
+/* ── STATUS BADGE ── */
+function StatusBadge({ status }) {
+  const c = STATUS_CFG[status] || STATUS_CFG["PRESENT"];
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",gap:"3px",background:c.bg,color:c.color,border:`1px solid ${c.color}`,fontSize:"8px",fontWeight:900,letterSpacing:"0.1em",padding:"2px 5px"}}>
+      <c.Icon size={8} color={c.color}/> {c.label}
+    </span>
+  );
+}
+
+/* ── DRAMA BAR ── */
+function DramaBar({ value }) {
+  const color = value >= 90 ? "#FF003C" : value >= 70 ? "#FF6B00" : "#E1FF00";
+  return (
+    <div style={{width:"100%",background:"#222",height:"4px",marginTop:"4px"}}>
+      <div style={{width:`${value}%`,height:"100%",background:color,transition:"width 0.4s"}}/>
+    </div>
+  );
+}
+
+/* ── SENATOR CARD ── */
+function SenatorCard({ senator, inRoster, onToggle }) {
+  const [pts, setPts] = useState(senator.pts);
+  const bump = (d, e) => { e.stopPropagation(); setPts(p => Math.max(0, p+d)); };
+  return (
+    <div onClick={() => onToggle(senator)} style={{background:inRoster?"#0d1a00":"#121212",border:`2px solid ${inRoster?"#E1FF00":"#2a2a2a"}`,padding:"10px",cursor:"pointer",position:"relative",transition:"border-color 0.2s,background 0.2s"}}>
+      {inRoster && <div style={{position:"absolute",top:"6px",right:"6px",background:"#E1FF00",color:"#000",fontSize:"8px",fontWeight:900,padding:"1px 4px",letterSpacing:"0.1em"}}>★ ROSTER</div>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"4px"}}>
+        <div style={{paddingRight:"50px"}}>
+          <div style={{color:"#F3F4F6",fontSize:"12px",fontWeight:900,letterSpacing:"0.08em",textTransform:"uppercase"}}>{senator.name}</div>
+          <div style={{color:"#6B7280",fontSize:"9px",marginTop:"1px",letterSpacing:"0.04em"}}>{senator.party} · {senator.role}</div>
+        </div>
+        <div style={{color:"#E1FF00",fontSize:"22px",fontWeight:900,fontFamily:"monospace",lineHeight:1,flexShrink:0}}>{pts}</div>
+      </div>
+      <StatusBadge status={senator.status}/>
+      <div style={{marginTop:"6px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{color:"#6B7280",fontSize:"8px",letterSpacing:"0.1em"}}>DRAMA INDEX</span>
+          <span style={{color:"#9CA3AF",fontSize:"8px",fontFamily:"monospace"}}>{senator.drama}/100</span>
+        </div>
+        <DramaBar value={senator.drama}/>
+      </div>
+      <div style={{display:"flex",gap:"4px",marginTop:"8px"}}>
+        {[
+          [5, "+5 TRABAHO", "#0d1a00","#E1FF00"],
+          [-3,"-3 ABSENT",  "#1a0005","#FF003C"],
+          [10,"+10 DRAMA",  "#1a0800","#FF6B00"],
+        ].map(([d,lbl,bg,col]) => (
+          <button key={lbl} onClick={e=>bump(d,e)} style={{flex:1,background:bg,border:`1px solid ${col}`,color:col,fontSize:"10px",fontWeight:900,padding:"3px 0",letterSpacing:"0.04em"}}>
+            {lbl}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── LIVE GRID TAB ── */
+function LiveGridTab({ roster, onToggle }) {
+  const filters = ["ALL","PRESENT","WALKOUT","EVADING ARREST","DETAINED"];
+  const [f, setF] = useState("ALL");
+  const list = f === "ALL" ? SENATORS : SENATORS.filter(s => s.status === f);
+  const fLabel = s => s === "EVADING ARREST" ? "NAGTATAKAS" : s === "DETAINED" ? "KULUNGAN" : s;
+  const fColor = s => s === "ALL" ? "#9CA3AF" : (STATUS_CFG[s]?.color || "#9CA3AF");
+
+  return (
+    <div>
+      {/* filter strip */}
+      <div style={{display:"flex",gap:"4px",padding:"8px 10px",overflowX:"auto",borderBottom:"1px solid #1a1a1a",background:"#0a0a0a"}}>
+        {filters.map(fi => {
+          const active = f === fi;
+          const col = fColor(fi);
+          return (
+            <button key={fi} onClick={() => setF(fi)} style={{background:active?col:"#000",border:`1px solid ${col}`,color:active?"#000":col,fontSize:"7px",fontWeight:900,padding:"3px 7px",flexShrink:0,letterSpacing:"0.1em",transition:"all 0.15s"}}>
+              {fLabel(fi)}
+            </button>
+          );
+        })}
+      </div>
+      {/* roster strip */}
+      <div style={{background:"#0d1a00",borderBottom:"1px solid #E1FF00",padding:"5px 10px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+          <Users size={10} color="#E1FF00"/>
+          <span style={{color:"#E1FF00",fontSize:"9px",fontWeight:900,letterSpacing:"0.1em"}}>{roster.length}/5 NAPILI</span>
+        </div>
+        <span style={{color:"#6B7280",fontSize:"8px"}}>I-tap para i-add/remove sa Core 5</span>
+      </div>
+      {/* cards */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr",gap:"2px",padding:"8px"}}>
+        {list.map(s => <SenatorCard key={s.id} senator={s} inRoster={!!roster.find(r=>r.id===s.id)} onToggle={onToggle}/>)}
+      </div>
+    </div>
+  );
+}
+
+/* ── FIGHTER CARD ── */
+function FighterCard({ fighter, onChip }) {
+  return (
+    <div style={{background:"#0a0a0a",border:`2px solid ${fighter.color}`,padding:"8px"}}>
+      <div style={{width:"100%",aspectRatio:"1",background:`${fighter.color}22`,border:`1px solid ${fighter.color}`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"6px"}}>
+        <span style={{color:fighter.color,fontSize:"22px",fontWeight:900,fontFamily:"monospace",letterSpacing:"-0.05em"}}>{fighter.image}</span>
+      </div>
+      <div style={{color:"#F3F4F6",fontSize:"10px",fontWeight:900,letterSpacing:"0.05em",textTransform:"uppercase"}}>{fighter.name}</div>
+      <div style={{color:fighter.color,fontSize:"8px",fontWeight:700,marginTop:"1px"}}>{fighter.title}</div>
+      <div style={{color:"#6B7280",fontSize:"8px",marginTop:"2px"}}>{fighter.subtitle}</div>
+      <div style={{background:"#111",border:"1px solid #222",padding:"5px",marginTop:"6px",fontSize:"8px",color:"#9CA3AF",fontStyle:"italic",lineHeight:1.4}}>"{fighter.quote}"</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px",marginTop:"6px"}}>
+        {Object.entries(fighter.stats).map(([k,v]) => (
+          <div key={k} style={{background:"#111",padding:"3px 4px"}}>
+            <div style={{color:"#6B7280",fontSize:"7px",letterSpacing:"0.1em"}}>{k.replace(/_/g," ")}</div>
+            <div style={{color:fighter.color,fontSize:"11px",fontWeight:900,fontFamily:"monospace"}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:"3px",marginTop:"6px"}}>
+        {fighter.chips.map(chip => (
+          <button key={chip} onClick={() => onChip(chip)} style={{background:"#000",border:`1px solid ${fighter.color}`,color:fighter.color,fontSize:"8px",fontWeight:900,padding:"3px 4px",letterSpacing:"0.08em",textAlign:"left"}}>
+            {chip}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── RESIBO TAB ── */
+function ResiboTab() {
+  const [votes, setVotes] = useState({ left: 54, right: 46 });
+  const [lastChip, setLastChip] = useState(null);
+  const [anim, setAnim] = useState(false);
+  const cast = (side, chip) => {
+    setLastChip(chip); setAnim(true);
+    setTimeout(() => setAnim(false), 600);
+    setVotes(v => { const raw = Math.max(5, Math.min(95, v.left + (side==="left"?2:-2))); return { left:raw, right:100-raw }; });
+  };
+  const lc = MATCHUP.left.color, rc = MATCHUP.right.color;
+  const verdict = votes.left > votes.right ? "CHIZ PANALO" : "APC PANALO";
+
+  return (
+    <div style={{padding:"12px"}}>
+      <div style={{background:"#1a0005",border:"2px solid #FF003C",padding:"8px 12px",marginBottom:"12px",textAlign:"center"}}>
+        <div style={{color:"#FF003C",fontSize:"9px",fontWeight:900,letterSpacing:"0.15em"}}>RESIBO BATTLEGROUND — WEEK 26</div>
+        <div style={{color:"#F3F4F6",fontSize:"11px",fontWeight:700,marginTop:"3px",lineHeight:1.4}}>{MATCHUP.context}</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 40px 1fr",gap:"6px",alignItems:"start"}}>
+        <FighterCard fighter={MATCHUP.left}  onChip={c => cast("left",  c)}/>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingTop:"40px",gap:"4px"}}>
+          <Swords size={18} color="#FF003C"/>
+          <div style={{color:"#FF003C",fontSize:"10px",fontWeight:900}}>VS</div>
+        </div>
+        <FighterCard fighter={MATCHUP.right} onChip={c => cast("right", c)}/>
+      </div>
+      {/* vote bar */}
+      <div style={{marginTop:"14px",background:"#121212",border:"2px solid #2a2a2a",padding:"10px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:"5px"}}>
+          <span style={{color:lc,fontSize:"10px",fontWeight:900,fontFamily:"monospace"}}>{votes.left}%</span>
+          <span style={{color:"#9CA3AF",fontSize:"9px",letterSpacing:"0.1em"}}>COMMUNITY VERDICT</span>
+          <span style={{color:rc,fontSize:"10px",fontWeight:900,fontFamily:"monospace"}}>{votes.right}%</span>
+        </div>
+        <div style={{height:"12px",background:"#000",display:"flex",border:"1px solid #2a2a2a"}}>
+          <div style={{width:`${votes.left}%`,background:lc,transition:"width 0.5s cubic-bezier(0.34,1.56,0.64,1)"}}/>
+          <div style={{flex:1,background:rc}}/>
+        </div>
+        {lastChip && (
+          <div style={{marginTop:"6px",textAlign:"center",color:"#E1FF00",fontSize:"10px",fontWeight:900,opacity:anim?1:0.3,transition:"opacity 0.3s",letterSpacing:"0.1em"}}>
+            IBINOTO MO: {lastChip}
+          </div>
+        )}
+      </div>
+      {/* stat tiles */}
+      <div style={{marginTop:"10px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px"}}>
+        {[
+          { lbl:"TOTAL CHIPS CAST", val:"2,847",    I:BarChart2 },
+          { lbl:"DRAMA INTENSITY",  val:"GRABE",     I:Flame     },
+          { lbl:"WALKING WOUNDED",  val:"Chiz, Win", I:AlertTriangle },
+          { lbl:"CURRENT VERDICT",  val:verdict,     I:Trophy    },
+        ].map(({ lbl, val, I }) => (
+          <div key={lbl} style={{background:"#121212",border:"1px solid #2a2a2a",padding:"8px",display:"flex",flexDirection:"column",gap:"2px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+              <I size={9} color="#6B7280"/>
+              <span style={{color:"#6B7280",fontSize:"8px",letterSpacing:"0.1em"}}>{lbl}</span>
+            </div>
+            <span style={{color:"#E1FF00",fontSize:"13px",fontWeight:900,fontFamily:"monospace"}}>{val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── DYNASTY TAB ── */
+function DynastyTab() {
+  const [open, setOpen] = useState(null);
+  const total = DYNASTIES.reduce((a,d) => a+d.pct, 0);
+  return (
+    <div style={{padding:"12px"}}>
+      <div style={{background:"#000",border:"2px solid #E1FF00",padding:"8px 12px",marginBottom:"12px"}}>
+        <div style={{color:"#E1FF00",fontSize:"9px",fontWeight:900,letterSpacing:"0.15em"}}>DYNASTY MONOPOLY TRACKER</div>
+        <div style={{color:"#9CA3AF",fontSize:"10px",marginTop:"3px"}}>Sino ang nagmamay-ari ng Senado? Lahat ng kamag-anak, lahat ng komite.</div>
+      </div>
+      {/* control bars */}
+      <div style={{background:"#121212",border:"2px solid #2a2a2a",padding:"12px",marginBottom:"12px"}}>
+        <div style={{color:"#9CA3AF",fontSize:"9px",letterSpacing:"0.1em",marginBottom:"8px"}}>COMBINED DYNASTY CONTROL</div>
+        {DYNASTIES.map(d => (
+          <div key={d.family} style={{marginBottom:"6px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:"2px"}}>
+              <span style={{color:d.color,fontSize:"10px",fontWeight:900,letterSpacing:"0.1em"}}>{d.family}</span>
+              <span style={{color:d.color,fontSize:"10px",fontWeight:900,fontFamily:"monospace"}}>{d.pct}%</span>
+            </div>
+            <div style={{background:"#000",height:"8px",border:`1px solid ${d.color}33`}}>
+              <div style={{width:`${d.pct}%`,height:"100%",background:d.color,transition:"width 0.6s"}}/>
+            </div>
+          </div>
+        ))}
+        <div style={{marginTop:"8px",borderTop:"1px solid #2a2a2a",paddingTop:"6px",display:"flex",justifyContent:"space-between"}}>
+          <span style={{color:"#6B7280",fontSize:"9px",letterSpacing:"0.1em"}}>TOTAL DYNASTY GRIP</span>
+          <span style={{color:"#E1FF00",fontSize:"14px",fontWeight:900,fontFamily:"monospace"}}>{total}%</span>
+        </div>
+      </div>
+      {/* accordion cards */}
+      {DYNASTIES.map(d => {
+        const isOpen = open === d.family;
+        return (
+          <div key={d.family} style={{background:"#121212",border:`2px solid ${isOpen?d.color:"#2a2a2a"}`,marginBottom:"8px",transition:"border-color 0.2s"}}>
+            <button onClick={() => setOpen(isOpen ? null : d.family)} style={{width:"100%",background:"none",border:"none",padding:"10px 12px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <Crown size={14} color={d.color}/>
+                <div style={{textAlign:"left"}}>
+                  <div style={{color:d.color,fontSize:"13px",fontWeight:900,letterSpacing:"0.12em"}}>PAMILYA {d.family}</div>
+                  <div style={{color:"#6B7280",fontSize:"9px",marginTop:"1px"}}>{d.members.length} aktibong miyembro · {d.committees.length} komite</div>
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <div style={{background:d.color,color:"#000",fontSize:"12px",fontWeight:900,fontFamily:"monospace",padding:"2px 6px"}}>{d.pct}%</div>
+                {isOpen ? <ChevronUp size={14} color={d.color}/> : <ChevronDown size={14} color="#6B7280"/>}
+              </div>
+            </button>
+            {isOpen && (
+              <div style={{borderTop:`1px solid ${d.color}44`,padding:"10px 12px",background:"#0a0a0a"}}>
+                <div style={{marginBottom:"8px"}}>
+                  <div style={{color:"#9CA3AF",fontSize:"8px",letterSpacing:"0.1em",marginBottom:"4px"}}>KASALUKUYANG MIYEMBRO</div>
+                  {d.members.map(m => (
+                    <div key={m} style={{display:"flex",alignItems:"center",gap:"6px",marginBottom:"3px"}}>
+                      <div style={{width:"6px",height:"6px",background:d.color,flexShrink:0}}/>
+                      <span style={{color:"#F3F4F6",fontSize:"10px",fontWeight:700}}>{m}</span>
+                    </div>
+                  ))}
+                  {d.exMembers.map(m => (
+                    <div key={m} style={{display:"flex",alignItems:"center",gap:"6px",marginBottom:"3px"}}>
+                      <div style={{width:"6px",height:"6px",background:"#444",flexShrink:0}}/>
+                      <span style={{color:"#6B7280",fontSize:"9px",fontStyle:"italic"}}>{m}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginBottom:"8px"}}>
+                  <div style={{color:"#9CA3AF",fontSize:"8px",letterSpacing:"0.1em",marginBottom:"4px"}}>HAWAK NA KOMITE</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:"4px"}}>
+                    {d.committees.map(c => (
+                      <span key={c} style={{background:`${d.color}18`,border:`1px solid ${d.color}55`,color:d.color,fontSize:"8px",fontWeight:700,padding:"2px 5px",letterSpacing:"0.05em"}}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{background:"#111",border:`1px solid ${d.color}33`,padding:"6px 8px"}}>
+                  <div style={{color:"#9CA3AF",fontSize:"9px",lineHeight:1.5}}>📌 {d.note}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── CORE 5 FOOTER ── */
+function CoreFiveFooter({ roster }) {
+  const sorted = [...roster].sort((a,b) => b.pts - a.pts);
+  const total = sorted.reduce((s,r) => s+r.pts, 0);
+  const maxPts = [...SENATORS].sort((a,b) => b.pts - a.pts).slice(0,5).reduce((s,r) => s+r.pts, 0);
+  const eff = total > 0 ? Math.round((total/maxPts)*100) : 0;
+  const effLabel = eff >= 80 ? "🔥 SOLID LINEUP" : eff >= 60 ? "⚡ PWEDE NA" : "💀 KAILANGAN PA";
+  const effColor = eff >= 80 ? "#E1FF00" : eff >= 60 ? "#FF6B00" : "#FF003C";
+
+  return (
+    <div style={{position:"sticky",bottom:0,background:"#000",borderTop:"2px solid #E1FF00",zIndex:100}}>
+      <div style={{background:"#E1FF00",padding:"4px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+          <Star size={10} color="#000"/>
+          <span style={{color:"#000",fontSize:"9px",fontWeight:900,letterSpacing:"0.15em"}}>MY CORE 5</span>
+        </div>
+        <div style={{display:"flex",gap:"12px"}}>
+          {[["TOTAL PTS",total],["EFFICIENCY",`${eff}%`]].map(([lbl,val]) => (
+            <div key={lbl} style={{textAlign:"right"}}>
+              <div style={{color:"#000",fontSize:"8px",fontWeight:700,letterSpacing:"0.1em"}}>{lbl}</div>
+              <div style={{color:"#000",fontSize:"16px",fontWeight:900,fontFamily:"monospace",lineHeight:1}}>{val}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {roster.length === 0
+        ? <div style={{padding:"8px 12px",color:"#6B7280",fontSize:"9px",textAlign:"center",letterSpacing:"0.1em"}}>Wala pang napili — i-tap ang isang senator para idagdag sa Core 5</div>
+        : (
+          <div style={{display:"flex",gap:"4px",padding:"6px 8px",overflowX:"auto"}}>
+            {sorted.map(s => (
+              <div key={s.id} style={{background:"#121212",border:"1px solid #E1FF00",padding:"4px 6px",flexShrink:0,minWidth:"70px"}}>
+                <div style={{color:"#E1FF00",fontSize:"8px",fontWeight:900,letterSpacing:"0.05em",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"80px"}}>{s.name.split(" ").pop()}</div>
+                <div style={{color:"#F3F4F6",fontSize:"13px",fontWeight:900,fontFamily:"monospace"}}>{s.pts}</div>
+              </div>
+            ))}
+            {roster.length < 5 && (
+              <div style={{background:"#0a0a0a",border:"1px dashed #3a3a3a",padding:"4px 6px",flexShrink:0,minWidth:"50px",display:"flex",alignItems:"center",justifyContent:"center",color:"#3a3a3a",fontSize:"18px"}}>+</div>
+            )}
+          </div>
+        )
+      }
+      {total > 0 && (
+        <div style={{padding:"4px 12px",background:"#0a0a0a",borderTop:"1px solid #1a1a1a",fontSize:"8px",color:"#6B7280",letterSpacing:"0.04em",display:"flex",flexWrap:"wrap",gap:"4px",alignItems:"center"}}>
+          <span>{sorted.map(s=>`${s.name.split(" ").pop()} (${s.pts})`).join(" + ")} = {total} pts</span>
+          {roster.length === 5 && <span style={{color:effColor,fontWeight:900}}>{effLabel}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── ROOT APP ── */
+function Bardagulan() {
+  const [tab, setTab] = useState("grid");
+  const [roster, setRoster] = useState([]);
+
+  const toggleRoster = (senator) => {
+    setRoster(prev => {
+      if (prev.find(s => s.id === senator.id)) return prev.filter(s => s.id !== senator.id);
+      if (prev.length >= 5) return prev;
+      return [...prev, senator];
+    });
+  };
+
+  const TABS = [
+    { id:"grid",    label:"LIVE GRID", I:Radio  },
+    { id:"resibo",  label:"RESIBO",    I:Swords },
+    { id:"dynasty", label:"DYNASTY",   I:Crown  },
+  ];
+
+  return (
+    <div style={{background:"#000",minHeight:"100vh",maxWidth:"480px",margin:"0 auto",color:"#F3F4F6",paddingBottom:"160px"}}>
+      {/* MASTHEAD */}
+      <div style={{background:"#000",borderBottom:"3px solid #E1FF00",padding:"12px 12px 8px"}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
+          <div>
+            <div style={{color:"#E1FF00",fontSize:"24px",fontWeight:900,letterSpacing:"0.08em",textTransform:"uppercase",lineHeight:1}}>BARDAGULAN</div>
+            <div style={{color:"#FF003C",fontSize:"9px",fontWeight:900,letterSpacing:"0.2em",marginTop:"2px"}}>SENATE FANTASY LEAGUE · SEASON 2026</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{background:"#FF003C",color:"#fff",fontSize:"8px",fontWeight:900,padding:"2px 6px",letterSpacing:"0.15em",marginBottom:"2px",display:"inline-block"}}>LIVE</div>
+            <div style={{color:"#6B7280",fontSize:"8px",display:"block"}}>WK 26 / SY 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <NewsTicker/>
+
+      {/* TABS */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:"2px solid #1a1a1a",position:"sticky",top:0,background:"#000",zIndex:50}}>
+        {TABS.map(({ id, label, I }) => (
+          <button key={id} onClick={() => setTab(id)} style={{background:tab===id?"#E1FF00":"#000",border:"none",borderRight:"1px solid #1a1a1a",color:tab===id?"#000":"#6B7280",padding:"10px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",transition:"all 0.15s"}}>
+            <I size={13} color={tab===id?"#000":"#6B7280"}/>
+            <span style={{fontSize:"8px",fontWeight:900,letterSpacing:"0.1em"}}>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {tab === "grid"    && <LiveGridTab roster={roster} onToggle={toggleRoster}/>}
+      {tab === "resibo"  && <ResiboTab/>}
+      {tab === "dynasty" && <DynastyTab/>}
+
+      <CoreFiveFooter roster={roster}/>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(Bardagulan));
+</script>
+</body>
+</html>
