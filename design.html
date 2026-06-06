@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOLA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,900;1,100;1,900&display=swap');
+
+:root {
+  --bg:    #070605;
+  --fg:    #E8E2D4;
+  --lime:  #D4FF40;
+  --dim:   rgba(232,226,212,0.08);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { overflow-x:hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN ── */
+body::after {
+  content:'';
+  position:fixed; inset:-200%;
+  width:400%; height:400%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.05;
+  pointer-events:none;
+  z-index:8000;
+  animation:grain .5s steps(1) infinite;
+}
+@keyframes grain{
+  0%  {transform:translate(0,0)}   20%{transform:translate(-3%,4%)}
+  40% {transform:translate(5%,-2%)} 60%{transform:translate(-4%,-5%)}
+  80% {transform:translate(3%,2%)} 100%{transform:translate(0,0)}
+}
+
+/* ── CURSOR ── */
+#cur {
+  position:fixed; width:6px; height:6px;
+  background:var(--lime);
+  border-radius:50%;
+  pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .12s,height .12s;
+  mix-blend-mode:difference;
+}
+#cur.big { width:64px; height:64px; }
+
+/* ── HERO ── */
+#hero {
+  height:100vh;
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.bg-letters {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:38vw; font-weight:900; font-style:italic;
+  letter-spacing:-.07em; line-height:1;
+  color: #0D0B09;
+  pointer-events:none;
+  will-change:transform;
+  user-select:none;
+}
+
+.product-scene {
+  position:relative; z-index:2;
+  will-change:transform;
+  transform-style:preserve-3d;
+}
+
+.product-scene svg {
+  width: clamp(160px,22vh,240px);
+  display:block;
+}
+
+.product-glow {
+  position:absolute;
+  inset:-60%; z-index:-1;
+  background: radial-gradient(ellipse at 50% 55%, rgba(212,255,64,.18) 0%, transparent 65%);
+  will-change:transform;
+  pointer-events:none;
+}
+
+.hero-label {
+  position:absolute;
+  bottom:40px; left:48px; right:48px;
+  display:flex; justify-content:space-between;
+  font-size:10px; font-weight:500;
+  letter-spacing:.2em; text-transform:uppercase;
+  color: rgba(232,226,212,.2);
+}
+
+/* ── REVEAL ZONE ── */
+#reveal {
+  height:100vh;
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.reveal-bg {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22vw; font-weight:900; font-style:italic;
+  color: #0C0A08;
+  letter-spacing:-.06em;
+  user-select:none; pointer-events:none;
+}
+
+.reveal-grid {
+  position:relative; z-index:2;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap:0;
+  width: min(900px, 90vw);
+}
+
+.rf {
+  padding:48px 40px;
+  border:1px solid rgba(232,226,212,.05);
+  cursor:none;
+  transition:border-color .3s;
+}
+
+.rf:hover { border-color: rgba(212,255,64,.15); }
+
+.rf-head {
+  font-size:clamp(18px,2.4vw,28px);
+  font-weight:900; font-style:italic;
+  letter-spacing:-.03em; line-height:1.1;
+  margin-bottom:12px;
+  filter:blur(8px); opacity:.2;
+  transition:filter .4s cubic-bezier(.23,1,.32,1), opacity .4s;
+}
+
+.rf-body {
+  font-size:13px; font-weight:300;
+  line-height:1.7; color:rgba(232,226,212,.4);
+  filter:blur(6px); opacity:0;
+  transition:filter .4s .05s cubic-bezier(.23,1,.32,1), opacity .4s .05s;
+}
+
+.rf:hover .rf-head { filter:blur(0); opacity:1; }
+.rf:hover .rf-body  { filter:blur(0); opacity:1; }
+
+.rf-num {
+  font-size:10px; font-weight:700;
+  letter-spacing:.15em; color:var(--lime);
+  margin-bottom:16px; opacity:.6;
+  display:block;
+  filter:blur(4px);
+  transition:filter .4s;
+}
+
+.rf:hover .rf-num { filter:blur(0); opacity:1; }
+
+/* ── STAT ── */
+#stat {
+  height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+  gap:0;
+}
+
+.stat-num {
+  font-size:clamp(100px,26vw,320px);
+  font-weight:900; letter-spacing:-.06em; line-height:.85;
+  color: rgba(232,226,212,.06);
+  animation:statPulse 6s ease-in-out infinite;
+  position:relative;
+}
+
+.stat-num::after {
+  content: attr(data-val);
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(232,226,212,.9) 0%, rgba(212,255,64,.5) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  clip-path: polygon(0 0, var(--pct, 0%) 0, var(--pct, 0%) 100%, 0 100%);
+  transition:none;
+}
+
+@keyframes statPulse{
+  0%,100%{letter-spacing:-.06em}
+  50%{letter-spacing:-.04em}
+}
+
+.stat-unit {
+  font-size:clamp(20px,5vw,56px);
+  font-weight:100; font-style:italic;
+  letter-spacing:.02em;
+  color:rgba(232,226,212,.25);
+  margin-top:-1vw;
+}
+
+.stat-note {
+  position:absolute; bottom:10vh;
+  font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(232,226,212,.12);
+}
+
+/* ── COLORWAYS ── */
+#colors {
+  height:100vh;
+  display:flex;
+  overflow:hidden;
+}
+
+.cw {
+  flex:1;
+  display:flex; align-items:flex-end;
+  padding:40px 28px;
+  cursor:none;
+  transition:flex .6s cubic-bezier(.23,1,.32,1);
+  position:relative;
+  overflow:hidden;
+}
+
+.cw:hover { flex:3; }
+
+.cw-bg {
+  position:absolute; inset:0;
+  opacity:.6;
+  transition:opacity .6s;
+}
+
+.cw:hover .cw-bg { opacity:1; }
+
+.cw-content {
+  position:relative; z-index:2;
+  opacity:0; transform:translateY(12px);
+  transition:opacity .4s .1s, transform .4s .1s;
+}
+
+.cw:hover .cw-content { opacity:1; transform:translateY(0); }
+
+.cw-name {
+  font-size:clamp(16px,2vw,22px);
+  font-weight:900; letter-spacing:-.02em;
+  color:#fff; line-height:1;
+  margin-bottom:8px;
+}
+
+.cw-desc {
+  font-size:11px; color:rgba(255,255,255,.5);
+  font-weight:300; line-height:1.5;
+}
+
+.cw-line {
+  position:absolute; top:0; left:0; right:0;
+  height:2px; background:var(--lime);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .5s cubic-bezier(.23,1,.32,1);
+}
+
+.cw:hover .cw-line { transform:scaleX(1); }
+
+/* ── EXIT ── */
+#exit {
+  height:100vh;
+  background:var(--lime);
+  display:flex; flex-direction:column;
+  align-items:flex-start; justify-content:flex-end;
+  padding:0 8vw 10vh;
+  position:relative; overflow:hidden;
+}
+
+.exit-bg-word {
+  position:absolute;
+  top:-5vw; left:-2vw;
+  font-size:55vw; font-weight:900; font-style:italic;
+  color:rgba(0,0,0,.05);
+  letter-spacing:-.07em; line-height:1;
+  pointer-events:none; user-select:none;
+}
+
+.exit-label {
+  font-size:11px; font-weight:700;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:rgba(0,0,0,.3);
+  margin-bottom:24px;
+  position:relative; z-index:2;
+}
+
+.exit-name {
+  font-size:clamp(72px,16vw,200px);
+  font-weight:900; font-style:italic;
+  letter-spacing:-.06em; line-height:.85;
+  color:#050403;
+  position:relative; z-index:2;
+  margin-bottom:24px;
+}
+
+.exit-price {
+  font-size:clamp(28px,4vw,48px);
+  font-weight:100; letter-spacing:.04em;
+  color:rgba(0,0,0,.4);
+  position:relative; z-index:2;
+}
+
+/* ── RIPPLE ── */
+.ripple {
+  position:fixed;
+  width:4px; height:4px;
+  border-radius:50%;
+  border:1px solid var(--lime);
+  pointer-events:none; z-index:7000;
+  transform:translate(-50%,-50%);
+  animation:rip .7s ease-out forwards;
+}
+@keyframes rip{
+  to{width:160px;height:160px;opacity:0}
+}
+
+/* ── SCROLL REVEAL ── */
+.sr { opacity:0; transform:translateY(20px); transition:opacity .9s, transform .9s; }
+.sr.on { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="bg-letters" id="bgLetters">SOLA</div>
+
+  <div class="product-scene" id="productScene">
+    <div class="product-glow" id="productGlow"></div>
+    <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="pg" cx="36%" cy="26%" r="72%">
+          <stop offset="0%"  stop-color="#2a2218"/>
+          <stop offset="100%" stop-color="#0a0806"/>
+        </radialGradient>
+        <radialGradient id="ps" cx="28%" cy="18%" r="50%">
+          <stop offset="0%"  stop-color="rgba(212,255,64,.08)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <radialGradient id="pr" cx="50%" cy="50%" r="50%">
+          <stop offset="75%" stop-color="transparent"/>
+          <stop offset="100%" stop-color="rgba(212,255,64,.12)"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="100" cy="150" rx="68" ry="104" fill="url(#pr)"/>
+      <ellipse cx="100" cy="150" rx="66" ry="102" fill="url(#pg)"/>
+      <ellipse cx="100" cy="150" rx="66" ry="102" fill="url(#ps)"/>
+      <ellipse cx="100" cy="130" rx="42" ry="62"
+        fill="none" stroke="rgba(212,255,64,.15)"
+        stroke-width=".8" stroke-dasharray="5 4"/>
+      <circle cx="100" cy="224" r="4.5"
+        fill="none" stroke="rgba(212,255,64,.2)" stroke-width="1"/>
+      <circle cx="100" cy="224" r="1.8" fill="rgba(212,255,64,.2)"/>
+      <rect x="86" y="248" width="28" height="6" rx="3"
+        fill="rgba(212,255,64,.06)"/>
+    </svg>
+  </div>
+
+  <div class="hero-label">
+    <span>SOLA — Personal Wellness</span>
+    <span>Concept 01 — 2025</span>
+  </div>
+</section>
+
+<!-- ── REVEAL ZONE ── -->
+<section id="reveal">
+  <div class="reveal-bg">TOUCH</div>
+  <div class="reveal-grid">
+    <div class="rf">
+      <span class="rf-num">01</span>
+      <div class="rf-head">Your roommate<br/>will never know.</div>
+      <div class="rf-body">Brushless motor. Under 35dB. Below the threshold of perception through a standard interior wall.</div>
+    </div>
+    <div class="rf">
+      <span class="rf-num">02</span>
+      <div class="rf-head">Touch it<br/>anywhere.</div>
+      <div class="rf-body">The entire top face is a single capacitive zone. Swipe up for more. Press to stop. No modes, no memory, no instruction needed.</div>
+    </div>
+    <div class="rf">
+      <span class="rf-num">03</span>
+      <div class="rf-head">Looks like<br/>an earbud case.</div>
+      <div class="rf-body">104 × 78 × 28mm. Has never been questioned. Not in a bag, not on a shelf, not at security. Not once.</div>
+    </div>
+    <div class="rf">
+      <span class="rf-num">04</span>
+      <div class="rf-head">Take it in<br/>the shower.</div>
+      <div class="rf-body">IPX7. One metre. Thirty minutes. Flush USB-C port — no cap to lose, nothing to seal, nothing to break.</div>
+    </div>
+    <div class="rf" style="grid-column:span 2">
+      <span class="rf-num">05</span>
+      <div class="rf-head">No app. No bluetooth.<br/>No waiting.</div>
+      <div class="rf-body">Pick it up. Use it. 90 minutes per charge. Back to full in sixty. That is the complete instruction set.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STAT ── -->
+<section id="stat">
+  <div class="stat-num" data-val="&lt;35" id="statNum">&lt;35</div>
+  <div class="stat-unit">decibels.</div>
+  <div class="stat-note sr">Quieter than a conversation at one metre.</div>
+</section>
+
+<!-- ── COLORWAYS ── -->
+<section id="colors">
+  <div class="cw">
+    <div class="cw-line"></div>
+    <div class="cw-bg" style="background:linear-gradient(180deg,#b8b2aa,#888278)"></div>
+    <div class="cw-content">
+      <div class="cw-name">Stone</div>
+      <div class="cw-desc">Goes everywhere.<br/>Questions nothing.</div>
+    </div>
+  </div>
+  <div class="cw">
+    <div class="cw-line"></div>
+    <div class="cw-bg" style="background:linear-gradient(180deg,#7a9a7a,#446044)"></div>
+    <div class="cw-content">
+      <div class="cw-name">Fern</div>
+      <div class="cw-desc">Next to the plants.<br/>Belongs there.</div>
+    </div>
+  </div>
+  <div class="cw">
+    <div class="cw-line"></div>
+    <div class="cw-bg" style="background:linear-gradient(180deg,#222,#040404)"></div>
+    <div class="cw-content">
+      <div class="cw-name">Ink</div>
+      <div class="cw-desc">Not for everyone.<br/>You know if it's you.</div>
+    </div>
+  </div>
+  <div class="cw">
+    <div class="cw-line"></div>
+    <div class="cw-bg" style="background:linear-gradient(180deg,#6a8090,#384858)"></div>
+    <div class="cw-content">
+      <div class="cw-name">Rain</div>
+      <div class="cw-desc">A grey sky<br/>you actually love.</div>
+    </div>
+  </div>
+  <div class="cw">
+    <div class="cw-line"></div>
+    <div class="cw-bg" style="background:linear-gradient(180deg,#c8a070,#906040)"></div>
+    <div class="cw-content">
+      <div class="cw-name">Sand</div>
+      <div class="cw-desc">Has people fooled.<br/>Every time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EXIT ── -->
+<section id="exit">
+  <div class="exit-bg-word">S</div>
+  <div class="exit-label">SOLA · Personal Wellness · Concept 01</div>
+  <div class="exit-name">SOLA.</div>
+  <div class="exit-price">$55 — Nobody knows.</div>
+</section>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+let mx = 0, my = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top  = my + 'px';
+});
+document.querySelectorAll('.rf, .cw, #exit').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+});
+
+/* ── CLICK RIPPLE ── */
+document.addEventListener('click', e => {
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.left = e.clientX + 'px';
+  r.style.top  = e.clientY + 'px';
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+});
+
+/* ── 3D PRODUCT TILT (smoothed) ── */
+const scene = document.getElementById('productScene');
+const glow  = document.getElementById('productGlow');
+const bgL   = document.getElementById('bgLetters');
+let tx = 0, ty = 0, cx = 0, cy = 0;
+
+function tiltLoop() {
+  cx += (tx - cx) * 0.06;
+  cy += (ty - cy) * 0.06;
+  scene.style.transform =
+    `perspective(900px) rotateY(${cx}deg) rotateX(${cy}deg)`;
+  glow.style.transform =
+    `translate(${cx * 2}px, ${-cy * 1.5}px)`;
+  bgL.style.transform =
+    `translate(${-cx * 4}px, ${cy * 3}px)`;
+  requestAnimationFrame(tiltLoop);
+}
+tiltLoop();
+
+document.getElementById('hero').addEventListener('mousemove', e => {
+  const w = window.innerWidth, h = window.innerHeight;
+  tx = (e.clientX / w - 0.5) * 28;
+  ty = -(e.clientY / h - 0.5) * 18;
+});
+document.getElementById('hero').addEventListener('mouseleave', () => {
+  tx = 0; ty = 0;
+});
+
+/* ── STAT FILL ON SCROLL ── */
+const statNum = document.getElementById('statNum');
+const statSec = document.getElementById('stat');
+
+function updateStat() {
+  const r   = statSec.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1,
+    1 - (r.top) / (window.innerHeight * 0.8)
+  ));
+  statNum.style.setProperty('--pct', (pct * 100) + '%');
+}
+
+/* ── SCROLL REVEALS ── */
+const srObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('on'); });
+}, { threshold: 0.2 });
+document.querySelectorAll('.sr').forEach(el => srObs.observe(el));
+
+window.addEventListener('scroll', updateStat, { passive: true });
+updateStat();
+</script>
+</body>
+</html>
