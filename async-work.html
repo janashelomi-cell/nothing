@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AsyncWork — Remote Ops</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,900&display=swap');
+
+:root {
+  --bg:    #070605;
+  --bg2:   #0d0b09;
+  --bg3:   #111009;
+  --fg:    #E8E2D4;
+  --fg2:   rgba(232,226,212,0.45);
+  --fg3:   rgba(232,226,212,0.12);
+  --lime:  #D4FF40;
+  --lime2: rgba(212,255,64,0.12);
+  --lime3: rgba(212,255,64,0.06);
+  --red:   #FF5A5A;
+  --blue:  #5AB4FF;
+  --amber: #FFB547;
+  --border: rgba(232,226,212,0.07);
+  --sidebar: 280px;
+  --right: 320px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* GRAIN */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.04;
+  pointer-events:none;
+  z-index:9000;
+  animation:grain .6s steps(1) infinite;
+}
+@keyframes grain{
+  0%{transform:translate(0,0)} 20%{transform:translate(-3%,4%)}
+  40%{transform:translate(5%,-2%)} 60%{transform:translate(-4%,-5%)}
+  80%{transform:translate(3%,2%)} 100%{transform:translate(0,0)}
+}
+
+/* CURSOR */
+#cur {
+  position:fixed; width:6px; height:6px;
+  background:var(--lime); border-radius:50%;
+  pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .12s,height .12s,background .15s;
+  mix-blend-mode:difference;
+}
+#cur.big { width:48px; height:48px; }
+
+/* ── TOPBAR ── */
+#topbar {
+  height:56px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center;
+  padding:0 20px;
+  gap:0;
+  flex-shrink:0;
+  background:var(--bg);
+  position:relative; z-index:100;
+}
+
+.logo {
+  font-size:13px; font-weight:900; font-style:italic;
+  letter-spacing:-.02em;
+  color:var(--fg);
+  flex-shrink:0;
+  margin-right:28px;
+}
+.logo span { color:var(--lime); }
+
+.tz-clocks {
+  display:flex; gap:0;
+  flex:1;
+  overflow:hidden;
+}
+
+.tz-chip {
+  display:flex; align-items:center; gap:8px;
+  padding:0 16px; height:56px;
+  border-right:1px solid var(--border);
+  font-size:11px;
+}
+.tz-chip:first-child { border-left:1px solid var(--border); }
+.tz-city {
+  color:var(--fg2);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  font-weight:500;
+}
+.tz-time {
+  font-size:13px; font-weight:700;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.04em;
+}
+.tz-time.work  { color:var(--lime); }
+.tz-time.sleep { color:var(--fg3); }
+.tz-time.eve   { color:var(--amber); }
+
+.top-right {
+  margin-left:auto;
+  display:flex; align-items:center; gap:12px;
+}
+
+.pulse-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--lime);
+  box-shadow:0 0 0 0 rgba(212,255,64,.5);
+  animation:pulseAnim 2s ease-out infinite;
+}
+@keyframes pulseAnim{
+  0%{box-shadow:0 0 0 0 rgba(212,255,64,.5)}
+  70%{box-shadow:0 0 0 8px rgba(212,255,64,0)}
+  100%{box-shadow:0 0 0 0 rgba(212,255,64,0)}
+}
+.live-label {
+  font-size:10px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--lime); opacity:.7;
+}
+
+/* ── MAIN LAYOUT ── */
+#main {
+  flex:1;
+  display:grid;
+  grid-template-columns: var(--sidebar) 1fr var(--right);
+  overflow:hidden;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow-y:auto; overflow-x:hidden;
+}
+#sidebar::-webkit-scrollbar { width:4px; }
+#sidebar::-webkit-scrollbar-track { background:transparent; }
+#sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+.section-head {
+  padding:16px 20px 10px;
+  font-size:9px; font-weight:700;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--fg3);
+  flex-shrink:0;
+}
+
+/* TEAM MEMBER */
+.member {
+  padding:12px 20px;
+  border-bottom:1px solid var(--border);
+  cursor:none;
+  transition:background .2s;
+  position:relative;
+}
+.member:hover { background:var(--bg2); }
+.member-top {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:5px;
+}
+.avatar {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700;
+  flex-shrink:0;
+}
+.member-name { font-size:12px; font-weight:600; }
+.member-role { font-size:10px; color:var(--fg2); font-weight:300; }
+.member-meta {
+  display:flex; align-items:center; gap:6px;
+  margin-top:4px;
+}
+.status-dot {
+  width:5px; height:5px; border-radius:50%;
+  flex-shrink:0;
+}
+.status-dot.online  { background:var(--lime); }
+.status-dot.away    { background:var(--amber); }
+.status-dot.offline { background:var(--fg3); }
+.member-tz {
+  font-size:10px; color:var(--fg2);
+  font-variant-numeric:tabular-nums;
+}
+.member-task {
+  font-size:10px; color:var(--fg2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:180px;
+}
+
+.divider { height:1px; background:var(--border); margin:4px 0; }
+
+/* COMPLIANCE PANEL */
+.compliance-item {
+  padding:10px 20px;
+  border-bottom:1px solid var(--border);
+}
+.comp-country {
+  font-size:11px; font-weight:600;
+  margin-bottom:3px;
+}
+.comp-row {
+  display:flex; align-items:center; gap:6px;
+  font-size:10px; color:var(--fg2); font-weight:300;
+  margin-top:2px;
+}
+.comp-badge {
+  font-size:8px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:1px 5px; border-radius:3px;
+}
+.comp-badge.ok   { background:var(--lime2); color:var(--lime); }
+.comp-badge.warn { background:rgba(255,181,71,.12); color:var(--amber); }
+.comp-badge.risk { background:rgba(255,90,90,.12); color:var(--red); }
+
+/* ── CENTER MAP ── */
+#center {
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+#map-area {
+  flex:1;
+  position:relative;
+  overflow:hidden;
+}
+
+#world-map {
+  width:100%; height:100%;
+  opacity:.9;
+}
+
+.map-label {
+  position:absolute;
+  font-size:9px; font-weight:700;
+  letter-spacing:.15em; text-transform:uppercase;
+  color:var(--fg3);
+  pointer-events:none;
+}
+.map-label.tl { top:16px; left:20px; }
+.map-label.tr { top:16px; right:20px; }
+
+/* map pins */
+.pin {
+  position:absolute;
+  transform:translate(-50%,-100%);
+  cursor:none;
+  z-index:10;
+}
+.pin-dot {
+  width:10px; height:10px; border-radius:50%;
+  margin:0 auto;
+  position:relative;
+}
+.pin-dot::after {
+  content:'';
+  position:absolute; inset:-4px;
+  border-radius:50%;
+  border:1px solid currentColor;
+  opacity:.3;
+  animation:pinRing 2.5s ease-out infinite;
+}
+@keyframes pinRing{
+  0%{inset:-4px;opacity:.4}
+  100%{inset:-16px;opacity:0}
+}
+.pin-name {
+  font-size:9px; font-weight:700;
+  letter-spacing:.08em;
+  text-align:center;
+  margin-top:4px;
+  white-space:nowrap;
+}
+.pin-time {
+  font-size:8px;
+  text-align:center;
+  opacity:.6;
+  font-variant-numeric:tabular-nums;
+}
+
+/* handoff arrow */
+#handoff-svg {
+  position:absolute; inset:0;
+  pointer-events:none; z-index:5;
+}
+
+/* ── BOTTOM FILE PROGRESS ── */
+#file-strip {
+  border-top:1px solid var(--border);
+  padding:14px 20px;
+  display:flex; gap:12px;
+  flex-shrink:0;
+  background:var(--bg);
+  overflow-x:auto;
+}
+#file-strip::-webkit-scrollbar { height:3px; }
+#file-strip::-webkit-scrollbar-thumb { background:var(--border); }
+
+.file-card {
+  flex-shrink:0;
+  width:200px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:12px 14px;
+  transition:border-color .25s;
+}
+.file-card:hover { border-color:rgba(212,255,64,.2); }
+.file-top {
+  display:flex; align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.file-icon {
+  font-size:16px; line-height:1;
+  flex-shrink:0;
+}
+.file-status {
+  font-size:8px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:2px 6px; border-radius:3px;
+}
+.file-status.active  { background:var(--lime2); color:var(--lime); }
+.file-status.review  { background:rgba(90,180,255,.12); color:var(--blue); }
+.file-status.blocked { background:rgba(255,90,90,.12); color:var(--red); }
+.file-status.done    { background:var(--fg3); color:var(--fg2); }
+.file-name {
+  font-size:11px; font-weight:600;
+  margin-bottom:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.file-sub {
+  font-size:9px; color:var(--fg2); font-weight:300;
+  margin-bottom:10px;
+}
+.progress-bar {
+  height:3px; background:var(--fg3); border-radius:2px;
+  overflow:hidden; margin-bottom:6px;
+}
+.progress-fill {
+  height:100%; border-radius:2px;
+  background:var(--lime);
+  transition:width 1.2s cubic-bezier(.23,1,.32,1);
+}
+.file-footer {
+  display:flex; justify-content:space-between;
+  align-items:center;
+}
+.file-owner {
+  font-size:9px; color:var(--fg2);
+}
+.file-pct {
+  font-size:11px; font-weight:700;
+  font-variant-numeric:tabular-nums;
+  color:var(--lime);
+}
+
+/* ── RIGHT PANEL ── */
+#right {
+  border-left:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+.panel-head {
+  padding:16px 18px 12px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.panel-title {
+  font-size:11px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--fg2);
+}
+
+/* TIMELINE */
+#timeline {
+  flex:1;
+  overflow-y:auto;
+  padding:8px 0;
+}
+#timeline::-webkit-scrollbar { width:3px; }
+#timeline::-webkit-scrollbar-thumb { background:var(--border); }
+
+.tl-item {
+  padding:10px 18px;
+  position:relative;
+  border-left:2px solid var(--border);
+  margin-left:28px;
+  margin-bottom:2px;
+  transition:border-color .3s;
+}
+.tl-item.active { border-left-color:var(--lime); }
+.tl-item.done   { border-left-color:var(--fg3); }
+
+.tl-dot {
+  position:absolute;
+  left:-6px; top:14px;
+  width:10px; height:10px; border-radius:50%;
+  background:var(--bg);
+  border:2px solid currentColor;
+}
+.tl-item.active .tl-dot { color:var(--lime); }
+.tl-item.done   .tl-dot { color:var(--fg3); }
+.tl-item.pending .tl-dot { color:var(--border); }
+
+.tl-time {
+  font-size:9px; color:var(--fg3);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:3px;
+}
+.tl-title {
+  font-size:11px; font-weight:600;
+  margin-bottom:2px;
+}
+.tl-item.done .tl-title { color:var(--fg2); }
+.tl-item.pending .tl-title { color:var(--fg3); }
+
+.tl-from-to {
+  display:flex; align-items:center; gap:5px;
+  font-size:10px; color:var(--fg2);
+  margin-top:4px;
+}
+.tl-person {
+  display:flex; align-items:center; gap:4px;
+}
+.tl-avatar {
+  width:14px; height:14px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:7px; font-weight:700;
+  flex-shrink:0;
+}
+.arrow-icon { color:var(--fg3); font-size:9px; }
+
+.tl-note {
+  font-size:10px; color:var(--fg2); font-weight:300;
+  margin-top:4px; line-height:1.5;
+}
+
+/* HANDOFF ALERT */
+.handoff-alert {
+  margin:0 14px 10px;
+  padding:12px 14px;
+  background:var(--lime2);
+  border:1px solid rgba(212,255,64,.2);
+  border-radius:6px;
+  flex-shrink:0;
+}
+.ha-label {
+  font-size:9px; font-weight:700;
+  letter-spacing:.15em; text-transform:uppercase;
+  color:var(--lime); margin-bottom:4px;
+}
+.ha-text {
+  font-size:11px; font-weight:400;
+  line-height:1.5;
+  color:rgba(232,226,212,.8);
+}
+.ha-time {
+  font-size:10px; color:var(--lime);
+  font-variant-numeric:tabular-nums;
+  margin-top:6px; font-weight:600;
+}
+
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<!-- ── TOPBAR ── -->
+<div id="topbar">
+  <div class="logo">Async<span>Work</span></div>
+
+  <div class="tz-clocks" id="tzClocks">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="top-right">
+    <div class="pulse-dot"></div>
+    <div class="live-label">Live</div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="main">
+
+  <!-- LEFT SIDEBAR -->
+  <div id="sidebar">
+    <div class="section-head">Team — 8 Members</div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(212,255,64,.12);color:var(--lime)">MR</div>
+        <div>
+          <div class="member-name">Mara Reyes</div>
+          <div class="member-role">Lead Designer</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot online"></div>
+        <div class="member-tz" data-tz="Europe/Madrid" data-tzname="Madrid">—</div>
+        <div class="member-task">· Onboarding flow v3</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(90,180,255,.12);color:var(--blue)">DK</div>
+        <div>
+          <div class="member-name">Dev Kapoor</div>
+          <div class="member-role">Senior Engineer</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot online"></div>
+        <div class="member-tz" data-tz="America/New_York" data-tzname="New York">—</div>
+        <div class="member-task">· Reviewing PR #214</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(255,181,71,.12);color:var(--amber)">YN</div>
+        <div>
+          <div class="member-name">Yuki Namba</div>
+          <div class="member-role">Product Manager</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot away"></div>
+        <div class="member-tz" data-tz="Asia/Tokyo" data-tzname="Tokyo">—</div>
+        <div class="member-task">· Async standup notes</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(212,255,64,.08);color:var(--lime)">LS</div>
+        <div>
+          <div class="member-name">Lena Schulz</div>
+          <div class="member-role">Frontend Engineer</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot online"></div>
+        <div class="member-tz" data-tz="Europe/Berlin" data-tzname="Berlin">—</div>
+        <div class="member-task">· Component library PR</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(255,90,90,.1);color:var(--red)">AT</div>
+        <div>
+          <div class="member-name">Ama Twum</div>
+          <div class="member-role">UX Researcher</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot offline"></div>
+        <div class="member-tz" data-tz="Africa/Accra" data-tzname="Accra">—</div>
+        <div class="member-task">· User interviews — done</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(90,180,255,.08);color:var(--blue)">JC</div>
+        <div>
+          <div class="member-name">João Costa</div>
+          <div class="member-role">Backend Engineer</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot online"></div>
+        <div class="member-tz" data-tz="America/Sao_Paulo" data-tzname="São Paulo">—</div>
+        <div class="member-task">· Auth refactor</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(212,255,64,.1);color:var(--lime)">PO</div>
+        <div>
+          <div class="member-name">Priya Osei</div>
+          <div class="member-role">Data Engineer</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot away"></div>
+        <div class="member-tz" data-tz="Asia/Kolkata" data-tzname="Mumbai">—</div>
+        <div class="member-task">· Pipeline monitoring</div>
+      </div>
+    </div>
+
+    <div class="member" data-hover>
+      <div class="member-top">
+        <div class="avatar" style="background:rgba(255,181,71,.1);color:var(--amber)">TN</div>
+        <div>
+          <div class="member-name">Tom Nguyen</div>
+          <div class="member-role">DevOps</div>
+        </div>
+      </div>
+      <div class="member-meta">
+        <div class="status-dot online"></div>
+        <div class="member-tz" data-tz="Australia/Sydney" data-tzname="Sydney">—</div>
+        <div class="member-task">· Infra cost audit</div>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:8px">Compliance</div>
+
+    <div class="compliance-item">
+      <div class="comp-country">Spain (EU)</div>
+      <div class="comp-row">
+        <span class="comp-badge ok">OK</span>
+        GDPR compliant · €3,200/mo equiv.
+      </div>
+      <div class="comp-row">
+        <span class="comp-badge ok">OK</span>
+        35h week max logged
+      </div>
+    </div>
+
+    <div class="compliance-item">
+      <div class="comp-country">Japan</div>
+      <div class="comp-row">
+        <span class="comp-badge warn">WATCH</span>
+        Visa renewal due in 22 days
+      </div>
+      <div class="comp-row">
+        <span class="comp-badge ok">OK</span>
+        My Number registered
+      </div>
+    </div>
+
+    <div class="compliance-item">
+      <div class="comp-country">Brazil</div>
+      <div class="comp-row">
+        <span class="comp-badge ok">OK</span>
+        CLT contractor agreement
+      </div>
+      <div class="comp-row">
+        <span class="comp-badge ok">OK</span>
+        Tax treaty active
+      </div>
+    </div>
+
+    <div class="compliance-item">
+      <div class="comp-country">Australia</div>
+      <div class="comp-row">
+        <span class="comp-badge risk">ACTION</span>
+        Working Holiday — 58 days left
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER -->
+  <div id="center">
+    <div id="map-area">
+      <span class="map-label tl">Global Team Map</span>
+      <span class="map-label tr" id="memberCount">8 members · 7 countries</span>
+
+      <!-- SVG WORLD MAP (simplified Robinson-like paths) -->
+      <svg id="world-map" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="mapglow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(212,255,64,0.03)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <rect width="1000" height="500" fill="#0a0805"/>
+        <rect width="1000" height="500" fill="url(#mapglow)"/>
+
+        <!-- Latitude lines -->
+        <g stroke="rgba(232,226,212,0.04)" stroke-width="0.5" fill="none">
+          <line x1="0" y1="83" x2="1000" y2="83"/>
+          <line x1="0" y1="166" x2="1000" y2="166"/>
+          <line x1="0" y1="250" x2="1000" y2="250"/>
+          <line x1="0" y1="333" x2="1000" y2="333"/>
+          <line x1="0" y1="416" x2="1000" y2="416"/>
+        </g>
+        <!-- Longitude lines -->
+        <g stroke="rgba(232,226,212,0.04)" stroke-width="0.5" fill="none">
+          <line x1="111" y1="0" x2="111" y2="500"/>
+          <line x1="222" y1="0" x2="222" y2="500"/>
+          <line x1="333" y1="0" x2="333" y2="500"/>
+          <line x1="444" y1="0" x2="444" y2="500"/>
+          <line x1="556" y1="0" x2="556" y2="500"/>
+          <line x1="667" y1="0" x2="667" y2="500"/>
+          <line x1="778" y1="0" x2="778" y2="500"/>
+          <line x1="889" y1="0" x2="889" y2="500"/>
+        </g>
+
+        <!-- Continents (simplified filled shapes) -->
+        <g fill="rgba(232,226,212,0.07)" stroke="rgba(232,226,212,0.1)" stroke-width="0.6">
+          <!-- North America -->
+          <path d="M80,90 L160,80 L200,100 L220,130 L210,160 L180,190 L160,240 L140,280 L120,300 L100,280 L90,250 L80,200 L70,160 L60,120 Z"/>
+          <!-- Greenland -->
+          <path d="M200,40 L240,35 L260,55 L250,80 L220,85 L200,65 Z"/>
+          <!-- South America -->
+          <path d="M170,290 L210,280 L230,310 L240,350 L230,390 L210,420 L185,430 L170,400 L160,360 L155,320 Z"/>
+          <!-- Europe -->
+          <path d="M420,80 L470,70 L490,90 L480,110 L460,120 L440,130 L420,125 L410,105 Z"/>
+          <!-- British Isles -->
+          <path d="M400,85 L415,80 L418,95 L405,100 Z"/>
+          <!-- Africa -->
+          <path d="M430,140 L490,130 L510,150 L520,190 L515,240 L500,280 L480,320 L460,340 L440,330 L420,300 L415,260 L410,220 L415,180 L420,155 Z"/>
+          <!-- Asia -->
+          <path d="M490,60 L600,50 L680,60 L740,70 L800,65 L840,80 L860,110 L840,140 L800,150 L760,160 L720,155 L680,165 L640,160 L600,150 L560,145 L520,140 L500,120 L490,95 Z"/>
+          <!-- Indian subcontinent -->
+          <path d="M610,150 L650,145 L660,165 L655,200 L640,220 L620,215 L605,195 L600,170 Z"/>
+          <!-- Southeast Asia -->
+          <path d="M720,155 L760,150 L780,165 L770,185 L740,190 L715,180 Z"/>
+          <!-- Australia -->
+          <path d="M760,300 L840,290 L880,310 L890,350 L870,385 L840,400 L800,395 L770,375 L755,345 L750,315 Z"/>
+          <!-- Japan -->
+          <path d="M820,105 L835,100 L840,115 L828,122 L818,115 Z"/>
+          <!-- New Zealand -->
+          <path d="M890,390 L900,380 L908,395 L900,408 L890,403 Z"/>
+        </g>
+
+        <!-- Handoff arcs drawn by JS -->
+        <svg id="handoff-svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg>
+      </svg>
+
+      <!-- MAP PINS (positioned by JS via CSS %) -->
+      <div class="pin" id="pin-madrid" style="left:43.5%;top:42%">
+        <div class="pin-dot" style="background:var(--lime);color:var(--lime)"></div>
+        <div class="pin-name" style="color:var(--lime)">Mara</div>
+        <div class="pin-time" id="pin-time-madrid">—</div>
+      </div>
+
+      <div class="pin" id="pin-ny" style="left:21%;top:41%">
+        <div class="pin-dot" style="background:var(--blue);color:var(--blue)"></div>
+        <div class="pin-name" style="color:var(--blue)">Dev</div>
+        <div class="pin-time" id="pin-time-ny">—</div>
+      </div>
+
+      <div class="pin" id="pin-tokyo" style="left:82.5%;top:38%">
+        <div class="pin-dot" style="background:var(--amber);color:var(--amber)"></div>
+        <div class="pin-name" style="color:var(--amber)">Yuki</div>
+        <div class="pin-time" id="pin-time-tokyo">—</div>
+      </div>
+
+      <div class="pin" id="pin-berlin" style="left:47%;top:37%">
+        <div class="pin-dot" style="background:var(--lime);color:var(--lime)"></div>
+        <div class="pin-name" style="color:var(--lime)">Lena</div>
+        <div class="pin-time" id="pin-time-berlin">—</div>
+      </div>
+
+      <div class="pin" id="pin-accra" style="left:43%;top:56%">
+        <div class="pin-dot" style="background:var(--red);color:var(--red)"></div>
+        <div class="pin-name" style="color:var(--red)">Ama</div>
+        <div class="pin-time" id="pin-time-accra">—</div>
+      </div>
+
+      <div class="pin" id="pin-sao" style="left:24%;top:71%">
+        <div class="pin-dot" style="background:var(--blue);color:var(--blue)"></div>
+        <div class="pin-name" style="color:var(--blue)">João</div>
+        <div class="pin-time" id="pin-time-sao">—</div>
+      </div>
+
+      <div class="pin" id="pin-mumbai" style="left:62%;top:50%">
+        <div class="pin-dot" style="background:var(--lime);color:var(--lime)"></div>
+        <div class="pin-name" style="color:var(--lime)">Priya</div>
+        <div class="pin-time" id="pin-time-mumbai">—</div>
+      </div>
+
+      <div class="pin" id="pin-sydney" style="left:85%;top:73%">
+        <div class="pin-dot" style="background:var(--amber);color:var(--amber)"></div>
+        <div class="pin-name" style="color:var(--amber)">Tom</div>
+        <div class="pin-time" id="pin-time-sydney">—</div>
+      </div>
+
+    </div>
+
+    <!-- FILE PROGRESS STRIP -->
+    <div id="file-strip">
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">🎨</span>
+          <span class="file-status active">Active</span>
+        </div>
+        <div class="file-name">Onboarding v3</div>
+        <div class="file-sub">Figma · 14 frames</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">Mara Reyes</span>
+          <span class="file-pct">72%</span>
+        </div>
+      </div>
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">🎨</span>
+          <span class="file-status review">Review</span>
+        </div>
+        <div class="file-name">Component Library</div>
+        <div class="file-sub">Figma · 82 components</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:95%"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">Lena Schulz</span>
+          <span class="file-pct">95%</span>
+        </div>
+      </div>
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">🔧</span>
+          <span class="file-status active">Active</span>
+        </div>
+        <div class="file-name">Auth Refactor</div>
+        <div class="file-sub">GitHub · PR #214</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:48%"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">João Costa</span>
+          <span class="file-pct">48%</span>
+        </div>
+      </div>
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">📊</span>
+          <span class="file-status done">Done</span>
+        </div>
+        <div class="file-name">User Interviews</div>
+        <div class="file-sub">Notion · 12 sessions</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--fg2)"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">Ama Twum</span>
+          <span class="file-pct" style="color:var(--fg2)">100%</span>
+        </div>
+      </div>
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">🔧</span>
+          <span class="file-status blocked">Blocked</span>
+        </div>
+        <div class="file-name">Data Pipeline v2</div>
+        <div class="file-sub">GitHub · needs review</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:61%;background:var(--red)"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">Priya Osei</span>
+          <span class="file-pct" style="color:var(--red)">61%</span>
+        </div>
+      </div>
+
+      <div class="file-card" data-hover>
+        <div class="file-top">
+          <span class="file-icon">☁️</span>
+          <span class="file-status active">Active</span>
+        </div>
+        <div class="file-name">Infra Cost Audit</div>
+        <div class="file-sub">Notion · ongoing</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+        <div class="file-footer">
+          <span class="file-owner">Tom Nguyen</span>
+          <span class="file-pct">33%</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right">
+    <div class="panel-head">
+      <div class="panel-title">Handoff Timeline</div>
+    </div>
+
+    <div class="handoff-alert">
+      <div class="ha-label">Next handoff</div>
+      <div class="ha-text">Onboarding v3 designs move from <strong>Mara</strong> (Madrid) to <strong>Dev</strong> (New York)</div>
+      <div class="ha-time" id="handoffCountdown">—</div>
+    </div>
+
+    <div id="timeline">
+
+      <div class="tl-item done">
+        <div class="tl-dot"></div>
+        <div class="tl-time">Yesterday 09:14 JST</div>
+        <div class="tl-title">Research → Design</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(255,90,90,.15);color:var(--red)">AT</div>
+            Ama
+          </div>
+          <span class="arrow-icon">→</span>
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(212,255,64,.12);color:var(--lime)">MR</div>
+            Mara
+          </div>
+        </div>
+        <div class="tl-note">12 interview summaries · 3 insight docs handed off via Notion</div>
+      </div>
+
+      <div class="tl-item done">
+        <div class="tl-dot"></div>
+        <div class="tl-time">Yesterday 14:30 CET</div>
+        <div class="tl-title">Spec Review</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(255,181,71,.12);color:var(--amber)">YN</div>
+            Yuki
+          </div>
+          <span class="arrow-icon">→</span>
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(212,255,64,.12);color:var(--lime)">MR</div>
+            Mara
+          </div>
+        </div>
+        <div class="tl-note">Product spec v2.1 approved — 4 scope changes flagged async</div>
+      </div>
+
+      <div class="tl-item active">
+        <div class="tl-dot"></div>
+        <div class="tl-time" id="tl-now">Now · CET</div>
+        <div class="tl-title">Design In Progress ✦</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(212,255,64,.12);color:var(--lime)">MR</div>
+            Mara
+          </div>
+          <span class="arrow-icon">·</span>
+          <div style="font-size:10px;color:var(--lime)">Figma · 14 frames</div>
+        </div>
+        <div class="tl-note">Onboarding v3 — 72% complete. Estimated handoff in ~4h.</div>
+      </div>
+
+      <div class="tl-item pending">
+        <div class="tl-dot"></div>
+        <div class="tl-time">Today ~16:00 EST</div>
+        <div class="tl-title">Design → Engineering</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(212,255,64,.12);color:var(--lime)">MR</div>
+            Mara
+          </div>
+          <span class="arrow-icon">→</span>
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(90,180,255,.12);color:var(--blue)">DK</div>
+            Dev
+          </div>
+        </div>
+        <div class="tl-note">Figma file + redlines → Dev picks up when NY opens</div>
+      </div>
+
+      <div class="tl-item pending">
+        <div class="tl-dot"></div>
+        <div class="tl-time">Today ~18:00 EST</div>
+        <div class="tl-title">Component PR</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(212,255,64,.1);color:var(--lime)">LS</div>
+            Lena
+          </div>
+          <span class="arrow-icon">→</span>
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(90,180,255,.12);color:var(--blue)">DK</div>
+            Dev
+          </div>
+        </div>
+        <div class="tl-note">Component library review — PR #218 ready for approval</div>
+      </div>
+
+      <div class="tl-item pending">
+        <div class="tl-dot"></div>
+        <div class="tl-time">Tomorrow ~10:00 AEST</div>
+        <div class="tl-title">Infra Sign-off</div>
+        <div class="tl-from-to">
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(90,180,255,.12);color:var(--blue)">DK</div>
+            Dev
+          </div>
+          <span class="arrow-icon">→</span>
+          <div class="tl-person">
+            <div class="tl-avatar" style="background:rgba(255,181,71,.1);color:var(--amber)">TN</div>
+            Tom
+          </div>
+        </div>
+        <div class="tl-note">Cost audit + deployment approval before Sydney EOD</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CURSOR ──
+const cur = document.getElementById('cur');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+});
+document.querySelectorAll('[data-hover]').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+});
+
+// ── TIMEZONE DATA ──
+const TZ_CLOCKS = [
+  { id:'madrid',  tz:'Europe/Madrid',    label:'Madrid',    pinId:'pin-time-madrid' },
+  { id:'berlin',  tz:'Europe/Berlin',    label:'Berlin',    pinId:'pin-time-berlin' },
+  { id:'accra',   tz:'Africa/Accra',     label:'Accra',     pinId:'pin-time-accra'  },
+  { id:'ny',      tz:'America/New_York', label:'New York',  pinId:'pin-time-ny'     },
+  { id:'sao',     tz:'America/Sao_Paulo',label:'São Paulo', pinId:'pin-time-sao'    },
+  { id:'mumbai',  tz:'Asia/Kolkata',     label:'Mumbai',    pinId:'pin-time-mumbai' },
+  { id:'tokyo',   tz:'Asia/Tokyo',       label:'Tokyo',     pinId:'pin-time-tokyo'  },
+  { id:'sydney',  tz:'Australia/Sydney', label:'Sydney',    pinId:'pin-time-sydney' },
+];
+
+const MEMBER_TZS = document.querySelectorAll('[data-tz]');
+
+function getHour(tz) {
+  return parseInt(new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:tz}).format(new Date()));
+}
+
+function timeClass(h) {
+  if (h >= 8 && h < 19) return 'work';
+  if (h >= 19 && h < 23) return 'eve';
+  return 'sleep';
+}
+
+function fmtTime(tz) {
+  return new Intl.DateTimeFormat('en-GB',{
+    hour:'2-digit', minute:'2-digit', hour12:false, timeZone:tz
+  }).format(new Date());
+}
+
+// Build top-bar clock chips once
+const tzContainer = document.getElementById('tzClocks');
+TZ_CLOCKS.forEach(t => {
+  const chip = document.createElement('div');
+  chip.className = 'tz-chip';
+  chip.innerHTML = `<span class="tz-city">${t.label}</span><span class="tz-time" id="tztime-${t.id}">—</span>`;
+  tzContainer.appendChild(chip);
+});
+
+function updateClocks() {
+  const now = new Date();
+
+  TZ_CLOCKS.forEach(t => {
+    const el = document.getElementById('tztime-' + t.id);
+    const pinEl = document.getElementById(t.pinId);
+    const h = getHour(t.tz);
+    const t_str = fmtTime(t.tz);
+    if (el) { el.textContent = t_str; el.className = 'tz-time ' + timeClass(h); }
+    if (pinEl) pinEl.textContent = t_str;
+  });
+
+  // Sidebar member times
+  MEMBER_TZS.forEach(el => {
+    const tz = el.dataset.tz;
+    const name = el.dataset.tzname;
+    el.textContent = name + ' ' + fmtTime(tz);
+  });
+
+  // Handoff countdown: target is today 16:00 EST
+  const targetTz = 'America/New_York';
+  const targetStr = new Intl.DateTimeFormat('en-US',{
+    year:'numeric',month:'2-digit',day:'2-digit',
+    timeZone:targetTz
+  }).format(now);
+  const [m,d,y] = targetStr.split('/');
+  const target = new Date(`${y}-${m}-${d}T16:00:00`);
+  // Adjust for EST offset: get UTC time for 16:00 EST
+  const estOffset = new Intl.DateTimeFormat('en-US',{timeZone:targetTz,timeZoneName:'shortOffset'}).format(now);
+  // Simple: get now in EST
+  const nowEst = new Date(now.toLocaleString('en-US',{timeZone:targetTz}));
+  const targetEst = new Date(nowEst);
+  targetEst.setHours(16,0,0,0);
+  if (targetEst < nowEst) targetEst.setDate(targetEst.getDate()+1);
+  const diff = Math.max(0, targetEst - nowEst);
+  const hrs = Math.floor(diff/3600000);
+  const mins = Math.floor((diff%3600000)/60000);
+  const hcd = document.getElementById('handoffCountdown');
+  if (hcd) hcd.textContent = `in ${hrs}h ${mins}m`;
+
+  // now label
+  const tlNow = document.getElementById('tl-now');
+  if (tlNow) {
+    const cetStr = new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin',hour12:false}).format(now);
+    tlNow.textContent = `Now ${cetStr} · CET`;
+  }
+}
+
+updateClocks();
+setInterval(updateClocks, 10000);
+
+// ── HANDOFF ARCS on the SVG map ──
+// Coordinates match the pin % positions mapped onto the SVG viewBox 0 0 1000 500
+const ARCS = [
+  // Madrid → New York (active handoff)
+  { x1:435, y1:200, x2:210, y2:200, color:'rgba(212,255,64,0.35)', active:true },
+  // Berlin → Madrid
+  { x1:470, y1:180, x2:435, y2:200, color:'rgba(212,255,64,0.15)', active:false },
+  // Tokyo → NY
+  { x1:825, y1:185, x2:210, y2:200, color:'rgba(90,180,255,0.15)', active:false },
+];
+
+function drawArcs() {
+  const svg = document.getElementById('handoff-svg');
+  if (!svg) return;
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Get map-area dimensions to scale
+  const mapArea = document.getElementById('map-area');
+  const W = mapArea.clientWidth || 800;
+  const H = mapArea.clientHeight || 400;
+  const vbW = 1000, vbH = 500;
+
+  svg.setAttribute('viewBox', `0 0 ${vbW} ${vbH}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  ARCS.forEach(arc => {
+    const mx = (arc.x1 + arc.x2) / 2;
+    const my = Math.min(arc.y1, arc.y2) - 80;
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M${arc.x1},${arc.y1} Q${mx},${my} ${arc.x2},${arc.y2}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', arc.color);
+    path.setAttribute('stroke-width', arc.active ? '1.5' : '0.8');
+    if (arc.active) {
+      path.setAttribute('stroke-dasharray', '6 4');
+      path.style.animation = 'dash 3s linear infinite';
+    } else {
+      path.setAttribute('stroke-dasharray', '3 6');
+    }
+    svg.appendChild(path);
+
+    if (arc.active) {
+      // Animated dot along the path
+      const circle = document.createElementNS(ns, 'circle');
+      circle.setAttribute('r', '4');
+      circle.setAttribute('fill', 'rgba(212,255,64,0.9)');
+      const animMotion = document.createElementNS(ns, 'animateMotion');
+      animMotion.setAttribute('dur', '4s');
+      animMotion.setAttribute('repeatCount', 'indefinite');
+      const mpath = document.createElementNS(ns, 'mpath');
+      // Use the same path
+      const pathId = 'arc-path-active';
+      path.setAttribute('id', pathId);
+      mpath.setAttribute('href', '#' + pathId);
+      animMotion.appendChild(mpath);
+      circle.appendChild(animMotion);
+      svg.appendChild(circle);
+    }
+  });
+}
+
+// inject dash animation
+const styleEl = document.createElement('style');
+styleEl.textContent = `@keyframes dash{ to { stroke-dashoffset: -20; } }`;
+document.head.appendChild(styleEl);
+
+window.addEventListener('resize', drawArcs);
+setTimeout(drawArcs, 100);
+</script>
+</body>
+</html>
