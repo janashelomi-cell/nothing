@@ -2,22 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>BARDAGULAN — Senate Fantasy League 2026</title>
-<style>
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  html,body{background:#000;height:100%;overflow:hidden}
-  body{font-family:'Arial Black','Impact','Helvetica Neue',Arial,sans-serif;color:#F3F4F6}
-  button{font-family:inherit;cursor:pointer}
-  #root{height:100%}
-  ::-webkit-scrollbar{width:5px;height:5px}
-  ::-webkit-scrollbar-track{background:#0d0d0d}
-  ::-webkit-scrollbar-thumb{background:#E1FF00}
-  ::-webkit-scrollbar-thumb:hover{background:#c8e600}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-</style>
 </head>
-<body>
+<body style="margin:0;background:#000">
 <div id="root"></div>
 <script>/**
  * @license React
@@ -319,272 +307,431 @@ var d=null!=c&&c.hydratedSources||null,e=!1,f="",g=aj;null!==c&&void 0!==c&&(!0=
 function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmountComponentAtNode=function(a){if(!Vd(a))throw Error(m(40));return a._reactRootContainer?(yb(function(){Wd(null,null,a,!1,function(){a._reactRootContainer=null;a[Ja]=null})}),!0):!1};Q.unstable_batchedUpdates=Tf;Q.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!Vd(c))throw Error(m(200));if(null==a||void 0===a._reactInternals)throw Error(m(38));return Wd(a,b,c,!1,d)};Q.version="18.3.1-next-f1338f8080-20240426"});
 })();
 </script>
-<script>const { useState, useEffect } = React;
-const mkIcon = (paths, circle) => ({ size = 14, color = "currentColor", strokeWidth = 2 } = {}) => React.createElement(
+<script>const { useState, useEffect, useRef, useCallback } = React;
+class AudioEngine {
+  constructor() {
+    this.ctx = null;
+    this.musicNodes = [];
+    this.muted = false;
+  }
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  tone(freq, dur, type = "square", vol = 0.15, delay = 0) {
+    if (!this.ctx || this.muted) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g);
+    g.connect(this.ctx.destination);
+    o.type = type;
+    o.frequency.value = freq;
+    const t = this.ctx.currentTime + delay;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(1e-3, t + dur);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+  sfxScore() {
+    [220, 330, 440, 660].forEach((f, i) => this.tone(f, 0.15, "sine", 0.2, i * 0.07));
+  }
+  sfxDrama() {
+    this.tone(80, 0.4, "sawtooth", 0.3);
+    this.tone(160, 0.3, "square", 0.15, 0.1);
+    [400, 350, 300].forEach((f, i) => this.tone(f, 0.15, "sine", 0.1, 0.2 + i * 0.08));
+  }
+  sfxSelect() {
+    this.tone(440, 0.1, "sine", 0.18);
+    this.tone(660, 0.1, "sine", 0.12, 0.1);
+  }
+  sfxDeselect() {
+    this.tone(330, 0.1, "sine", 0.12);
+    this.tone(220, 0.1, "sine", 0.1, 0.1);
+  }
+  sfxTransition() {
+    [200, 400, 600, 800].forEach((f, i) => this.tone(f, 0.08, "sine", 0.08, i * 0.04));
+  }
+  sfxLockIn() {
+    [220, 330, 440, 550, 660, 880].forEach((f, i) => this.tone(f, 0.2, "sine", 0.2, i * 0.06));
+    this.tone(880, 0.5, "sine", 0.25, 0.4);
+  }
+  startMusic() {
+    if (!this.ctx || this.muted) return;
+    const pattern = [110, 0, 130, 0, 110, 0, 87, 0, 98, 0, 110, 0, 98, 0, 87, 0];
+    let step = 0;
+    this._musicTimer = setInterval(() => {
+      const f = pattern[step % pattern.length];
+      if (f > 0) this.tone(f, 0.18, "sawtooth", 0.06);
+      if (step % 4 === 0) this.tone(55, 0.05, "square", 0.08);
+      step++;
+    }, 150);
+  }
+  stopMusic() {
+    clearInterval(this._musicTimer);
+  }
+  toggleMute() {
+    this.muted = !this.muted;
+    if (this.muted) this.stopMusic();
+    else this.startMusic();
+    return this.muted;
+  }
+}
+const audio = new AudioEngine();
+const SENATORS = [
+  { id: 1, name: "Win Gatchalian", initials: "WG", party: "NPC", color: "#3B82F6", status: "PRESENT", basePts: 142, drama: 98, role: "Majority Floor Leader", projection: "+18 pts/wk" },
+  { id: 2, name: "Alan Peter Cayetano", initials: "APC", party: "IND", color: "#EF4444", status: "WALKOUT", basePts: 88, drama: 100, role: "Coup Architect", projection: "+22 pts/wk" },
+  { id: 3, name: "Tito Sotto", initials: "TS", party: "NPC", color: "#8B5CF6", status: "PRESENT", basePts: 119, drama: 71, role: "Senate President Emeritus", projection: "+12 pts/wk" },
+  { id: 4, name: "Bato dela Rosa", initials: "BD", party: "PFP", color: "#F59E0B", status: "PRESENT", basePts: 94, drama: 85, role: "Committee on Public Order", projection: "+14 pts/wk" },
+  { id: 5, name: "Kiko Pangilinan", initials: "KP", party: "LP", color: "#10B981", status: "PRESENT", basePts: 110, drama: 62, role: "Opposition Stalwart", projection: "+10 pts/wk" },
+  { id: 6, name: "Chiz Escudero", initials: "CE", party: "IND", color: "#E1FF00", status: "PRESENT", basePts: 131, drama: 88, role: "Senate President", projection: "+16 pts/wk" },
+  { id: 7, name: "Nancy Binay", initials: "NB", party: "UNA", color: "#EC4899", status: "PRESENT", basePts: 103, drama: 55, role: "Committee on Women", projection: "+9 pts/wk" },
+  { id: 8, name: "Mark Villar", initials: "MV", party: "NP", color: "#06B6D4", status: "PRESENT", basePts: 97, drama: 60, role: "Committee on Public Works", projection: "+10 pts/wk" },
+  { id: 9, name: "Cynthia Villar", initials: "CV", party: "NP", color: "#0EA5E9", status: "PRESENT", basePts: 108, drama: 58, role: "Committee on Agriculture", projection: "+10 pts/wk" },
+  { id: 10, name: "Sherwin Gatchalian", initials: "SG", party: "NPC", color: "#6366F1", status: "PRESENT", basePts: 76, drama: 44, role: "Committee on Basic Education", projection: "+7 pts/wk" },
+  { id: 11, name: "Erwin Tulfo", initials: "ET", party: "PFP", color: "#F97316", status: "WALKOUT", basePts: 61, drama: 92, role: "Committee on Social Services", projection: "+20 pts/wk" },
+  { id: 12, name: "Raffy Tulfo", initials: "RT", party: "IND", color: "#FB923C", status: "PRESENT", basePts: 79, drama: 89, role: "Committee on Labor", projection: "+18 pts/wk" },
+  { id: 13, name: "Lito Lapid", initials: "LL", party: "NP", color: "#A78BFA", status: "PRESENT", basePts: 55, drama: 33, role: "Committee on Justice", projection: "+5 pts/wk" },
+  { id: 14, name: "JV Ejercito", initials: "JV", party: "NUP", color: "#34D399", status: "PRESENT", basePts: 88, drama: 50, role: "Committee on Health", projection: "+8 pts/wk" },
+  { id: 15, name: "Jinggoy Estrada", initials: "JE", party: "PMP", color: "#FF003C", status: "EVADING ARREST", basePts: 22, drama: 97, role: "On Bail / Eternal Comeback", projection: "+25 pts/wk" },
+  { id: 16, name: "Loren Legarda", initials: "LL2", party: "IND", color: "#C084FC", status: "PRESENT", basePts: 122, drama: 45, role: "Committee on Finance", projection: "+11 pts/wk" },
+  { id: 17, name: "Imee Marcos", initials: "IM", party: "NP", color: "#F43F5E", status: "PRESENT", basePts: 115, drama: 80, role: "Committee on Foreign Affairs", projection: "+14 pts/wk" },
+  { id: 18, name: "Risa Hontiveros", initials: "RH", party: "LP", color: "#E879F9", status: "PRESENT", basePts: 138, drama: 91, role: "Opposition Conscience", projection: "+19 pts/wk" },
+  { id: 19, name: "Francis Tolentino", initials: "FT", party: "PFP", color: "#FCD34D", status: "PRESENT", basePts: 84, drama: 55, role: "Committee on Tourism", projection: "+8 pts/wk" },
+  { id: 20, name: "Nene Pimentel III", initials: "NP3", party: "PDP", color: "#4ADE80", status: "WALKOUT", basePts: 47, drama: 68, role: "Minority Bloc Coordinator", projection: "+12 pts/wk" },
+  { id: 21, name: "Sonny Angara", initials: "SA", party: "LDP", color: "#38BDF8", status: "PRESENT", basePts: 126, drama: 40, role: "Committee on Education", projection: "+11 pts/wk" },
+  { id: 22, name: "Ronaldo Puno", initials: "RP", party: "NP", color: "#9CA3AF", status: "DETAINED", basePts: 0, drama: 99, role: "PDEA Case (Involuntary Leave)", projection: "HIGH RISK" },
+  { id: 23, name: "Ping Lacson", initials: "PL", party: "IND", color: "#7C3AED", status: "PRESENT", basePts: 109, drama: 62, role: "Committee on National Defense", projection: "+10 pts/wk" },
+  { id: 24, name: "Robinhood Padilla", initials: "ROP", party: "PFP", color: "#D97706", status: "PRESENT", basePts: 71, drama: 74, role: "Action Star / Committee on DICT", projection: "+11 pts/wk" }
+];
+const STATUS_CFG = {
+  "PRESENT": { label: "PRESENT", color: "#22C55E", bg: "#052e16" },
+  "WALKOUT": { label: "LUMABAS NA", color: "#F97316", bg: "#1c0700" },
+  "EVADING ARREST": { label: "NAGTATAKAS", color: "#FF003C", bg: "#1f0010" },
+  "DETAINED": { label: "NASA KULUNGAN", color: "#6B7280", bg: "#111" }
+};
+const LIVE_FEED = [
+  { id: 1, senatorId: 1, pts: 15, type: "TRABAHO", headline: "Gatchalian opens Senate session despite minority walkout, pushes 3 priority bills to floor", source: "Rappler", time: "8 min ago", color: "#22C55E" },
+  { id: 2, senatorId: 2, pts: 22, type: "DRAMA", headline: "Cayetano presents 'definitive' vote count \u2014 for the 4th consecutive week \u2014 still unverified", source: "Inquirer", time: "14 min ago", color: "#FF003C" },
+  { id: 3, senatorId: 18, pts: 19, type: "DRAMA", headline: "Hontiveros flags P4.2B 'ghost deliveries' in DSWD audit, files privilege speech", source: "Rappler", time: "31 min ago", color: "#FF003C" },
+  { id: 4, senatorId: 6, pts: 16, type: "TRABAHO", headline: "Escudero certifies 2026 GAA amendments as urgent, schedules marathon plenary next week", source: "PhilStar", time: "45 min ago", color: "#22C55E" },
+  { id: 5, senatorId: 11, pts: 20, type: "DRAMA", headline: "Erwin Tulfo storms out of DSWD hearing after Sec. Gatchalian refuses documents", source: "ABS-CBN", time: "1 hr ago", color: "#FF003C" },
+  { id: 6, senatorId: 15, pts: 25, type: "SCANDAL", headline: "EXCLUSIVE: Jinggoy Estrada tracked to Duty Free Fiesta, warrant of arrest still unserved", source: "VERA Files", time: "1.5 hrs ago", color: "#FF003C" },
+  { id: 7, senatorId: 4, pts: 14, type: "DRAMA", headline: "Bato dela Rosa threatens contempt vs journalist who published PDEA informant list", source: "Rappler", time: "2 hrs ago", color: "#F97316" },
+  { id: 8, senatorId: 22, pts: 8, type: "UPDATE", headline: "Puno hearing delayed to next month \u2014 defense counsel files 3rd motion for extension", source: "Inquirer", time: "2.5 hrs ago", color: "#6B7280" },
+  { id: 9, senatorId: 17, pts: 14, type: "TRABAHO", headline: "Marcos chairs Senate foreign affairs hearing on West Philippine Sea \u2014 gets standing ovation", source: "PhilStar", time: "3 hrs ago", color: "#22C55E" },
+  { id: 10, senatorId: 3, pts: 12, type: "SHADE", headline: "Sotto on leadership crisis: 'Bilang dating Presidente ng Senado \u2014 never ko ginawa iyan'", source: "Inquirer", time: "3.5 hrs ago", color: "#8B5CF6" },
+  { id: 11, senatorId: 12, pts: 18, type: "DRAMA", headline: "Raffy Tulfo's Kuya Resolved: 400 OFWs get backpay after Senate pressure on POEA", source: "ABS-CBN", time: "4 hrs ago", color: "#F97316" },
+  { id: 12, senatorId: 9, pts: 10, type: "TRABAHO", headline: "Cynthia Villar: NFA rice imports surge to 2.3M MT \u2014 'Saan pumunta ang dapat ibenta sa ating mga magsasaka?'", source: "Rappler", time: "5 hrs ago", color: "#22C55E" },
+  { id: 13, senatorId: 5, pts: 10, type: "TRABAHO", headline: "Pangilinan files SB 2847: mandatory mental health leave for government workers", source: "Inquirer", time: "5.5 hrs ago", color: "#22C55E" },
+  { id: 14, senatorId: 20, pts: 12, type: "DRAMA", headline: "Pimentel bloc demands Senate recognition \u2014 threatens all-out minority obstruction of Senate agenda", source: "PhilStar", time: "6 hrs ago", color: "#FF003C" }
+];
+const TYPE_CONFIG = {
+  TRABAHO: { label: "TRABAHO", color: "#22C55E", bg: "#052e16" },
+  DRAMA: { label: "DRAMA", color: "#FF003C", bg: "#1f0010" },
+  SCANDAL: { label: "ISKANDALO", color: "#FF003C", bg: "#1a0010" },
+  UPDATE: { label: "UPDATE", color: "#6B7280", bg: "#111" },
+  SHADE: { label: "SHADE", color: "#8B5CF6", bg: "#1a0d2e" }
+};
+const mkIcon = (paths, extras = []) => ({ size = 16, color = "currentColor", strokeWidth = 2 } = {}) => React.createElement(
   "svg",
   { xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth, strokeLinecap: "round", strokeLinejoin: "round" },
   ...paths.map((d) => React.createElement("path", { d })),
-  ...circle ? [React.createElement("circle", circle)] : []
+  ...extras.map((e) => React.createElement(e[0], e[1]))
 );
-const CheckCircle = mkIcon(["M22 11.08V12a10 10 0 1 1-5.93-9.14", "M22 4 12 14.01l-3-3"]);
-const XCircle = mkIcon(["M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z", "m15 9-6 6", "m9 9 6 6"]);
-const AlertTriangle = mkIcon(["m10.29 3.86-8.17 14.14a1 1 0 0 0 .86 1.5h16.04a1 1 0 0 0 .86-1.5L11.71 3.86a1 1 0 0 0-1.72 0z", "M12 9v4", "M12 17h.01"]);
-const Shield = mkIcon(["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"]);
-const Users = mkIcon(["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M16 3.13a4 4 0 0 1 0 7.75"], { cx: 20, cy: 7, r: 4 });
-const Swords = mkIcon(["m14.5 17.5 3 3 3-3-3-3-3 3z", "m2.5 2.5 16 16", "m2.5 11.5 6-6", "m12.5 6.5 2-2", "m17 7-5-5", "M3.4 17.6l3.5-3.5"]);
-const Crown = mkIcon(["M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z", "M5 20h14"]);
-const ChevronDown = mkIcon(["m6 9 6 6 6-6"]);
-const ChevronUp = mkIcon(["m18 15-6-6-6 6"]);
-const Star = mkIcon(["M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"]);
-const Flame = mkIcon(["M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"]);
-const BarChart2 = mkIcon(["M18 20V10", "M12 20V4", "M6 20v-6"]);
-const Trophy = mkIcon(["M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22", "M18 2H6v7a6 6 0 0 0 12 0V2z"]);
-const Radio = mkIcon(["M4.9 19.1C1 15.2 1 8.8 4.9 4.9", "M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5", "M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", "M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5", "M19.1 4.9C23 8.8 23 15.1 19.1 19"]);
-const TrendingUp = mkIcon(["m23 6-9.5 9.5-5-5L1 18", "M17 6h6v6"]);
-const Activity = mkIcon(["M22 12h-4l-3 9L9 3l-3 9H2"]);
-const Zap = mkIcon(["M13 2 3 14h9l-1 8 10-12h-9l1-8z"]);
-const SENATORS = [
-  { id: 1, name: "WIN GATCHALIAN", party: "NPC", status: "PRESENT", pts: 142, role: "Majority Floor Leader (Disputed)", drama: 98 },
-  { id: 2, name: "ALAN PETER CAYETANO", party: "IND", status: "WALKOUT", pts: 88, role: "Minority Leader / Coup Architect", drama: 100 },
-  { id: 3, name: "TITO SOTTO", party: "NPC", status: "PRESENT", pts: 119, role: "Senate President Emeritus", drama: 71 },
-  { id: 4, name: "BATO DELA ROSA", party: "PFP", status: "PRESENT", pts: 94, role: "Committee on Public Order", drama: 85 },
-  { id: 5, name: "KIKO PANGILINAN", party: "LP", status: "PRESENT", pts: 110, role: "Opposition Stalwart", drama: 62 },
-  { id: 6, name: "CHIZ ESCUDERO", party: "IND", status: "PRESENT", pts: 131, role: "Senate President", drama: 88 },
-  { id: 7, name: "NANCY BINAY", party: "UNA", status: "PRESENT", pts: 103, role: "Committee on Women", drama: 55 },
-  { id: 8, name: "MARK VILLAR", party: "NP", status: "PRESENT", pts: 97, role: "Committee on Public Works", drama: 60 },
-  { id: 9, name: "CYNTHIA VILLAR", party: "NP", status: "PRESENT", pts: 108, role: "Committee on Agriculture", drama: 58 },
-  { id: 10, name: "SHERWIN GATCHALIAN", party: "NPC", status: "PRESENT", pts: 76, role: "Committee on Basic Education", drama: 44 },
-  { id: 11, name: "ERWIN TULFO", party: "PFP", status: "WALKOUT", pts: 61, role: "Committee on Social Services", drama: 92 },
-  { id: 12, name: "RAFFY TULFO", party: "IND", status: "PRESENT", pts: 79, role: "Committee on Labor", drama: 89 },
-  { id: 13, name: "LITO LAPID", party: "NP", status: "PRESENT", pts: 55, role: "Committee on Justice", drama: 33 },
-  { id: 14, name: "JV EJERCITO", party: "NUP", status: "PRESENT", pts: 88, role: "Committee on Health", drama: 50 },
-  { id: 15, name: "JINGGOY ESTRADA", party: "PMP", status: "EVADING ARREST", pts: 22, role: "On Bail / Eternal Comeback", drama: 97 },
-  { id: 16, name: "LOREN LEGARDA", party: "IND", status: "PRESENT", pts: 122, role: "Committee on Finance", drama: 45 },
-  { id: 17, name: "IMEE MARCOS", party: "NP", status: "PRESENT", pts: 115, role: "Committee on Foreign Affairs", drama: 80 },
-  { id: 18, name: "RISA HONTIVEROS", party: "LP", status: "PRESENT", pts: 138, role: "Opposition Conscience / Drama Queen", drama: 91 },
-  { id: 19, name: "FRANCIS TOLENTINO", party: "PFP", status: "PRESENT", pts: 84, role: "Committee on Tourism", drama: 55 },
-  { id: 20, name: "AQUILINO PIMENTEL III", party: "PDP", status: "WALKOUT", pts: 47, role: "Minority Bloc Coordinator", drama: 68 },
-  { id: 21, name: "SONNY ANGARA", party: "LDP", status: "PRESENT", pts: 126, role: "Committee on Education", drama: 40 },
-  { id: 22, name: "RONALDO PUNO", party: "NP", status: "DETAINED", pts: 0, role: "PDEA Case / Sabbatical (Involuntary)", drama: 99 },
-  { id: 23, name: "PING LACSON", party: "IND", status: "PRESENT", pts: 109, role: "Committee on National Defense", drama: 62 },
-  { id: 24, name: "ROBINHOOD PADILLA", party: "PFP", status: "PRESENT", pts: 71, role: "Action Star / Committee on DICT", drama: 74 }
-];
-const STATUS_CFG = {
-  "PRESENT": { label: "PRESENT", color: "#E1FF00", bg: "#1a1f00", Icon: CheckCircle },
-  "WALKOUT": { label: "LUMABAS NA", color: "#FF6B00", bg: "#1f1100", Icon: XCircle },
-  "EVADING ARREST": { label: "NAGTATAKAS", color: "#FF003C", bg: "#1f0010", Icon: AlertTriangle },
-  "DETAINED": { label: "NASA KULUNGAN", color: "#9CA3AF", bg: "#111111", Icon: Shield }
-};
-const TICKER = [
-  "\u{1F534} BREAKING: Cayetano coalition claims 13 votes pero walang roll call \u2014 BARDAGULAN CONFIRMED",
-  "\u26A1 Win Gatchalian nagpadala ng memo sa 12 committee chairs: 'Ikaw pa rin ang boss ko'",
-  "\u{1F3C6} Risa Hontiveros leads drama points sa Week 23 \u2014 #SabotageQueen",
-  "\u{1F6A8} Jinggoy Estrada spotted sa Duty Free \u2014 EVADING ARREST badge remains ACTIVE",
-  "\u{1F451} Chiz Escudero: 'Hindi ako nag-resign. Nag-bakasyon lang.' \u2014 +15 drama pts",
-  "\u{1F480} Erwin Tulfo walkout counter: 4 na ngayong taon. Personal record na.",
-  "\u{1F4CA} Villar siblings combined committee control: 14% ng Senate budget",
-  "\u{1F525} Bato dela Rosa nagbanta ng contempt sa journalist \u2014 +22 pts sa drama board",
-  "\u26A0\uFE0F QUORUM ALERT: 10 senators missing. Session suspended. Fantasy points FROZEN.",
-  "\u{1F3AD} Tulfos vs Cayetanos sa committee hearing \u2014 Resibo Battleground UPDATE: Tulfos leading 61\u201339"
-];
-const DYNASTIES = [
-  { family: "VILLAR", members: ["CYNTHIA VILLAR", "MARK VILLAR"], exMembers: [], committees: ["Agriculture", "Public Works", "Finance (observer)", "DPWH Oversight"], pct: 14, color: "#E1FF00", note: "Mother-son tandem. Combined budget influence: \u20B11.2T per year." },
-  { family: "CAYETANO", members: ["ALAN PETER CAYETANO"], exMembers: ["PIA CAYETANO (ex-senator)"], committees: ["Foreign Affairs (blocked)", "Rules Committee (disputed)"], pct: 8, color: "#FF6B00", note: "Alan Peter operating as lone wolf after Pia's exit. Still coordinating externally." },
-  { family: "TULFO", members: ["RAFFY TULFO", "ERWIN TULFO"], exMembers: ["BEN TULFO (ex-undersecretary)"], committees: ["Labor", "Social Services", "DSWD Oversight", "OFW Affairs"], pct: 11, color: "#FF003C", note: "Media empire + Senate seats. Combined: 4 shows, 2 seats, unlimited tsismis budget." },
-  { family: "ESTRADA", members: ["JV EJERCITO", "JINGGOY ESTRADA"], exMembers: ["ERAP (ex-president, culturally immortal)"], committees: ["Health", "Justice (nominal)"], pct: 9, color: "#9C27B0", note: "Half-brothers. JV present, Jinggoy evading. Legacy brand still delivering votes." }
-];
-const MATCHUP = {
-  left: {
-    name: "CHIZ ESCUDERO",
-    title: "Senate President",
-    subtitle: "Nagtatagal sa trono",
-    image: "CE",
-    color: "#E1FF00",
-    stats: { VOTES: 14, COMMITTEES: 12, DRAMA: 88, DAYS_IN_POWER: 410 },
-    quote: "Ang Senate ay para sa lahat \u2014 pero ang pwesto ko ay para sa akin.",
-    chips: ["#Trabaho", "#LegitimateLeader", "#PalagayNa"]
-  },
-  right: {
-    name: "ALAN PETER CAYETANO",
-    title: "Coup Architect",
-    subtitle: "Nag-oorganisa sa labas",
-    image: "APC",
-    color: "#FF003C",
-    stats: { VOTES: 11, COMMITTEES: 3, DRAMA: 100, DAYS_PLOTTING: 180 },
-    quote: "May 13 na kaming boto. Ibibigay ko sa inyo bukas. O makalawa. O next week.",
-    chips: ["#Drama", "#SaanAngBoto", "#HindiDasurb"]
-  },
-  context: "LEADERSHIP COUP WEEK 26 \u2014 Win Gatchalian vs Cayetano bloc: Sino ba talaga ang may hawak ng gavel?"
-};
-function NewsTicker() {
-  const [idx, setIdx] = useState(0);
-  const [vis, setVis] = useState(true);
+const IconStar = mkIcon(["M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"]);
+const IconZap = mkIcon(["M13 2 3 14h9l-1 8 10-12h-9l1-8z"]);
+const IconCheck = mkIcon(["M20 6 9 17l-5-5"]);
+const IconX = mkIcon(["M18 6 6 18", "M6 6l12 12"]);
+const IconTrophy = mkIcon(["M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22", "M18 2H6v7a6 6 0 0 0 12 0V2z"]);
+const IconFlame = mkIcon(["M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"]);
+const IconNews = mkIcon(["M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2", "M18 14h-8", "M15 18h-5", "M10 6h8v4h-8V6z"]);
+const IconVolume = mkIcon(["M11 5 6 9H2v6h4l5 4V5z", "M19.07 4.93a10 10 0 0 1 0 14.14", "M15.54 8.46a5 5 0 0 1 0 7.07"]);
+const IconMute = mkIcon(["M11 5 6 9H2v6h4l5 4V5z", "M23 9l-6 6", "M17 9l6 6"]);
+const IconExternal = mkIcon(["M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", "M15 3h6v6", "M10 14 21 3"]);
+const IconArrow = mkIcon(["M5 12h14", "M12 5l7 7-7 7"]);
+const IconBack = mkIcon(["M19 12H5", "M12 19l-7-7 7-7"]);
+function DramaBar({ v, color }) {
+  const c = color || (v >= 90 ? "#FF003C" : v >= 70 ? "#F97316" : "#E1FF00");
+  return /* @__PURE__ */ React.createElement("div", { style: { width: "100%", height: "5px", background: "#1a1a1a", borderRadius: "2px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: `${v}%`, height: "100%", background: c, borderRadius: "2px", transition: "width 0.5s" } }));
+}
+function RollingNumber({ value, color = "#E1FF00" }) {
+  const [display, setDisplay] = useState(value);
+  const prev = useRef(value);
   useEffect(() => {
-    const t = setInterval(() => {
-      setVis(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % TICKER.length);
-        setVis(true);
-      }, 300);
-    }, 4e3);
+    if (value === prev.current) return;
+    const diff = value - prev.current;
+    const steps = 12;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      setDisplay(Math.round(prev.current + diff * step / steps));
+      if (step >= steps) {
+        clearInterval(timer);
+        prev.current = value;
+      }
+    }, 30);
+    return () => clearInterval(timer);
+  }, [value]);
+  return /* @__PURE__ */ React.createElement("span", { style: { color, fontFamily: "monospace", fontWeight: 900 } }, display);
+}
+function Particle({ x, y, color, onDone }) {
+  const [pos, setPos] = useState({ x, y, o: 1 });
+  useEffect(() => {
+    const dx = (Math.random() - 0.5) * 120;
+    const dy = -(Math.random() * 80 + 40);
+    let frame = 0;
+    const tick = () => {
+      frame++;
+      const p = frame / 40;
+      setPos({ x: x + dx * p, y: y + dy * p - 40 * p * p, o: 1 - p });
+      if (frame < 40) requestAnimationFrame(tick);
+      else onDone();
+    };
+    requestAnimationFrame(tick);
+  }, []);
+  return /* @__PURE__ */ React.createElement("div", { style: { position: "fixed", left: pos.x, top: pos.y, opacity: pos.o, pointerEvents: "none", zIndex: 9999, color, fontWeight: 900, fontSize: "14px", fontFamily: "monospace", whiteSpace: "nowrap", transition: "none" } }, "+", Math.round(Math.random() * 10 + 5));
+}
+function IntroScreen({ onStart }) {
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    const t = setInterval(() => setPulse((p) => !p), 800);
     return () => clearInterval(t);
   }, []);
-  return /* @__PURE__ */ React.createElement("div", { style: { background: "#FF003C", padding: "6px 20px", display: "flex", alignItems: "center", gap: "12px", borderBottom: "2px solid #E1FF00" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { width: "8px", height: "8px", background: "#fff", borderRadius: "50%", animation: "pulse 1s infinite" } }), /* @__PURE__ */ React.createElement("div", { style: { background: "#000", color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.18em", padding: "2px 8px", border: "1px solid #E1FF00" } }, "LIVE FEED")), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflow: "hidden", position: "relative" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#fff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", opacity: vis ? 1 : 0, transition: "opacity 0.3s", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, TICKER[idx])), /* @__PURE__ */ React.createElement("div", { style: { flexShrink: 0, color: "rgba(255,255,255,0.6)", fontSize: "10px", fontFamily: "monospace", letterSpacing: "0.1em" } }, "WK 26 \xB7 SY 2026"));
+  function start() {
+    audio.init();
+    audio.sfxTransition();
+    audio.startMusic();
+    onStart();
+  }
+  return /* @__PURE__ */ React.createElement("div", { style: { background: "#000", height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { position: "absolute", inset: 0, backgroundImage: "linear-gradient(#E1FF0008 1px,transparent 1px),linear-gradient(90deg,#E1FF0008 1px,transparent 1px)", backgroundSize: "40px 40px" } }), /* @__PURE__ */ React.createElement("div", { style: { position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, #1a1f0033 0%, #000 70%)" } }), /* @__PURE__ */ React.createElement("div", { style: { position: "relative", textAlign: "center", maxWidth: "700px", padding: "40px" } }, /* @__PURE__ */ React.createElement("div", { style: { marginBottom: "8px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontSize: "11px", fontWeight: 900, letterSpacing: "0.3em" } }, "\u{1F1F5}\u{1F1ED} SEASON 2026 \xB7 WEEK 26")), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "clamp(60px,10vw,96px)", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 0.9, textTransform: "uppercase", textShadow: "0 0 40px #E1FF0066, 0 0 80px #E1FF0033" } }, "BARDA", /* @__PURE__ */ React.createElement("br", null), "GULAN"), /* @__PURE__ */ React.createElement("div", { style: { color: "#FF003C", fontSize: "14px", fontWeight: 900, letterSpacing: "0.3em", marginTop: "12px", textTransform: "uppercase" } }, "SENATE FANTASY LEAGUE"), /* @__PURE__ */ React.createElement("div", { style: { color: "#9CA3AF", fontSize: "15px", lineHeight: 1.7, marginTop: "28px", marginBottom: "36px" } }, "Draft your ", /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontWeight: 900 } }, "Core 5 senators"), ". Earn points from real Senate events.", /* @__PURE__ */ React.createElement("br", null), "Backed by ", /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontWeight: 700 } }, "Rappler"), ", ", /* @__PURE__ */ React.createElement("span", { style: { color: "#fff", fontWeight: 700 } }, "Inquirer"), ", ", /* @__PURE__ */ React.createElement("span", { style: { color: "#F97316", fontWeight: 700 } }, "ABS-CBN"), ", and ", /* @__PURE__ */ React.createElement("span", { style: { color: "#C084FC", fontWeight: 700 } }, "VERA Files"), "."), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "40px" } }, [
+    { n: "01", title: "DRAFT", desc: "Pick 5 senators from the full 24-member roster" },
+    { n: "02", title: "SCORE", desc: "Earn pts from verified news events as they happen live" },
+    { n: "03", title: "WIN", desc: "Out-score rival squads. Drama = bonus points." }
+  ].map(({ n, title, desc }) => /* @__PURE__ */ React.createElement("div", { key: n, style: { background: "#0d0d0d", border: "1px solid #1a1a1a", padding: "16px", textAlign: "left" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.2em", marginBottom: "6px" } }, n), /* @__PURE__ */ React.createElement("div", { style: { color: "#fff", fontSize: "13px", fontWeight: 900, letterSpacing: "0.08em", marginBottom: "6px" } }, title), /* @__PURE__ */ React.createElement("div", { style: { color: "#6B7280", fontSize: "11px", lineHeight: 1.5 } }, desc)))), /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: start,
+      style: {
+        background: "#E1FF00",
+        color: "#000",
+        border: "none",
+        padding: "18px 56px",
+        fontSize: "15px",
+        fontWeight: 900,
+        letterSpacing: "0.2em",
+        cursor: "pointer",
+        textTransform: "uppercase",
+        boxShadow: pulse ? "0 0 40px #E1FF00aa, 0 0 80px #E1FF0044" : "0 0 20px #E1FF0055",
+        transition: "box-shadow 0.4s"
+      }
+    },
+    "START DRAFT \u2192"
+  ), /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "10px", marginTop: "14px", letterSpacing: "0.1em" } }, "Click to enable audio \xB7 Best on desktop Chrome/Firefox")));
 }
-function StatusBadge({ status, small }) {
-  const c = STATUS_CFG[status] || STATUS_CFG["PRESENT"];
-  const sz = small ? 9 : 11;
-  return /* @__PURE__ */ React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: "4px", background: c.bg, color: c.color, border: `1px solid ${c.color}`, fontSize: small ? "8px" : "9px", fontWeight: 900, letterSpacing: "0.1em", padding: small ? "2px 5px" : "3px 7px" } }, /* @__PURE__ */ React.createElement(c.Icon, { size: sz, color: c.color }), " ", c.label);
-}
-function DramaBar({ value, height = 5 }) {
-  const color = value >= 90 ? "#FF003C" : value >= 70 ? "#FF6B00" : "#E1FF00";
-  return /* @__PURE__ */ React.createElement("div", { style: { width: "100%", background: "#1a1a1a", height: `${height}px`, marginTop: "5px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: `${value}%`, height: "100%", background: color, transition: "width 0.4s" } }));
-}
-function SenatorRow({ senator, inRoster, onToggle, rank }) {
-  const [pts, setPts] = useState(senator.pts);
-  const cfg = STATUS_CFG[senator.status] || STATUS_CFG["PRESENT"];
-  const bump = (d, e) => {
-    e.stopPropagation();
-    setPts((p) => Math.max(0, p + d));
-  };
+function DraftCard({ senator, selected, onToggle, disabled }) {
+  const [flipped, setFlipped] = useState(false);
+  const cfg = STATUS_CFG[senator.status];
   return /* @__PURE__ */ React.createElement(
     "div",
     {
-      onClick: () => onToggle(senator),
-      style: {
-        display: "grid",
-        gridTemplateColumns: "32px 1fr 120px 90px 80px 180px",
-        alignItems: "center",
-        gap: "12px",
-        padding: "10px 16px",
-        background: inRoster ? "#0d1a00" : "transparent",
-        borderLeft: `3px solid ${inRoster ? "#E1FF00" : "transparent"}`,
-        borderBottom: "1px solid #1a1a1a",
-        cursor: "pointer",
-        transition: "background 0.15s,border-left-color 0.15s"
-      },
-      onMouseEnter: (e) => {
-        if (!inRoster) e.currentTarget.style.background = "#161616";
-      },
-      onMouseLeave: (e) => {
-        if (!inRoster) e.currentTarget.style.background = "transparent";
+      style: { perspective: "800px", cursor: disabled && !selected ? "not-allowed" : "pointer" },
+      onMouseEnter: () => setFlipped(true),
+      onMouseLeave: () => setFlipped(false),
+      onClick: () => {
+        if (disabled && !selected) return;
+        audio.init();
+        selected ? audio.sfxDeselect() : audio.sfxSelect();
+        onToggle(senator);
       }
     },
-    /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "11px", fontFamily: "monospace", fontWeight: 700, textAlign: "center" } }, String(rank).padStart(2, "0")),
-    /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "13px", fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "8px" } }, senator.name, inRoster && /* @__PURE__ */ React.createElement("span", { style: { background: "#E1FF00", color: "#000", fontSize: "7px", fontWeight: 900, padding: "1px 4px", letterSpacing: "0.1em" } }, "\u2605 CORE 5")), /* @__PURE__ */ React.createElement("div", { style: { color: "#6B7280", fontSize: "10px", marginTop: "2px" } }, senator.party, " \xB7 ", senator.role)),
-    /* @__PURE__ */ React.createElement(StatusBadge, { status: senator.status, small: true }),
-    /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#6B7280", fontSize: "9px", letterSpacing: "0.08em" } }, "DRAMA"), /* @__PURE__ */ React.createElement("span", { style: { color: "#9CA3AF", fontSize: "9px", fontFamily: "monospace" } }, senator.drama)), /* @__PURE__ */ React.createElement(DramaBar, { value: senator.drama, height: 4 })),
-    /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "26px", fontWeight: 900, fontFamily: "monospace", textAlign: "center", lineHeight: 1 } }, pts),
-    /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "4px" }, onClick: (e) => e.stopPropagation() }, [[5, "+5 TRABAHO", "#E1FF00", "#0d1a00"], [-3, "-3 ABSENT", "#FF003C", "#1a0005"], [10, "+10 DRAMA", "#FF6B00", "#1a0800"]].map(([d, lbl, col, bg]) => /* @__PURE__ */ React.createElement("button", { key: lbl, onClick: (e) => bump(d, e), style: { flex: 1, background: bg, border: `1px solid ${col}`, color: col, fontSize: "9px", fontWeight: 900, padding: "4px 2px", letterSpacing: "0.04em", whiteSpace: "nowrap" } }, lbl)))
+    /* @__PURE__ */ React.createElement("div", { style: {
+      position: "relative",
+      width: "100%",
+      paddingBottom: "140%",
+      transition: "transform 0.45s",
+      transformStyle: "preserve-3d",
+      transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)"
+    } }, /* @__PURE__ */ React.createElement("div", { style: {
+      position: "absolute",
+      inset: 0,
+      backfaceVisibility: "hidden",
+      background: selected ? `${senator.color}22` : "#0d0d0d",
+      border: `2px solid ${selected ? senator.color : "#1a1a1a"}`,
+      padding: "12px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+      boxShadow: selected ? `0 0 20px ${senator.color}44` : "none",
+      transition: "border-color 0.2s,background 0.2s"
+    } }, /* @__PURE__ */ React.createElement("div", { style: { width: "100%", aspectRatio: "1", background: `linear-gradient(135deg, ${senator.color}33, ${senator.color}11)`, border: `1px solid ${senator.color}44`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" } }, /* @__PURE__ */ React.createElement("span", { style: { color: senator.color, fontSize: "clamp(18px,3vw,28px)", fontWeight: 900, fontFamily: "monospace", letterSpacing: "-0.05em" } }, senator.initials), selected && /* @__PURE__ */ React.createElement("div", { style: { position: "absolute", top: "4px", right: "4px", background: "#E1FF00", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" } }, /* @__PURE__ */ React.createElement(IconCheck, { size: 11, color: "#000" })), /* @__PURE__ */ React.createElement("div", { style: { position: "absolute", bottom: "4px", left: "4px", background: cfg.bg, border: `1px solid ${cfg.color}`, padding: "1px 4px", fontSize: "7px", fontWeight: 900, color: cfg.color, letterSpacing: "0.08em" } }, cfg.label)), /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "11px", fontWeight: 900, letterSpacing: "0.05em", textTransform: "uppercase", lineHeight: 1.2 } }, senator.name), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px" } }, senator.party), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: "auto" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "8px", letterSpacing: "0.1em" } }, "BASE PTS"), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "20px", fontWeight: 900, fontFamily: "monospace" } }, senator.basePts)), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", textAlign: "right", letterSpacing: "0.05em" } }, senator.projection), /* @__PURE__ */ React.createElement(DramaBar, { v: senator.drama, color: senator.color }), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "8px", letterSpacing: "0.08em" } }, "DRAMA"), /* @__PURE__ */ React.createElement("span", { style: { color: "#9CA3AF", fontSize: "8px", fontFamily: "monospace" } }, senator.drama, "/100"))), /* @__PURE__ */ React.createElement("div", { style: {
+      position: "absolute",
+      inset: 0,
+      backfaceVisibility: "hidden",
+      transform: "rotateY(180deg)",
+      background: `linear-gradient(135deg, ${senator.color}22, #0d0d0d)`,
+      border: `2px solid ${senator.color}`,
+      padding: "14px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px"
+    } }, /* @__PURE__ */ React.createElement("div", { style: { color: senator.color, fontSize: "12px", fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: `1px solid ${senator.color}33`, paddingBottom: "8px" } }, senator.name), /* @__PURE__ */ React.createElement("div", { style: { color: "#9CA3AF", fontSize: "10px", lineHeight: 1.6, flex: 1 } }, senator.role), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" } }, [["BASE PTS", senator.basePts], ["DRAMA", senator.drama], ["PARTY", senator.party], ["STATUS", senator.status.split(" ")[0]]].map(([k, v]) => /* @__PURE__ */ React.createElement("div", { key: k, style: { background: "#0a0a0a", border: `1px solid ${senator.color}22`, padding: "6px 8px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "7px", letterSpacing: "0.12em" } }, k), /* @__PURE__ */ React.createElement("div", { style: { color: senator.color, fontSize: "12px", fontWeight: 900, fontFamily: "monospace" } }, v)))), /* @__PURE__ */ React.createElement("div", { style: { color: selected ? "#FF003C" : "#E1FF00", fontSize: "10px", fontWeight: 900, textAlign: "center", letterSpacing: "0.1em", padding: "6px", border: `1px solid ${selected ? "#FF003C" : "#E1FF00"}`, background: selected ? "#1f0010" : "#0d1a00" } }, selected ? "\u2715 REMOVE FROM ROSTER" : "\uFF0B ADD TO CORE 5")))
   );
 }
-function LiveGridPanel({ roster, onToggle }) {
-  const [filter, setFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState("pts");
-  const filters = ["ALL", "PRESENT", "WALKOUT", "EVADING ARREST", "DETAINED"];
-  const fLabel = (s) => s === "EVADING ARREST" ? "NAGTATAKAS" : s === "DETAINED" ? "KULUNGAN" : s;
-  const fColor = (s) => s === "ALL" ? "#9CA3AF" : STATUS_CFG[s]?.color || "#9CA3AF";
-  const list = (filter === "ALL" ? SENATORS : SENATORS.filter((s) => s.status === filter)).slice().sort((a, b) => sortBy === "pts" ? b.pts - a.pts : sortBy === "drama" ? b.drama - a.drama : a.name.localeCompare(b.name));
-  const counts = {
-    PRESENT: SENATORS.filter((s) => s.status === "PRESENT").length,
-    WALKOUT: SENATORS.filter((s) => s.status === "WALKOUT").length,
-    "EVADING ARREST": SENATORS.filter((s) => s.status === "EVADING ARREST").length,
-    DETAINED: SENATORS.filter((s) => s.status === "DETAINED").length
-  };
-  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px", borderBottom: "2px solid #1a1a1a", background: "#1a1a1a" } }, Object.entries(counts).map(([st, cnt]) => {
-    const c = STATUS_CFG[st];
-    return /* @__PURE__ */ React.createElement("div", { key: st, style: { background: "#0d0d0d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: "28px", fontWeight: 900, fontFamily: "monospace", color: c.color, lineHeight: 1 } }, cnt), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { color: c.color, fontSize: "9px", fontWeight: 900, letterSpacing: "0.12em" } }, fLabel(st)), /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "9px", marginTop: "2px" } }, "senators")));
-  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", borderBottom: "1px solid #1a1a1a", background: "#0a0a0a", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "10px", letterSpacing: "0.1em", marginRight: "4px" } }, "FILTER:"), filters.map((f) => {
-    const active = filter === f;
-    const col = fColor(f);
-    return /* @__PURE__ */ React.createElement("button", { key: f, onClick: () => setFilter(f), style: { background: active ? col : "#0d0d0d", border: `1px solid ${active ? col : "#2a2a2a"}`, color: active ? "#000" : col, fontSize: "9px", fontWeight: 900, padding: "4px 10px", letterSpacing: "0.1em", transition: "all 0.15s" } }, fLabel(f));
-  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "10px", letterSpacing: "0.1em", marginRight: "4px" } }, "SORT:"), [["pts", "POINTS"], ["drama", "DRAMA"], ["name", "A-Z"]].map(([k, lbl]) => /* @__PURE__ */ React.createElement("button", { key: k, onClick: () => setSortBy(k), style: { background: sortBy === k ? "#E1FF00" : "#0d0d0d", border: `1px solid ${sortBy === k ? "#E1FF00" : "#2a2a2a"}`, color: sortBy === k ? "#000" : "#9CA3AF", fontSize: "9px", fontWeight: 900, padding: "4px 10px", letterSpacing: "0.1em" } }, lbl)), /* @__PURE__ */ React.createElement("div", { style: { marginLeft: "12px", display: "flex", alignItems: "center", gap: "6px" } }, /* @__PURE__ */ React.createElement(Users, { size: 11, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.1em" } }, roster.length, "/5 NAPILI")))), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "32px 1fr 120px 90px 80px 180px", gap: "12px", padding: "6px 16px", background: "#070707", borderBottom: "2px solid #1a1a1a", flexShrink: 0 } }, ["#", "SENADOR / ROLE", "STATUS", "DRAMA IDX", "PTS", "MODIFIERS"].map((h) => /* @__PURE__ */ React.createElement("div", { key: h, style: { color: "#444", fontSize: "8px", fontWeight: 900, letterSpacing: "0.15em" } }, h))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflowY: "auto" } }, list.map((s, i) => /* @__PURE__ */ React.createElement(SenatorRow, { key: s.id, senator: s, rank: i + 1, inRoster: !!roster.find((r) => r.id === s.id), onToggle }))));
-}
-function FighterCard({ fighter, onChip }) {
-  return /* @__PURE__ */ React.createElement("div", { style: { background: "#0a0a0a", border: `2px solid ${fighter.color}`, padding: "20px", display: "flex", flexDirection: "column", gap: "14px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "16px", alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "80px", height: "80px", flexShrink: 0, background: `${fighter.color}18`, border: `2px solid ${fighter.color}`, display: "flex", alignItems: "center", justifyContent: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: fighter.color, fontSize: "26px", fontWeight: 900, fontFamily: "monospace", letterSpacing: "-0.05em" } }, fighter.image)), /* @__PURE__ */ React.createElement("div", { style: { flex: 1 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "16px", fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase" } }, fighter.name), /* @__PURE__ */ React.createElement("div", { style: { color: fighter.color, fontSize: "11px", fontWeight: 700, marginTop: "3px", letterSpacing: "0.08em" } }, fighter.title), /* @__PURE__ */ React.createElement("div", { style: { color: "#6B7280", fontSize: "10px", marginTop: "2px" } }, fighter.subtitle))), /* @__PURE__ */ React.createElement("div", { style: { background: "#111", border: `1px solid ${fighter.color}33`, padding: "10px 14px", fontSize: "11px", color: "#9CA3AF", fontStyle: "italic", lineHeight: 1.6, borderLeft: `3px solid ${fighter.color}` } }, '"', fighter.quote, '"'), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "6px" } }, Object.entries(fighter.stats).map(([k, v]) => /* @__PURE__ */ React.createElement("div", { key: k, style: { background: "#111", border: "1px solid #1a1a1a", padding: "8px 10px", textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "8px", letterSpacing: "0.12em", marginBottom: "3px" } }, k.replace(/_/g, " ")), /* @__PURE__ */ React.createElement("div", { style: { color: fighter.color, fontSize: "18px", fontWeight: 900, fontFamily: "monospace" } }, v)))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.15em", marginBottom: "6px" } }, "IBOTO ANG IYONG REAKSYON:"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap" } }, fighter.chips.map((chip) => /* @__PURE__ */ React.createElement(
-    "button",
-    {
-      key: chip,
-      onClick: () => onChip(chip),
-      style: { background: "#000", border: `1px solid ${fighter.color}`, color: fighter.color, fontSize: "10px", fontWeight: 900, padding: "6px 14px", letterSpacing: "0.08em", transition: "background 0.15s,color 0.15s", cursor: "pointer" },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.background = fighter.color;
-        e.currentTarget.style.color = "#000";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.background = "#000";
-        e.currentTarget.style.color = fighter.color;
-      }
-    },
-    chip
-  )))));
-}
-function ResiboPanel() {
-  const [votes, setVotes] = useState({ left: 54, right: 46 });
-  const [lastChip, setLastChip] = useState(null);
-  const [anim, setAnim] = useState(false);
-  const cast = (side, chip) => {
-    setLastChip({ chip, side });
-    setAnim(true);
-    setTimeout(() => setAnim(false), 600);
-    setVotes((v) => {
-      const raw = Math.max(5, Math.min(95, v.left + (side === "left" ? 3 : -3)));
-      return { left: raw, right: 100 - raw };
-    });
-  };
-  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }, /* @__PURE__ */ React.createElement("div", { style: { background: "#0d0005", border: "2px solid #FF003C", margin: "16px 20px", padding: "12px 18px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#FF003C", fontSize: "10px", fontWeight: 900, letterSpacing: "0.18em", marginBottom: "4px" } }, "\u2694 RESIBO BATTLEGROUND \u2014 WEEK 26"), /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "13px", fontWeight: 700, lineHeight: 1.5 } }, MATCHUP.context)), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "0", margin: "0 20px", alignItems: "center" } }, /* @__PURE__ */ React.createElement(FighterCard, { fighter: MATCHUP.left, onChip: (c) => cast("left", c) }), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "0 20px", gap: "8px" } }, /* @__PURE__ */ React.createElement(Swords, { size: 28, color: "#FF003C" }), /* @__PURE__ */ React.createElement("div", { style: { color: "#FF003C", fontSize: "16px", fontWeight: 900, letterSpacing: "0.1em" } }, "VS")), /* @__PURE__ */ React.createElement(FighterCard, { fighter: MATCHUP.right, onChip: (c) => cast("right", c) })), /* @__PURE__ */ React.createElement("div", { style: { margin: "20px", background: "#0d0d0d", border: "2px solid #2a2a2a", padding: "16px 20px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: MATCHUP.left.color, fontSize: "13px", fontWeight: 900, fontFamily: "monospace" } }, votes.left, "% \u2014 CHIZ"), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.18em" } }, "COMMUNITY VERDICT"), lastChip && /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, opacity: anim ? 1 : 0.4, transition: "opacity 0.3s", letterSpacing: "0.1em", marginTop: "3px" } }, "IBINOTO: ", lastChip.chip)), /* @__PURE__ */ React.createElement("span", { style: { color: MATCHUP.right.color, fontSize: "13px", fontWeight: 900, fontFamily: "monospace" } }, "APC \u2014 ", votes.right, "%")), /* @__PURE__ */ React.createElement("div", { style: { height: "16px", background: "#000", display: "flex", border: "1px solid #2a2a2a", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { width: `${votes.left}%`, background: MATCHUP.left.color, transition: "width 0.5s cubic-bezier(0.34,1.56,0.64,1)" } }), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, background: MATCHUP.right.color } })), /* @__PURE__ */ React.createElement("div", { style: { marginTop: "12px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "8px" } }, [
-    { lbl: "TOTAL CHIPS", val: "2,847", I: BarChart2 },
-    { lbl: "DRAMA LEVEL", val: "GRABE", I: Flame },
-    { lbl: "WALKING WOUNDED", val: "Chiz, Win", I: AlertTriangle },
-    { lbl: "CURRENT VERDICT", val: votes.left > votes.right ? "CHIZ PANALO" : "APC PANALO", I: Trophy }
-  ].map(({ lbl, val, I }) => /* @__PURE__ */ React.createElement("div", { key: lbl, style: { background: "#111", border: "1px solid #1a1a1a", padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" } }, /* @__PURE__ */ React.createElement(I, { size: 10, color: "#555" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "8px", letterSpacing: "0.12em" } }, lbl)), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "15px", fontWeight: 900, fontFamily: "monospace" } }, val))))));
-}
-function DynastyPanel() {
-  const [open, setOpen] = useState(null);
-  const total = DYNASTIES.reduce((a, d) => a + d.pct, 0);
-  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "16px 20px", borderBottom: "2px solid #1a1a1a", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "11px", fontWeight: 900, letterSpacing: "0.18em" } }, "DYNASTY MONOPOLY TRACKER"), /* @__PURE__ */ React.createElement("div", { style: { color: "#6B7280", fontSize: "12px", marginTop: "3px" } }, "Sino ang nagmamay-ari ng Senado? Lahat ng kamag-anak, lahat ng komite.")), /* @__PURE__ */ React.createElement("div", { style: { padding: "16px 20px", borderBottom: "2px solid #1a1a1a", background: "#080808", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "12px", marginBottom: "14px" } }, DYNASTIES.map((d) => /* @__PURE__ */ React.createElement("div", { key: d.family, style: { background: "#111", border: `2px solid ${d.color}`, padding: "12px 14px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: d.color, fontSize: "11px", fontWeight: 900, letterSpacing: "0.15em", marginBottom: "4px" } }, "PAMILYA ", d.family), /* @__PURE__ */ React.createElement("div", { style: { color: d.color, fontSize: "32px", fontWeight: 900, fontFamily: "monospace", lineHeight: 1 } }, d.pct, "%"), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", marginTop: "4px" } }, d.members.length, " miyembro \xB7 ", d.committees.length, " komite")))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "6px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em" } }, "COMBINED DYNASTY GRIP"), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "11px", fontWeight: 900, fontFamily: "monospace" } }, total, "% NG SENADO")), /* @__PURE__ */ React.createElement("div", { style: { height: "10px", background: "#000", display: "flex", border: "1px solid #1a1a1a" } }, DYNASTIES.map((d) => /* @__PURE__ */ React.createElement("div", { key: d.family, style: { width: `${d.pct / total * total}%`, background: d.color, height: "100%", transition: "width 0.6s" }, title: `${d.family}: ${d.pct}%` }))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "16px", marginTop: "6px" } }, DYNASTIES.map((d) => /* @__PURE__ */ React.createElement("div", { key: d.family, style: { display: "flex", alignItems: "center", gap: "5px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "8px", height: "8px", background: d.color } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#6B7280", fontSize: "9px" } }, d.family, " ", d.pct, "%")))))), /* @__PURE__ */ React.createElement("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", alignItems: "start" } }, DYNASTIES.map((d) => {
-    const isOpen = open === d.family;
-    return /* @__PURE__ */ React.createElement("div", { key: d.family, style: { background: "#0d0d0d", border: `2px solid ${isOpen ? d.color : "#1a1a1a"}`, transition: "border-color 0.2s" } }, /* @__PURE__ */ React.createElement("button", { onClick: () => setOpen(isOpen ? null : d.family), style: { width: "100%", background: "none", border: "none", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, /* @__PURE__ */ React.createElement(Crown, { size: 16, color: d.color }), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "left" } }, /* @__PURE__ */ React.createElement("div", { style: { color: d.color, fontSize: "14px", fontWeight: 900, letterSpacing: "0.1em" } }, "PAMILYA ", d.family), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "10px", marginTop: "2px" } }, d.members.length, " aktibong miyembro"))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { background: d.color, color: "#000", fontSize: "14px", fontWeight: 900, fontFamily: "monospace", padding: "3px 10px" } }, d.pct, "%"), isOpen ? /* @__PURE__ */ React.createElement(ChevronUp, { size: 14, color: d.color }) : /* @__PURE__ */ React.createElement(ChevronDown, { size: 14, color: "#555" }))), isOpen && /* @__PURE__ */ React.createElement("div", { style: { borderTop: `1px solid ${d.color}33`, padding: "14px 16px", background: "#070707" } }, /* @__PURE__ */ React.createElement("div", { style: { marginBottom: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em", marginBottom: "6px" } }, "KASALUKUYANG MIYEMBRO"), d.members.map((m) => /* @__PURE__ */ React.createElement("div", { key: m, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "6px", height: "6px", background: d.color, flexShrink: 0 } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#F3F4F6", fontSize: "11px", fontWeight: 700 } }, m))), d.exMembers.map((m) => /* @__PURE__ */ React.createElement("div", { key: m, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "6px", height: "6px", background: "#333", flexShrink: 0 } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "10px", fontStyle: "italic" } }, m)))), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em", marginBottom: "6px" } }, "HAWAK NA KOMITE"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "5px" } }, d.committees.map((c) => /* @__PURE__ */ React.createElement("span", { key: c, style: { background: `${d.color}14`, border: `1px solid ${d.color}44`, color: d.color, fontSize: "9px", fontWeight: 700, padding: "3px 8px", letterSpacing: "0.05em" } }, c)))), /* @__PURE__ */ React.createElement("div", { style: { background: "#111", border: `1px solid ${d.color}22`, padding: "8px 10px", borderLeft: `3px solid ${d.color}` } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#9CA3AF", fontSize: "10px", lineHeight: 1.6 } }, "\u{1F4CC} ", d.note))));
-  })));
-}
-function CoreFiveSidebar({ roster, onRemove }) {
-  const sorted = [...roster].sort((a, b) => b.pts - a.pts);
-  const total = sorted.reduce((s, r) => s + r.pts, 0);
-  const maxPts = [...SENATORS].sort((a, b) => b.pts - a.pts).slice(0, 5).reduce((s, r) => s + r.pts, 0);
-  const eff = total > 0 ? Math.round(total / maxPts * 100) : 0;
-  const effLabel = eff >= 80 ? "\u{1F525} SOLID LINEUP" : eff >= 60 ? "\u26A1 PWEDE NA" : "\u{1F480} KAILANGAN PA";
-  const effColor = eff >= 80 ? "#E1FF00" : eff >= 60 ? "#FF6B00" : "#FF003C";
-  return /* @__PURE__ */ React.createElement("div", { style: { width: "220px", flexShrink: 0, background: "#080808", borderLeft: "2px solid #1a1a1a", display: "flex", flexDirection: "column", height: "100%" } }, /* @__PURE__ */ React.createElement("div", { style: { background: "#E1FF00", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement(Star, { size: 14, color: "#000" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#000", fontSize: "10px", fontWeight: 900, letterSpacing: "0.18em" } }, "MY CORE 5")), /* @__PURE__ */ React.createElement("div", { style: { padding: "14px", borderBottom: "2px solid #1a1a1a" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" } }, [["TOTAL PTS", total, true], ["EFFICIENCY", `${eff}%`, false]].map(([lbl, val, big]) => /* @__PURE__ */ React.createElement("div", { key: lbl, style: { background: "#111", border: "1px solid #1a1a1a", padding: "8px 10px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "8px", letterSpacing: "0.12em", marginBottom: "3px" } }, lbl), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "20px", fontWeight: 900, fontFamily: "monospace", lineHeight: 1 } }, val)))), roster.length === 5 && /* @__PURE__ */ React.createElement("div", { style: { marginTop: "8px", textAlign: "center", color: effColor, fontSize: "10px", fontWeight: 900, letterSpacing: "0.1em" } }, effLabel)), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, padding: "10px", display: "flex", flexDirection: "column", gap: "6px" } }, roster.length === 0 ? /* @__PURE__ */ React.createElement("div", { style: { color: "#333", fontSize: "10px", textAlign: "center", padding: "20px 10px", lineHeight: 1.6, letterSpacing: "0.06em" } }, "Wala pang napili.", /* @__PURE__ */ React.createElement("br", null), "I-click ang isang senador sa grid.") : sorted.map((s) => {
-    const cfg = STATUS_CFG[s.status];
-    return /* @__PURE__ */ React.createElement("div", { key: s.id, style: { background: "#111", border: "1px solid #E1FF00", padding: "8px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "10px", fontWeight: 900, letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.name), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "4px", marginTop: "3px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "5px", height: "5px", background: cfg.color } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "8px" } }, s.party))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "18px", fontWeight: 900, fontFamily: "monospace" } }, s.pts), /* @__PURE__ */ React.createElement("button", { onClick: () => onRemove(s), style: { background: "none", border: "1px solid #FF003C", color: "#FF003C", fontSize: "10px", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, cursor: "pointer", lineHeight: 1 } }, "\xD7")));
-  }), roster.length < 5 && [...Array(5 - roster.length)].map((_, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { background: "#0a0a0a", border: "1px dashed #222", padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "center", color: "#222", fontSize: "11px", letterSpacing: "0.1em" } }, "SLOT ", roster.length + i + 1))), total > 0 && /* @__PURE__ */ React.createElement("div", { style: { padding: "10px 14px", borderTop: "2px solid #1a1a1a", background: "#050505" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#333", fontSize: "8px", letterSpacing: "0.08em", lineHeight: 1.8 } }, sorted.map((s) => `${s.name.split(" ").pop()} (${s.pts})`).join(" + "), /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontWeight: 900 } }, "= ", total, " PTS TOTAL"))));
-}
-function NavSidebar({ tab, setTab }) {
-  const items = [
-    { id: "grid", label: "LIVE STATUS GRID", sub: "24 senators \xB7 live pts", I: Radio },
-    { id: "resibo", label: "RESIBO BATTLEGROUND", sub: "Chiz vs APC \xB7 week 26", I: Swords },
-    { id: "dynasty", label: "DYNASTY MONOPOLY", sub: "4 families \xB7 42% grip", I: Crown }
-  ];
-  return /* @__PURE__ */ React.createElement("div", { style: { width: "200px", flexShrink: 0, background: "#060606", borderRight: "2px solid #1a1a1a", display: "flex", flexDirection: "column" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "20px 16px", borderBottom: "3px solid #E1FF00" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "20px", fontWeight: 900, letterSpacing: "0.1em", lineHeight: 1 } }, "BARDA-", /* @__PURE__ */ React.createElement("br", null), "GULAN"), /* @__PURE__ */ React.createElement("div", { style: { color: "#FF003C", fontSize: "8px", fontWeight: 900, letterSpacing: "0.18em", marginTop: "5px" } }, "SENATE FANTASY", /* @__PURE__ */ React.createElement("br", null), "LEAGUE \xB7 2026")), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, padding: "8px 0" } }, items.map(({ id, label, sub, I }) => {
-    const active = tab === id;
-    return /* @__PURE__ */ React.createElement("button", { key: id, onClick: () => setTab(id), style: { width: "100%", background: active ? "#0d1a00" : "none", border: "none", borderLeft: `3px solid ${active ? "#E1FF00" : "transparent"}`, padding: "12px 16px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "3px", cursor: "pointer", transition: "all 0.15s" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement(I, { size: 14, color: active ? "#E1FF00" : "#444" }), /* @__PURE__ */ React.createElement("span", { style: { color: active ? "#E1FF00" : "#6B7280", fontSize: "10px", fontWeight: 900, letterSpacing: "0.1em" } }, label)), /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "9px", marginLeft: "22px", letterSpacing: "0.06em" } }, sub));
-  })), /* @__PURE__ */ React.createElement("div", { style: { padding: "14px 16px", borderTop: "2px solid #1a1a1a" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "8px", letterSpacing: "0.12em", marginBottom: "6px" } }, "SESSION STATUS"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "7px", height: "7px", background: "#E1FF00", borderRadius: "50%" } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "9px", fontWeight: 900, letterSpacing: "0.1em" } }, "SESYON IN PROGRESS")), /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "9px", marginTop: "5px", lineHeight: 1.5 } }, SENATORS.filter((s) => s.status === "PRESENT").length, " present", /* @__PURE__ */ React.createElement("br", null), SENATORS.filter((s) => s.status !== "PRESENT").length, " absent/AWOL")));
-}
-function Bardagulan() {
-  const [tab, setTab] = useState("grid");
+function DraftScreen({ onConfirm }) {
   const [roster, setRoster] = useState([]);
-  const toggleRoster = (s) => {
-    setRoster((prev) => {
-      if (prev.find((r) => r.id === s.id)) return prev.filter((r) => r.id !== s.id);
-      if (prev.length >= 5) return prev;
-      return [...prev, s];
-    });
+  const [filter, setFilter] = useState("ALL");
+  const [sort, setSort] = useState("pts");
+  const toggle = (s) => {
+    setRoster((prev) => prev.find((r) => r.id === s.id) ? prev.filter((r) => r.id !== s.id) : prev.length < 5 ? [...prev, s] : prev);
   };
-  const removeFromRoster = (s) => setRoster((prev) => prev.filter((r) => r.id !== s.id));
-  return /* @__PURE__ */ React.createElement("div", { style: { background: "#000", minHeight: "100vh", display: "flex", flexDirection: "column", fontFamily: "'Arial Black','Impact','Helvetica Neue',Arial,sans-serif" } }, /* @__PURE__ */ React.createElement(NewsTicker, null), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", overflow: "hidden", height: "calc(100vh - 40px)" } }, /* @__PURE__ */ React.createElement(NavSidebar, { tab, setTab }), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "0 20px", background: "#080808", borderBottom: "2px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, minHeight: "42px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, tab === "grid" && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Radio, { size: 13, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.15em" } }, "LIVE STATUS GRID")), tab === "resibo" && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Swords, { size: 13, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.15em" } }, "RESIBO BATTLEGROUND")), tab === "dynasty" && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Crown, { size: 13, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.15em" } }, "DYNASTY MONOPOLY"))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement(Activity, { size: 11, color: "#FF003C" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontSize: "9px", fontWeight: 900, letterSpacing: "0.12em" } }, "REAL-TIME \xB7 AUTO-UPDATE"))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflow: "hidden", display: "flex" } }, /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflow: "hidden" } }, tab === "grid" && /* @__PURE__ */ React.createElement(LiveGridPanel, { roster, onToggle: toggleRoster }), tab === "resibo" && /* @__PURE__ */ React.createElement(ResiboPanel, null), tab === "dynasty" && /* @__PURE__ */ React.createElement(DynastyPanel, null)), /* @__PURE__ */ React.createElement(CoreFiveSidebar, { roster, onRemove: removeFromRoster })))));
+  const senators = SENATORS.filter((s) => filter === "ALL" || s.status === filter).sort((a, b) => sort === "pts" ? b.basePts - a.basePts : sort === "drama" ? b.drama - a.drama : a.name.localeCompare(b.name));
+  const totalPts = roster.reduce((s, r) => s + r.basePts, 0);
+  function confirm() {
+    if (roster.length < 5) return;
+    audio.sfxLockIn();
+    onConfirm(roster);
+  }
+  return /* @__PURE__ */ React.createElement("div", { style: { background: "#000", minHeight: "100vh", display: "flex", flexDirection: "column" } }, /* @__PURE__ */ React.createElement("div", { style: { background: "#080808", borderBottom: "2px solid #E1FF00", padding: "14px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "18px", fontWeight: 900, letterSpacing: "0.1em" } }, "DRAFT YOUR CORE 5"), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "11px", marginTop: "2px" } }, "Hover a card to flip \xB7 Click to select \xB7 Pick exactly 5 senators")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "20px" } }, /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.15em" } }, "SELECTED"), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "28px", fontWeight: 900, fontFamily: "monospace", lineHeight: 1 } }, roster.length, /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "16px" } }, "/5"))), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.15em" } }, "PROJ. PTS"), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "28px", fontWeight: 900, fontFamily: "monospace", lineHeight: 1 } }, totalPts)), /* @__PURE__ */ React.createElement("button", { onClick: confirm, disabled: roster.length < 5, style: {
+    background: roster.length === 5 ? "#E1FF00" : "#1a1a1a",
+    color: roster.length === 5 ? "#000" : "#333",
+    border: `2px solid ${roster.length === 5 ? "#E1FF00" : "#2a2a2a"}`,
+    padding: "14px 32px",
+    fontSize: "13px",
+    fontWeight: 900,
+    letterSpacing: "0.15em",
+    cursor: roster.length === 5 ? "pointer" : "not-allowed",
+    transition: "all 0.2s",
+    boxShadow: roster.length === 5 ? "0 0 30px #E1FF0066" : "none"
+  } }, roster.length === 5 ? "LOCK IN ROSTER \u2192" : "PICK " + (5 - roster.length) + " MORE"))), /* @__PURE__ */ React.createElement("div", { style: { padding: "10px 28px", background: "#060606", borderBottom: "1px solid #111", display: "flex", gap: "24px", alignItems: "center", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "9px", letterSpacing: "0.12em", marginRight: "4px" } }, "STATUS:"), ["ALL", "PRESENT", "WALKOUT", "EVADING ARREST", "DETAINED"].map((f) => {
+    const col = f === "ALL" ? "#9CA3AF" : STATUS_CFG[f]?.color || "#9CA3AF";
+    const fLabel = f === "EVADING ARREST" ? "NAGTATAKAS" : f === "DETAINED" ? "KULUNGAN" : f;
+    return /* @__PURE__ */ React.createElement("button", { key: f, onClick: () => setFilter(f), style: { background: filter === f ? col : "transparent", border: `1px solid ${filter === f ? col : "#222"}`, color: filter === f ? "#000" : col, fontSize: "9px", fontWeight: 900, padding: "3px 10px", letterSpacing: "0.08em", cursor: "pointer", transition: "all 0.15s" } }, fLabel);
+  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "9px", letterSpacing: "0.12em", marginRight: "4px" } }, "SORT:"), [["pts", "TOP PTS"], ["drama", "DRAMA"], ["name", "A-Z"]].map(([k, l]) => /* @__PURE__ */ React.createElement("button", { key: k, onClick: () => setSort(k), style: { background: sort === k ? "#E1FF00" : "transparent", border: `1px solid ${sort === k ? "#E1FF00" : "#222"}`, color: sort === k ? "#000" : "#6B7280", fontSize: "9px", fontWeight: 900, padding: "3px 10px", letterSpacing: "0.08em", cursor: "pointer" } }, l))), /* @__PURE__ */ React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: "8px" } }, roster.map((s) => /* @__PURE__ */ React.createElement("div", { key: s.id, style: { background: `${s.color}22`, border: `1px solid ${s.color}`, padding: "4px 8px", fontSize: "9px", fontWeight: 900, color: s.color, letterSpacing: "0.06em", whiteSpace: "nowrap", cursor: "pointer" }, onClick: () => toggle(s) }, s.initials, " \xD7")))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "20px 28px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: "12px" } }, senators.map((s) => /* @__PURE__ */ React.createElement(DraftCard, { key: s.id, senator: s, selected: !!roster.find((r) => r.id === s.id), onToggle: toggle, disabled: roster.length >= 5 })))));
+}
+function FeedItem({ item, isNew, onScore }) {
+  const senator = SENATORS.find((s) => s.id === item.senatorId);
+  const tc = TYPE_CONFIG[item.type];
+  const [scored, setScored] = useState(false);
+  const ref = useRef(null);
+  function handleScore() {
+    if (scored) return;
+    setScored(true);
+    if (ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      onScore(item, r.left + r.width / 2, r.top + r.height / 2);
+    }
+    audio.sfxScore();
+  }
+  return /* @__PURE__ */ React.createElement("div", { ref, style: {
+    background: isNew ? "#0d1a00" : "#090909",
+    border: `1px solid ${isNew ? "#E1FF0044" : "#111"}`,
+    padding: "12px 14px",
+    animation: isNew ? "feedIn 0.4s ease-out" : "none",
+    transition: "background 1s,border-color 1s"
+  } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "flex-start", gap: "12px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "36px", height: "36px", flexShrink: 0, background: `${senator?.color || "#333"}22`, border: `1px solid ${senator?.color || "#333"}44`, display: "flex", alignItems: "center", justifyContent: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { color: senator?.color || "#555", fontSize: "11px", fontWeight: 900, fontFamily: "monospace" } }, senator?.initials || "?")), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { style: { color: senator?.color || "#555", fontSize: "10px", fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase" } }, senator?.name), /* @__PURE__ */ React.createElement("span", { style: { background: tc.bg, color: tc.color, fontSize: "7px", fontWeight: 900, padding: "1px 5px", letterSpacing: "0.1em", border: `1px solid ${tc.color}44` } }, tc.label), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, fontFamily: "monospace", marginLeft: "auto", flexShrink: 0 } }, "+", item.pts, " pts")), /* @__PURE__ */ React.createElement("div", { style: { color: "#D1D5DB", fontSize: "11px", lineHeight: 1.5, marginBottom: "6px" } }, item.headline), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em" } }, item.source), /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "9px" } }, "\xB7"), /* @__PURE__ */ React.createElement("span", { style: { color: "#444", fontSize: "9px" } }, item.time), /* @__PURE__ */ React.createElement("button", { onClick: handleScore, disabled: scored, style: { marginLeft: "auto", background: scored ? "#0d1a00" : "#E1FF00", color: scored ? "#E1FF00" : "#000", border: `1px solid ${scored ? "#E1FF0044" : "#E1FF00"}`, fontSize: "9px", fontWeight: 900, padding: "3px 10px", cursor: scored ? "default" : "pointer", letterSpacing: "0.08em", transition: "all 0.2s" } }, scored ? "\u2713 SCORED" : "CLAIM PTS")))));
+}
+function GameScreen({ roster, onBack }) {
+  const [scores, setScores] = useState(() => Object.fromEntries(roster.map((s) => [s.id, s.basePts])));
+  const [feedItems, setFeedItems] = useState(LIVE_FEED.slice(0, 6));
+  const [newIds, setNewIds] = useState(/* @__PURE__ */ new Set());
+  const [particles, setParticles] = useState([]);
+  const [muted, setMuted] = useState(false);
+  const [week, setWeek] = useState(26);
+  const [tab, setTab] = useState("feed");
+  const [toast, setToast] = useState(null);
+  useEffect(() => {
+    let idx = 6;
+    const t = setInterval(() => {
+      if (idx >= LIVE_FEED.length) {
+        idx = 0;
+      }
+      const item = { ...LIVE_FEED[idx], id: Date.now(), time: "just now" };
+      idx++;
+      setFeedItems((prev) => [item, ...prev].slice(0, 20));
+      setNewIds((prev) => /* @__PURE__ */ new Set([...prev, item.id]));
+      setTimeout(() => setNewIds((prev) => {
+        const s = new Set(prev);
+        s.delete(item.id);
+        return s;
+      }), 3e3);
+      audio.sfxDrama();
+    }, 12e3);
+    return () => clearInterval(t);
+  }, []);
+  function handleScore(item, x, y) {
+    const senator = SENATORS.find((s) => s.id === item.senatorId);
+    if (!senator) return;
+    const inRoster = roster.find((r) => r.id === senator.id);
+    if (!inRoster) {
+      showToast(`${senator.name} ay wala sa iyong Core 5!`, "#FF003C");
+      return;
+    }
+    setScores((prev) => ({ ...prev, [senator.id]: (prev[senator.id] || 0) + item.pts }));
+    spawnParticles(x, y, senator.color);
+    showToast(`+${item.pts} pts para kay ${senator.name}!`, "#E1FF00");
+  }
+  function spawnParticles(x, y, color) {
+    const newOnes = Array.from({ length: 6 }, (_, i) => ({ id: Date.now() + i, x, y, color }));
+    setParticles((prev) => [...prev, ...newOnes]);
+  }
+  function removeParticle(id) {
+    setParticles((prev) => prev.filter((p) => p.id !== id));
+  }
+  function showToast(msg, color) {
+    setToast({ msg, color });
+    setTimeout(() => setToast(null), 2800);
+  }
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const rosterSorted = [...roster].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+  const rosterFeed = feedItems.filter((item) => roster.find((r) => r.id === item.senatorId));
+  return /* @__PURE__ */ React.createElement("div", { style: { background: "#000", height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" } }, particles.map((p) => /* @__PURE__ */ React.createElement(Particle, { key: p.id, ...p, onDone: () => removeParticle(p.id) })), toast && /* @__PURE__ */ React.createElement("div", { style: { position: "fixed", top: "70px", left: "50%", transform: "translateX(-50%)", background: "#0d0d0d", border: `2px solid ${toast.color}`, color: toast.color, padding: "10px 24px", fontSize: "12px", fontWeight: 900, letterSpacing: "0.1em", zIndex: 9998, animation: "toastIn 0.3s ease-out", whiteSpace: "nowrap" } }, toast.msg), /* @__PURE__ */ React.createElement("div", { style: { background: "#080808", borderBottom: "2px solid #E1FF00", padding: "0 24px", display: "flex", alignItems: "center", gap: "20px", flexShrink: 0, height: "52px" } }, /* @__PURE__ */ React.createElement("button", { onClick: () => {
+    audio.sfxTransition();
+    onBack();
+  }, style: { background: "none", border: "1px solid #333", color: "#9CA3AF", padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "10px", fontWeight: 900, letterSpacing: "0.1em" } }, /* @__PURE__ */ React.createElement(IconBack, { size: 11, color: "#9CA3AF" }), " BACK"), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "15px", fontWeight: 900, letterSpacing: "0.1em" } }, "BARDAGULAN"), /* @__PURE__ */ React.createElement("div", { style: { background: "#FF003C", color: "#fff", fontSize: "8px", fontWeight: 900, padding: "2px 7px", letterSpacing: "0.2em", animation: "pulse 1s infinite" } }, "\u25CF LIVE"), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "10px" } }, "WEEK ", week, " \xB7 SY 2026"), /* @__PURE__ */ React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: "20px" } }, /* @__PURE__ */ React.createElement("div", { style: { textAlign: "right" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "8px", letterSpacing: "0.15em" } }, "TOTAL SCORE"), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "22px", fontWeight: 900, fontFamily: "monospace", lineHeight: 1 } }, /* @__PURE__ */ React.createElement(RollingNumber, { value: total }))), /* @__PURE__ */ React.createElement("button", { onClick: () => {
+    const m = audio.toggleMute();
+    setMuted(m);
+  }, style: { background: "none", border: "1px solid #333", color: "#9CA3AF", padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", fontWeight: 900 } }, muted ? /* @__PURE__ */ React.createElement(IconMute, { size: 12, color: "#9CA3AF" }) : /* @__PURE__ */ React.createElement(IconVolume, { size: 12, color: "#9CA3AF" }), muted ? "MUTED" : "AUDIO"))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "260px", flexShrink: 0, background: "#060606", borderRight: "2px solid #111", display: "flex", flexDirection: "column", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", borderBottom: "2px solid #111", display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement(IconStar, { size: 13, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.18em" } }, "MY CORE 5")), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, padding: "10px", display: "flex", flexDirection: "column", gap: "8px", overflowY: "auto" } }, rosterSorted.map((s, i) => {
+    const cfg = STATUS_CFG[s.status];
+    const pts = scores[s.id] || 0;
+    return /* @__PURE__ */ React.createElement("div", { key: s.id, style: { background: "#0d0d0d", border: `2px solid ${s.color}33`, padding: "10px 12px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "32px", height: "32px", flexShrink: 0, background: `${s.color}22`, border: `1px solid ${s.color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: 900, color: s.color, fontFamily: "monospace" } }, s.initials), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#F3F4F6", fontSize: "11px", fontWeight: 900, letterSpacing: "0.05em", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, s.name), /* @__PURE__ */ React.createElement("div", { style: { color: cfg.color, fontSize: "8px", fontWeight: 900, marginTop: "2px", letterSpacing: "0.08em" } }, cfg.label)), /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "22px", fontWeight: 900, fontFamily: "monospace", flexShrink: 0 } }, /* @__PURE__ */ React.createElement(RollingNumber, { value: pts, color: "#E1FF00" }))), /* @__PURE__ */ React.createElement(DramaBar, { v: s.drama, color: s.color }), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: "4px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "8px" } }, "DRAMA ", s.drama, "/100"), /* @__PURE__ */ React.createElement("span", { style: { color: s.color, fontSize: "8px", letterSpacing: "0.06em" } }, s.projection)));
+  })), /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", borderTop: "2px solid #111", background: "#050505" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em" } }, "TOTAL SCORE"), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "26px", fontWeight: 900, fontFamily: "monospace" } }, /* @__PURE__ */ React.createElement(RollingNumber, { value: total }))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: "6px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px" } }, rosterSorted.map((s) => /* @__PURE__ */ React.createElement("div", { key: s.id, style: { background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "4px 6px", display: "flex", justifyContent: "space-between" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#555", fontSize: "8px" } }, s.name.split(" ").slice(-1)[0]), /* @__PURE__ */ React.createElement("span", { style: { color: s.color, fontSize: "8px", fontFamily: "monospace", fontWeight: 900 } }, scores[s.id] || 0)))))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", borderBottom: "2px solid #111", flexShrink: 0, background: "#080808" } }, [["feed", "\u{1F4E1} LIVE FEED", "Claim pts from breaking news"], ["myteam", "\u2B50 MY TEAM NEWS", "Events involving your Core 5"], ["howto", "\u{1F4D6} HOW TO PLAY", "Rules & scoring guide"]].map(([id, label, sub]) => /* @__PURE__ */ React.createElement("button", { key: id, onClick: () => setTab(id), style: { padding: "10px 20px", background: tab === id ? "#0d0d0d" : "none", border: "none", borderBottom: tab === id ? "2px solid #E1FF00" : "2px solid transparent", color: tab === id ? "#E1FF00" : "#555", fontSize: "10px", fontWeight: 900, cursor: "pointer", letterSpacing: "0.08em", display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start" } }, label, /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "8px", fontWeight: 400, letterSpacing: "0.06em" } }, sub)))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0" } }, tab === "feed" && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { padding: "8px 14px", background: "#050505", borderBottom: "1px solid #111", display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "7px", height: "7px", background: "#FF003C", borderRadius: "50%", animation: "pulse 1s infinite" } }), /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontSize: "9px", fontWeight: 900, letterSpacing: "0.15em" } }, "REAL-TIME \xB7 VERIFIED EVENTS"), /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "9px", marginLeft: "auto" } }, "Click CLAIM PTS on events featuring your senators")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "1px" } }, feedItems.map((item) => /* @__PURE__ */ React.createElement(FeedItem, { key: item.id, item, isNew: newIds.has(item.id), onScore: handleScore })))), tab === "myteam" && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { padding: "8px 14px", background: "#050505", borderBottom: "1px solid #111" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "9px", fontWeight: 900, letterSpacing: "0.15em" } }, "EVENTS INVOLVING YOUR CORE 5")), rosterFeed.length === 0 ? /* @__PURE__ */ React.createElement("div", { style: { padding: "40px", textAlign: "center", color: "#333", fontSize: "12px" } }, "Wala pang events para sa iyong team ngayong araw.", /* @__PURE__ */ React.createElement("br", null), "Bumalik mamaya!") : /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "1px" } }, rosterFeed.map((item) => /* @__PURE__ */ React.createElement(FeedItem, { key: item.id, item, isNew: newIds.has(item.id), onScore: handleScore })))), tab === "howto" && /* @__PURE__ */ React.createElement("div", { style: { padding: "28px", maxWidth: "600px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "16px", fontWeight: 900, letterSpacing: "0.1em", marginBottom: "20px" } }, "PAANO MAGLARO"), [
+    { title: "1. DRAFT YOUR CORE 5", body: "Pumili ng 5 senators mula sa buong 24-member roster. Bawat senator ay may base points at projected points per week. Ang may mas mataas na drama index ay risk-reward pick \u2014 mas malaking bonus, mas unpredictable din." },
+    { title: "2. CLAIM POINTS FROM NEWS", body: "Ang bawat event sa Live Feed ay may nakakabit na source (Rappler, Inquirer, ABS-CBN, VERA Files). Pag-click ng CLAIM PTS, ina-add ang points sa iyong Core 5 member na involved sa event. Hindi mo maaaring i-claim ang points ng senator na wala sa iyong roster." },
+    { title: "3. POINT SYSTEM", body: "TRABAHO events = steady 10-16 pts. DRAMA events = 18-25 pts (mataas ang risk, mataas ang reward). ISKANDALO events = 22-30 pts. DETAINED / NAGTATAKAS senators = bonus multiplier pero hindi makakapunta sa session." },
+    { title: "4. SOURCES", body: "Lahat ng events ay base sa real reporting. Ang Rappler at VERA Files ay nagpo-provide ng fact-checking. Ang mga headline ay kumakatawan sa actual Senate developments noong SY 2026." }
+  ].map(({ title, body }) => /* @__PURE__ */ React.createElement("div", { key: title, style: { marginBottom: "20px", borderLeft: "3px solid #E1FF00", paddingLeft: "16px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF00", fontSize: "11px", fontWeight: 900, letterSpacing: "0.1em", marginBottom: "6px" } }, title), /* @__PURE__ */ React.createElement("div", { style: { color: "#9CA3AF", fontSize: "12px", lineHeight: 1.7 } }, body))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: "24px", background: "#080808", border: "1px solid #1a1a1a", padding: "14px 16px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em", marginBottom: "8px" } }, "SOURCES USED IN THIS APP"), [["Rappler", "rappler.com", "#FF003C"], ["Philippine Daily Inquirer", "inquirer.net", "#fff"], ["ABS-CBN News", "news.abs-cbn.com", "#F97316"], ["PhilStar Global", "philstar.com", "#FCD34D"], ["VERA Files", "verafiles.org", "#C084FC"]].map(([name, url, color]) => /* @__PURE__ */ React.createElement("div", { key: name, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "5px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: "6px", height: "6px", background: color, flexShrink: 0 } }), /* @__PURE__ */ React.createElement("span", { style: { color, fontSize: "10px", fontWeight: 700 } }, name), /* @__PURE__ */ React.createElement("span", { style: { color: "#333", fontSize: "9px" } }, url))))))), /* @__PURE__ */ React.createElement("div", { style: { width: "220px", flexShrink: 0, background: "#060606", borderLeft: "2px solid #111", display: "flex", flexDirection: "column", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", borderBottom: "2px solid #111", display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement(IconTrophy, { size: 13, color: "#E1FF00" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#E1FF00", fontSize: "10px", fontWeight: 900, letterSpacing: "0.18em" } }, "LEADERBOARD")), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "8px" } }, [
+    { name: "TEAM LODI", pts: Math.round(total * 1.12), color: "#EF4444" },
+    { name: "INYONG LINEUP", pts: total, color: "#E1FF00", isMe: true },
+    { name: "TSISMIS FC", pts: Math.round(total * 0.94), color: "#8B5CF6" },
+    { name: "PALAKASAN SQUAD", pts: Math.round(total * 0.88), color: "#F97316" },
+    { name: "ANTI-DYNASTY XI", pts: Math.round(total * 0.81), color: "#10B981" },
+    { name: "DILAWAN UNITED", pts: Math.round(total * 0.76), color: "#3B82F6" }
+  ].sort((a, b) => b.pts - a.pts).map((team, i) => /* @__PURE__ */ React.createElement("div", { key: team.name, style: { background: team.isMe ? "#0d1a00" : "#0a0a0a", border: `1px solid ${team.isMe ? "#E1FF00" : "#111"}`, padding: "8px 10px", marginBottom: "4px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#444", fontSize: "10px", fontFamily: "monospace", fontWeight: 700, width: "16px", flexShrink: 0 } }, i + 1), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, color: team.isMe ? "#E1FF00" : "#9CA3AF", fontSize: "10px", fontWeight: 900, letterSpacing: "0.04em" } }, team.name), /* @__PURE__ */ React.createElement("div", { style: { color: team.color, fontSize: "13px", fontWeight: 900, fontFamily: "monospace", flexShrink: 0 } }, /* @__PURE__ */ React.createElement(RollingNumber, { value: team.pts, color: team.color }))), team.isMe && /* @__PURE__ */ React.createElement("div", { style: { color: "#E1FF0066", fontSize: "7px", marginTop: "3px", marginLeft: "24px", letterSpacing: "0.1em" } }, "\u2190 ITO ANG TEAM MO")))), /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", borderTop: "2px solid #111" } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", letterSpacing: "0.12em", marginBottom: "8px" } }, "SESSION DRAMA INDEX"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" } }, /* @__PURE__ */ React.createElement(IconFlame, { size: 12, color: "#FF003C" }), /* @__PURE__ */ React.createElement("span", { style: { color: "#FF003C", fontSize: "18px", fontWeight: 900, fontFamily: "monospace" } }, "87/100")), /* @__PURE__ */ React.createElement(DramaBar, { v: 87, color: "#FF003C" }), /* @__PURE__ */ React.createElement("div", { style: { color: "#555", fontSize: "9px", marginTop: "6px", lineHeight: 1.5 } }, "GRABE ang drama ngayong session.", /* @__PURE__ */ React.createElement("br", null), "Expect bonus scoring events.")))));
+}
+function App() {
+  const [screen, setScreen] = useState("intro");
+  const [roster, setRoster] = useState([]);
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("style", null, `
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+        @keyframes feedIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { background:#000; font-family:'Arial Black','Impact','Helvetica Neue',Arial,sans-serif; color:#F3F4F6; }
+        button { font-family: inherit; }
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:#0d0d0d; }
+        ::-webkit-scrollbar-thumb { background:#E1FF00; }
+      `), screen === "intro" && /* @__PURE__ */ React.createElement(IntroScreen, { onStart: () => setScreen("draft") }), screen === "draft" && /* @__PURE__ */ React.createElement(DraftScreen, { onConfirm: (r) => {
+    setRoster(r);
+    setScreen("game");
+  } }), screen === "game" && /* @__PURE__ */ React.createElement(GameScreen, { roster, onBack: () => {
+    audio.stopMusic();
+    setScreen("draft");
+  } }));
 }
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(Bardagulan));
+root.render(React.createElement(App));
 </script>
 </body>
 </html>
